@@ -4,7 +4,8 @@ import { useAuthStore } from '../stores/authStore';
 import { chatService } from '../services/chat.service';
 import type { ChatConversation, ChatMessage } from '../types';
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL as string || 'http://localhost:3000').replace(/\/api$/, '');
+const API_URL = import.meta.env.VITE_API_URL as string || 'http://localhost:3000/api';
+const SOCKET_URL = new URL(API_URL).origin;
 
 export function useChat() {
   const { accessToken } = useAuthStore();
