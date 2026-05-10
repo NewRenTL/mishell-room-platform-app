@@ -15,6 +15,12 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.device          # IP local de tu máquina — no compartir
+
+# Capacitor / Android generated
+assets/icon.png
+assets/splash.png
+icons/
 
 # Logs
 logs/

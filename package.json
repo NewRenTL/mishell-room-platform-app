@@ -7,9 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android": "vite build --mode android && npx cap sync android && npx cap open android",
+    "android:device": "vite build --mode device && npx cap sync android && npx cap open android",
+    "cap:sync": "vite build --mode android && npx cap sync"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.3",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.3.3",
+    "@capacitor/core": "^8.3.3",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@react-google-maps/api": "^2.20.8",
     "@tanstack/react-query": "^5.100.5",
     "@tanstack/react-query-devtools": "^5.100.5",
@@ -25,6 +34,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.2.4",
     "@types/leaflet": "^1.9.21",

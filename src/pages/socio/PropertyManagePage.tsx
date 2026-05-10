@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, Users, TrendingUp, Calendar, Trash2, Save, ImagePlus, CheckCircle2 } from 'lucide-react';
