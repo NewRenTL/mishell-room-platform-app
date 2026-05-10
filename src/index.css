@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  /* ── Mishell Red ─────────────────────────────── */
+  --color-mishell-50:  #FFF5F5;
+  --color-mishell-100: #FFE4E4;
+  --color-mishell-500: #F04040;
+  --color-mishell-600: #E8272A;
+  --color-mishell-700: #C41F22;
+
+  /* ── Ink Neutrals ────────────────────────────── */
+  --color-ink-50:  #F5F5F5;
+  --color-ink-100: #E5E5E5;
+  --color-ink-200: #CFCFCF;
+  --color-ink-400: #9E9E9E;
+  --color-ink-600: #6B6B6B;
+  --color-ink-700: #3D3D3D;
+  --color-ink-900: #1A1A1A;
+
+  /* ── Typography ──────────────────────────────── */
+  --font-sans: 'Sora', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base reset ────────────────────────────────── */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html {
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #E8272A #E5E5E5;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #F5F5F5;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* ── Custom Scrollbars (Webkit) ────────────────── */
+
+/* Vertical (Y) */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E5E5E5;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E8272A;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C41F22;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #C41F22;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── Utility: hide scrollbar entirely ─────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Thin scrollbar variant ───────────────────── */
+.scrollbar-mishell {
+  scrollbar-width: thin;
+  scrollbar-color: #E8272A #E5E5E5;
+}
+.scrollbar-mishell::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scrollbar-mishell::-webkit-scrollbar-track {
+  background: #E5E5E5;
+  border-radius: 9999px;
+}
+.scrollbar-mishell::-webkit-scrollbar-thumb {
+  background: #E8272A;
+  border-radius: 9999px;
+}
+.scrollbar-mishell::-webkit-scrollbar-thumb:hover {
+  background: #C41F22;
+}
