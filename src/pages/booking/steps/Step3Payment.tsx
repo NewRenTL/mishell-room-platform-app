@@ -71,7 +71,7 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden
               ${logo ? 'bg-white border border-ink-100' : selected === key ? 'bg-mishell-600' : 'bg-ink-100'}`}>
               {logo
-                ? <img src={logo} alt={label} className="w-10 h-10 object-contain" />
+                ? <img src={logo} alt={label} className="w-10 h-10 rounded object-contain" />
                 : Icon && <Icon size={18} className={selected === key ? 'text-white' : 'text-ink-600'} />
               }
             </div>
