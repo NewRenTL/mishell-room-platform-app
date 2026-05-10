@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreditCard, Smartphone, Info } from 'lucide-react';
+import { CreditCard, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { bookingsService } from '../../../services/bookings.service';
@@ -11,10 +11,18 @@ interface Props {
   onNext: () => void;
 }
 
-const METHODS: { key: PaymentMethod; label: string; description: string; Icon: typeof CreditCard }[] = [
-  { key: 'CARD',         label: 'Tarjeta',       description: 'Visa, Mastercard, American Express',    Icon: CreditCard },
-  { key: 'MERCADO_PAGO', label: 'Mercado Pago',  description: 'Paga con tu cuenta de Mercado Pago',   Icon: Smartphone },
-  { key: 'YAPE',         label: 'Yape',           description: 'Pago rápido con tu número de celular', Icon: Smartphone },
+type Method = {
+  key: PaymentMethod;
+  label: string;
+  description: string;
+  logo?: string;
+  Icon?: typeof CreditCard;
+};
+
+const METHODS: Method[] = [
+  { key: 'YAPE',         label: 'Yape',          description: 'Pago instantáneo desde tu celular',    logo: '/YapeLogo.png' },
+  { key: 'MERCADO_PAGO', label: 'MercadoPago',   description: 'Tarjeta / crédito',                    logo: '/MercadoPagoLogo.png' },
+  { key: 'CARD',         label: 'Tarjeta',        description: 'Visa, Mastercard, American Express',   Icon: CreditCard },
 ];
 
 export default function Step3Payment({ bookingId, onNext }: Props) {
@@ -46,7 +54,7 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
       </div>
 
       <div className="flex flex-col gap-3">
-        {METHODS.map(({ key, label, description, Icon }, i) => (
+        {METHODS.map(({ key, label, description, logo, Icon }, i) => (
           <motion.button
             key={key}
             type="button"
@@ -60,9 +68,12 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
             transition={{ delay: i * 0.07 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-              ${selected === key ? 'bg-mishell-600' : 'bg-ink-100'}`}>
-              <Icon size={18} className={selected === key ? 'text-white' : 'text-ink-600'} />
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden
+              ${logo ? 'bg-white border border-ink-100' : selected === key ? 'bg-mishell-600' : 'bg-ink-100'}`}>
+              {logo
+                ? <img src={logo} alt={label} className="w-10 h-10 object-contain" />
+                : Icon && <Icon size={18} className={selected === key ? 'text-white' : 'text-ink-600'} />
+              }
             </div>
             <div>
               <p className={`text-sm font-semibold ${selected === key ? 'text-mishell-700' : 'text-ink-900'}`}>{label}</p>
@@ -70,7 +81,7 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
             </div>
             {selected === key && (
               <motion.div
-                className="ml-auto w-5 h-5 rounded-full bg-mishell-600 flex items-center justify-center flex-shrink-0"
+                className="ml-auto w-5 h-5 rounded-full bg-mishell-600 flex items-center justify-center shrink-0"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
