@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Mishell Room',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     cleartext: true,
   },
   plugins: {
