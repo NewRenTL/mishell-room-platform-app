@@ -2,50 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, ChevronUp, WifiOff, HeadphonesIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useChat } from '../../hooks/useChat';
-
-function TypingIndicator() {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-white border border-ink-100 rounded-2xl rounded-bl-sm px-4 py-3">
-        <p className="text-[10px] font-bold text-mishell-600 mb-1">Soporte</p>
-        <div className="flex items-center gap-1">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 h-1.5 rounded-full bg-ink-400"
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 0.55, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 import { useAuthStore } from '../../stores/authStore';
-
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-}
-
-function fmtDate(iso: string) {
-  const d = new Date(iso);
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  if (diffDays === 0) return 'Hoy';
-  if (diffDays === 1) return 'Ayer';
-  return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'long' });
-}
-
-function groupByDate(messages: { createdAt: string; id: string }[]) {
-  const groups: Record<string, typeof messages> = {};
-  for (const m of messages) {
-    const key = new Date(m.createdAt).toDateString();
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(m);
-  }
-  return groups;
-}
+import { TypingIndicator } from '../../components/ui/TypingIndicator';
+import { fmtTime, fmtDate, groupByDate } from '../../utils/formatChat';
 
 export default function MessagesPage() {
   const user = useAuthStore((s) => s.user);
@@ -172,7 +131,7 @@ export default function MessagesPage() {
                 </div>
               </div>
             ))}
-            {isOtherTyping && <TypingIndicator />}
+            {isOtherTyping && <TypingIndicator label="Soporte" />}
             <div ref={messagesEndRef} />
           </>
         )}

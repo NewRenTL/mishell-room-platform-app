@@ -1,32 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Send, ChevronUp, WifiOff } from 'lucide-react';
-import { motion } from 'motion/react';
 import { useAdminChatMobile } from '../../hooks/useChat';
 import { useAuthStore } from '../../stores/authStore';
-
-function TypingIndicator() {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-white border border-ink-100 rounded-2xl rounded-bl-sm px-4 py-3">
-        <div className="flex items-center gap-1">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-1.5 h-1.5 rounded-full bg-ink-400"
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 0.55, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-}
+import { TypingIndicator } from '../../components/ui/TypingIndicator';
+import { fmtTime } from '../../utils/formatChat';
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
