@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { User, CreditCard, Phone, Calendar } from 'lucide-react';
+import { User, CreditCard, Phone } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
+import { DateInput } from '../../../components/ui/DateInput';
 import { Button } from '../../../components/ui/Button';
 import { bookingsService } from '../../../services/bookings.service';
 import { useBookingStore } from '../../../stores/bookingStore';
@@ -89,13 +90,11 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
       <section>
         <h2 className="text-sm font-bold text-ink-900 mb-3">Fechas</h2>
         <div className="flex flex-col gap-3">
-          <Input
-            icon={<Calendar size={16} />}
+          <DateInput
             label="Fecha de entrada"
-            type="date"
             value={form.checkIn}
             min={today}
-            onChange={(e) => set('checkIn', e.target.value)}
+            onChange={(val) => set('checkIn', val)}
           />
           <div className="flex gap-3">
             {[1, 2, 4].map((w) => (
