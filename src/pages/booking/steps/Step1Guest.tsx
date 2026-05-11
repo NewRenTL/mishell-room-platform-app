@@ -31,7 +31,7 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
   const [form, setForm] = useState({
     name: user ? `${user.firstName} ${user.lastName ?? ''}`.trim() : '',
     dni: user?.dni ?? '',
-    phone: '',
+    phone: user?.phone ?? '',
     checkIn: today,
     weeks: '1',
   });
