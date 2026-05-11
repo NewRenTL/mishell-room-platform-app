@@ -18,101 +18,151 @@ interface Props {
   onSuccess: () => void;
 }
 
-// ─── Card inline form ────────────────────────────────────────────────────────
+// ─── Card inline form (manual tokenization via MP REST API) ─────────────────
 
-const iframeInputClass =
-  'w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus-within:border-mishell-600 transition-colors overflow-hidden';
+const inputClass =
+  'w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white placeholder:text-ink-400 focus:outline-none focus:border-mishell-600 transition-colors';
+
+const MP_PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY as string;
+
+async function createMpCardToken(params: {
+  cardNumber: string;
+  cardholderName: string;
+  expirationMonth: string;
+  expirationYear: string;
+  securityCode: string;
+  docType: string;
+  docNumber: string;
+}): Promise<string> {
+  const fullYear = params.expirationYear.length === 2
+    ? `20${params.expirationYear}`
+    : params.expirationYear;
+
+  const response = await fetch(
+    `https://api.mercadopago.com/v1/card_tokens?public_key=${MP_PUBLIC_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        card_number: params.cardNumber,
+        security_code: params.securityCode,
+        expiration_month: parseInt(params.expirationMonth, 10),
+        expiration_year: parseInt(fullYear, 10),
+        cardholder: {
+          name: params.cardholderName,
+          identification: {
+            type: params.docType,
+            number: params.docNumber,
+          },
+        },
+      }),
+    },
+  );
+  const data = await response.json();
+  if (!data.id) throw new Error(data.message ?? data.cause?.[0]?.description ?? 'No se pudo tokenizar la tarjeta');
+  return data.id as string;
+}
+
+function detectMethodFromNumber(cardNumber: string): string {
+  const n = cardNumber.replace(/\s/g, '');
+  if (/^4/.test(n)) return 'visa';
+  if (/^5[1-5]|^2[2-7]|^50/.test(n)) return 'master';
+  if (/^3[47]/.test(n)) return 'amex';
+  if (/^6/.test(n)) return 'elo';
+  return 'visa';
+}
+
+async function detectCardBin(bin: string): Promise<{ issuerId: string }> {
+  try {
+    const r = await fetch(
+      `https://api.mercadopago.com/v1/payment_methods/search?public_key=${MP_PUBLIC_KEY}&bin=${bin}`,
+    );
+    const data = await r.json();
+    const method = data.results?.[0];
+    return { issuerId: method?.issuer?.id?.toString() ?? '' };
+  } catch {
+    return { issuerId: '' };
+  }
+}
+
+const IS_SANDBOX = import.meta.env.VITE_IS_SANDBOX !== 'false';
+
+const SANDBOX_CARDS = [
+  { brand: 'Mastercard', number: '5031 7557 3453 0604', cvv: '123', expiry: '11/30', method: 'master' },
+  { brand: 'Visa',       number: '4009 1753 3280 6176', cvv: '123', expiry: '11/30', method: 'visa'   },
+  { brand: 'Amex',       number: '3711 803032 57522',   cvv: '1234', expiry: '11/30', method: 'amex'  },
+];
 
 function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: number; onSuccess: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const cardFormRef = useRef<any>(null);
-  const mountedRef = useRef(false);
+  const [cardNumber, setCardNumber] = useState(IS_SANDBOX ? '5031 7557 3453 0604' : '');
+  const [cardName, setCardName]     = useState(IS_SANDBOX ? 'APRO' : '');
+  const [expiry, setExpiry]         = useState(IS_SANDBOX ? '11/30' : '');
+  const [cvv, setCvv]               = useState(IS_SANDBOX ? '123' : '');
+  const [docType, setDocType]       = useState('DNI');
+  const [docNumber, setDocNumber]   = useState(IS_SANDBOX ? '12345678' : '');
+  const [email, setEmail]           = useState(IS_SANDBOX ? 'test_user_2361503404@testuser.com' : '');
+  const [paymentMethodId, setPaymentMethodId] = useState(IS_SANDBOX ? 'master' : '');
+  const [issuerId, setIssuerId]     = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState('');
+  const [showInfo, setShowInfo]     = useState(false);
 
-  useEffect(() => {
-    let scriptEl: HTMLScriptElement | null = null;
-
-    function initCardForm() {
-      if (mountedRef.current) return;
-      mountedRef.current = true;
-
-      const mp = new (window as any).MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, { locale: 'es-PE' });
-
-      cardFormRef.current = mp.cardForm({
-        amount: total.toString(),
-        iframe: true,
-        form: {
-          id: 'mp-card-form',
-          cardNumber: { id: 'mp-card-number', placeholder: '•••• •••• •••• ••••' },
-          expirationDate: { id: 'mp-card-expiry', placeholder: 'MM/AA' },
-          securityCode: { id: 'mp-card-cvv', placeholder: 'CVV' },
-          cardholderName: { id: 'mp-card-name', placeholder: 'Nombre en la tarjeta' },
-          issuer: { id: 'mp-card-issuer', placeholder: 'Banco emisor' },
-          installments: { id: 'mp-card-installments', placeholder: 'Cuotas' },
-          identificationType: { id: 'mp-card-id-type', placeholder: 'Tipo doc' },
-          identificationNumber: { id: 'mp-card-id-number', placeholder: 'Número documento' },
-          cardholderEmail: { id: 'mp-card-email', placeholder: 'Email' },
-        },
-        callbacks: {
-          onFormMounted: (err: any) => {
-            if (err) console.error('[MP CardForm mount]', err);
-          },
-          onSubmit: async (event: any) => {
-            event.preventDefault();
-            setLoading(true);
-            setError('');
-            try {
-              const data = cardFormRef.current.getCardFormData() as CardPaymentPayload & { cardholderEmail: string };
-              if (!data.token) throw new Error('No se pudo tokenizar la tarjeta');
-              const res = await paymentsService.processCard(bookingId, {
-                token: data.token,
-                paymentMethodId: data.paymentMethodId,
-                issuerId: data.issuerId,
-                installments: Number(data.installments) || 1,
-                cardholderEmail: data.cardholderEmail,
-                identificationType: data.identificationType,
-                identificationNumber: data.identificationNumber,
-              });
-              const result = (res.data as any).data ?? res.data;
-              if (result.status === 'approved') {
-                onSuccess();
-              } else {
-                setError(`Pago no aprobado (${result.statusDetail ?? result.status}). Verifica los datos.`);
-              }
-            } catch (err: any) {
-              setError(err.response?.data?.message ?? err.message ?? 'Error al procesar el pago');
-            } finally {
-              setLoading(false);
-            }
-          },
-          onError: (errors: any[]) => {
-            console.error('[MP CardForm errors]', errors);
-          },
-        },
+  function handleCardNumber(val: string) {
+    const clean = val.replace(/\D/g, '').slice(0, 16);
+    setCardNumber(clean.replace(/(.{4})/g, '$1 ').trim());
+    setPaymentMethodId(detectMethodFromNumber(clean));
+    if (clean.length >= 6) {
+      detectCardBin(clean.slice(0, 6)).then(({ issuerId: issId }) => {
+        setIssuerId(issId);
       });
     }
+  }
 
-    if ((window as any).MercadoPago) {
-      initCardForm();
-    } else {
-      scriptEl = document.createElement('script');
-      scriptEl.src = 'https://sdk.mercadopago.com/js/v2';
-      scriptEl.async = true;
-      scriptEl.onload = initCardForm;
-      document.head.appendChild(scriptEl);
+  function handleExpiry(val: string) {
+    const clean = val.replace(/\D/g, '').slice(0, 4);
+    setExpiry(clean.length > 2 ? `${clean.slice(0, 2)}/${clean.slice(2)}` : clean);
+  }
+
+  async function handlePay() {
+    if (!cardNumber || !cardName || !expiry || !cvv || !docNumber || !email) {
+      setError('Completa todos los campos');
+      return;
     }
-
-    return () => {
-      mountedRef.current = false;
-      if (cardFormRef.current) {
-        try { cardFormRef.current.unmount(); } catch { /* ignore */ }
-        cardFormRef.current = null;
-      }
-      if (scriptEl && document.head.contains(scriptEl)) {
-        document.head.removeChild(scriptEl);
-      }
-    };
-  }, []);
+    const [month, year] = expiry.split('/');
+    if (!month || !year || month.length < 2 || year.length < 2) {
+      setError('Fecha de vencimiento inválida (MM/AA)');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const tokenId = await createMpCardToken({
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardholderName: cardName,
+        expirationMonth: month,
+        expirationYear: year,
+        securityCode: cvv,
+        docType,
+        docNumber,
+      });
+      const res = await paymentsService.processCard(bookingId, {
+        token: tokenId,
+        paymentMethodId,
+        issuerId: issuerId || undefined,
+        installments: 1,
+        cardholderEmail: email,
+        identificationType: docType,
+        identificationNumber: docNumber,
+      });
+      const result = (res.data as any).data ?? res.data;
+      if (result.status === 'approved') onSuccess();
+      else setError(`Pago no aprobado: ${result.statusDetail ?? result.status}`);
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? err.message ?? 'Error al procesar el pago');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <motion.div
@@ -124,57 +174,95 @@ function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
       <div className="flex items-center gap-2 mb-1">
         <CreditCard size={15} className="text-mishell-600" />
         <p className="text-sm font-semibold text-ink-900">Datos de tarjeta</p>
+        {IS_SANDBOX && (
+          <button
+            type="button"
+            onClick={() => setShowInfo((v) => !v)}
+            className="ml-auto flex items-center gap-1 text-[11px] text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-2 py-1"
+          >
+            <Info size={11} />
+            Modo prueba
+          </button>
+        )}
       </div>
-      <form id="mp-card-form" className="flex flex-col gap-3">
-        <div>
-          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Número de tarjeta</label>
-          <div id="mp-card-number" className={iframeInputClass} style={{ height: 46 }} />
+
+      {IS_SANDBOX && showInfo && (
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex flex-col gap-2 text-[11px] text-blue-800">
+          <p className="font-semibold text-blue-700">Datos de prueba (sandbox)</p>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-blue-500 text-left">
+                <th className="pb-1 pr-2">Marca</th>
+                <th className="pb-1 pr-2">Número</th>
+                <th className="pb-1 pr-2">CVV</th>
+                <th className="pb-1">Vence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SANDBOX_CARDS.map((c) => (
+                <tr key={c.brand} className="cursor-pointer hover:bg-blue-100 rounded"
+                  onClick={() => {
+                    handleCardNumber(c.number);
+                    setCvv(c.cvv);
+                    setExpiry(c.expiry);
+                    setPaymentMethodId(c.method);
+                    setShowInfo(false);
+                  }}
+                >
+                  <td className="py-0.5 pr-2 font-medium">{c.brand}</td>
+                  <td className="py-0.5 pr-2 font-mono">{c.number}</td>
+                  <td className="py-0.5 pr-2 font-mono">{c.cvv}</td>
+                  <td className="py-0.5 font-mono">{c.expiry}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="border-t border-blue-200 pt-2 flex flex-col gap-1">
+            <p><strong>Nombre:</strong> <code>APRO</code> (aprobado) · <code>OTHE</code> (rechazado) · <code>FUND</code> (sin fondos)</p>
+            <p><strong>Email:</strong> debe terminar en <code>@testuser.com</code></p>
+            <p className="text-blue-500">Click en una fila para autocompletar la tarjeta</p>
+          </div>
         </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <input className={inputClass} placeholder="Número de tarjeta *" inputMode="numeric"
+          value={cardNumber} onChange={(e) => handleCardNumber(e.target.value)} />
+
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Vencimiento</label>
-            <div id="mp-card-expiry" className={iframeInputClass} style={{ height: 46 }} />
-          </div>
-          <div>
-            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">CVV</label>
-            <div id="mp-card-cvv" className={iframeInputClass} style={{ height: 46 }} />
-          </div>
+          <input className={inputClass} placeholder="MM/AA *" inputMode="numeric"
+            value={expiry} onChange={(e) => handleExpiry(e.target.value)} />
+          <input className={inputClass} placeholder="CVV *" inputMode="numeric" maxLength={4}
+            value={cvv} onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))} />
         </div>
-        <div>
-          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Nombre del titular</label>
-          <div id="mp-card-name" className={iframeInputClass} style={{ height: 46 }} />
-        </div>
+
+        <input className={inputClass} placeholder="Nombre en la tarjeta *"
+          value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} />
+
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Tipo documento</label>
-            <div id="mp-card-id-type" className={iframeInputClass} style={{ height: 46 }} />
-          </div>
-          <div>
-            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Nro. documento</label>
-            <div id="mp-card-id-number" className={iframeInputClass} style={{ height: 46 }} />
-          </div>
+          <select className={inputClass} value={docType} onChange={(e) => setDocType(e.target.value)}>
+            <option value="DNI">DNI</option>
+            <option value="CE">C. Extranjería</option>
+            <option value="PP">Pasaporte</option>
+          </select>
+          <input className={inputClass} placeholder="Nro. documento *" inputMode="numeric"
+            value={docNumber} onChange={(e) => setDocNumber(e.target.value.replace(/\D/g, ''))} />
         </div>
-        <div>
-          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Email</label>
-          <div id="mp-card-email" className={iframeInputClass} style={{ height: 46 }} />
-        </div>
-        <div style={{ display: 'none' }}>
-          <div id="mp-card-issuer" />
-          <div id="mp-card-installments" />
-        </div>
+
+        <input className={inputClass} placeholder="Email *" type="email" inputMode="email"
+          value={email} onChange={(e) => setEmail(e.target.value)} />
+
         {error && (
           <div className="flex items-start gap-2 bg-mishell-50 rounded-xl p-3">
             <AlertCircle size={14} className="text-mishell-600 shrink-0 mt-0.5" />
             <p className="text-xs text-mishell-700">{error}</p>
           </div>
         )}
-        <p className="text-[11px] text-ink-400 bg-ink-50 rounded-xl px-3 py-2">
-          <strong>Prueba:</strong> Visa <code>4009175332806176</code> · CVV <code>123</code> · Venc. <code>11/25</code>
-        </p>
-        <Button type="submit" loading={loading}>
+
+        <Button loading={loading} onClick={handlePay}>
           Pagar S/ {total.toFixed(2)} con tarjeta
         </Button>
-      </form>
+      </div>
     </motion.div>
   );
 }
