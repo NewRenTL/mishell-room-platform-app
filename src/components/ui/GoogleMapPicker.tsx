@@ -43,6 +43,7 @@ interface Props {
 }
 
 export function GoogleMapPicker({ value, onChange, onAddressChange }: Props) {
+  console.log('[Maps] VITE_GOOGLE_MAPS_KEY:', import.meta.env.VITE_GOOGLE_MAPS_KEY);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
   });
