@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapPin, Calendar, User, AlertCircle, Smartphone, Info } from 'lucide-react';
+import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
 import { useBookingStore } from '../../../stores/bookingStore';
 import type { Property } from '../../../types';
-
-const IS_SANDBOX = import.meta.env.VITE_IS_SANDBOX !== 'false';
+import type { CardPaymentPayload } from '../../../services/payments.service';
 
 function fmt(dateStr: string | null) {
   if (!dateStr) return '—';
@@ -17,6 +16,167 @@ interface Props {
   bookingId: string;
   property?: Property;
   onSuccess: () => void;
+}
+
+// ─── Card inline form ────────────────────────────────────────────────────────
+
+const iframeInputClass =
+  'w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus-within:border-mishell-600 transition-colors overflow-hidden';
+
+function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: number; onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const cardFormRef = useRef<any>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    let scriptEl: HTMLScriptElement | null = null;
+
+    function initCardForm() {
+      if (mountedRef.current) return;
+      mountedRef.current = true;
+
+      const mp = new (window as any).MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, { locale: 'es-PE' });
+
+      cardFormRef.current = mp.cardForm({
+        amount: total.toString(),
+        iframe: true,
+        form: {
+          id: 'mp-card-form',
+          cardNumber: { id: 'mp-card-number', placeholder: '•••• •••• •••• ••••' },
+          expirationDate: { id: 'mp-card-expiry', placeholder: 'MM/AA' },
+          securityCode: { id: 'mp-card-cvv', placeholder: 'CVV' },
+          cardholderName: { id: 'mp-card-name', placeholder: 'Nombre en la tarjeta' },
+          issuer: { id: 'mp-card-issuer', placeholder: 'Banco emisor' },
+          installments: { id: 'mp-card-installments', placeholder: 'Cuotas' },
+          identificationType: { id: 'mp-card-id-type', placeholder: 'Tipo doc' },
+          identificationNumber: { id: 'mp-card-id-number', placeholder: 'Número documento' },
+          cardholderEmail: { id: 'mp-card-email', placeholder: 'Email' },
+        },
+        callbacks: {
+          onFormMounted: (err: any) => {
+            if (err) console.error('[MP CardForm mount]', err);
+          },
+          onSubmit: async (event: any) => {
+            event.preventDefault();
+            setLoading(true);
+            setError('');
+            try {
+              const data = cardFormRef.current.getCardFormData() as CardPaymentPayload & { cardholderEmail: string };
+              if (!data.token) throw new Error('No se pudo tokenizar la tarjeta');
+              const res = await paymentsService.processCard(bookingId, {
+                token: data.token,
+                paymentMethodId: data.paymentMethodId,
+                issuerId: data.issuerId,
+                installments: Number(data.installments) || 1,
+                cardholderEmail: data.cardholderEmail,
+                identificationType: data.identificationType,
+                identificationNumber: data.identificationNumber,
+              });
+              const result = (res.data as any).data ?? res.data;
+              if (result.status === 'approved') {
+                onSuccess();
+              } else {
+                setError(`Pago no aprobado (${result.statusDetail ?? result.status}). Verifica los datos.`);
+              }
+            } catch (err: any) {
+              setError(err.response?.data?.message ?? err.message ?? 'Error al procesar el pago');
+            } finally {
+              setLoading(false);
+            }
+          },
+          onError: (errors: any[]) => {
+            console.error('[MP CardForm errors]', errors);
+          },
+        },
+      });
+    }
+
+    if ((window as any).MercadoPago) {
+      initCardForm();
+    } else {
+      scriptEl = document.createElement('script');
+      scriptEl.src = 'https://sdk.mercadopago.com/js/v2';
+      scriptEl.async = true;
+      scriptEl.onload = initCardForm;
+      document.head.appendChild(scriptEl);
+    }
+
+    return () => {
+      mountedRef.current = false;
+      if (cardFormRef.current) {
+        try { cardFormRef.current.unmount(); } catch { /* ignore */ }
+        cardFormRef.current = null;
+      }
+      if (scriptEl && document.head.contains(scriptEl)) {
+        document.head.removeChild(scriptEl);
+      }
+    };
+  }, []);
+
+  return (
+    <motion.div
+      className="flex flex-col gap-3 pt-3 border-t border-ink-100"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex items-center gap-2 mb-1">
+        <CreditCard size={15} className="text-mishell-600" />
+        <p className="text-sm font-semibold text-ink-900">Datos de tarjeta</p>
+      </div>
+      <form id="mp-card-form" className="flex flex-col gap-3">
+        <div>
+          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Número de tarjeta</label>
+          <div id="mp-card-number" className={iframeInputClass} style={{ height: 46 }} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Vencimiento</label>
+            <div id="mp-card-expiry" className={iframeInputClass} style={{ height: 46 }} />
+          </div>
+          <div>
+            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">CVV</label>
+            <div id="mp-card-cvv" className={iframeInputClass} style={{ height: 46 }} />
+          </div>
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Nombre del titular</label>
+          <div id="mp-card-name" className={iframeInputClass} style={{ height: 46 }} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Tipo documento</label>
+            <div id="mp-card-id-type" className={iframeInputClass} style={{ height: 46 }} />
+          </div>
+          <div>
+            <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Nro. documento</label>
+            <div id="mp-card-id-number" className={iframeInputClass} style={{ height: 46 }} />
+          </div>
+        </div>
+        <div>
+          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Email</label>
+          <div id="mp-card-email" className={iframeInputClass} style={{ height: 46 }} />
+        </div>
+        <div style={{ display: 'none' }}>
+          <div id="mp-card-issuer" />
+          <div id="mp-card-installments" />
+        </div>
+        {error && (
+          <div className="flex items-start gap-2 bg-mishell-50 rounded-xl p-3">
+            <AlertCircle size={14} className="text-mishell-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-mishell-700">{error}</p>
+          </div>
+        )}
+        <p className="text-[11px] text-ink-400 bg-ink-50 rounded-xl px-3 py-2">
+          <strong>Prueba:</strong> Visa <code>4009175332806176</code> · CVV <code>123</code> · Venc. <code>11/25</code>
+        </p>
+        <Button type="submit" loading={loading}>
+          Pagar S/ {total.toFixed(2)} con tarjeta
+        </Button>
+      </form>
+    </motion.div>
+  );
 }
 
 // ─── Yape inline form ────────────────────────────────────────────────────────
@@ -115,6 +275,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showYape, setShowYape] = useState(false);
+  const [showCard, setShowCard] = useState(false);
 
   const weeks = checkIn && checkOut
     ? Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (7 * 86400000)))
@@ -134,21 +295,25 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       return;
     }
 
-    if (paymentMethod === 'CARD' || paymentMethod === 'MERCADO_PAGO') {
-      setLoading(true);
-      try {
-        const res = await paymentsService.createMpCheckout(bookingId);
-        const data = res.data.data ?? (res.data as any);
-        const url = IS_SANDBOX ? data.sandboxInitPoint : data.initPoint;
-        reset();
-        window.location.href = url;
-      } catch (err: any) {
-        setError(err.response?.data?.message ?? 'Error al iniciar el pago');
-        setLoading(false);
-      }
+    if (paymentMethod === 'CARD') {
+      setShowCard(true);
       return;
     }
 
+    if (paymentMethod === 'MERCADO_PAGO') {
+      setLoading(true);
+      try {
+        const res = await paymentsService.createMpCheckout(bookingId);
+        const data = (res.data as any).data ?? res.data;
+        const isSandbox = import.meta.env.VITE_IS_SANDBOX !== 'false';
+        const url = isSandbox ? data.sandboxInitPoint : data.initPoint;
+        reset();
+        window.location.href = url;
+      } catch (err: any) {
+        setError(err.response?.data?.message ?? 'Error al iniciar el pago con MercadoPago');
+        setLoading(false);
+      }
+    }
   }
 
   return (
@@ -227,7 +392,14 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
         )}
       </AnimatePresence>
 
-      {/* Yape form (shown after clicking confirm with Yape) */}
+      {/* Card form */}
+      <AnimatePresence>
+        {showCard && (
+          <CardForm bookingId={bookingId} total={total} onSuccess={() => { reset(); onSuccess(); }} />
+        )}
+      </AnimatePresence>
+
+      {/* Yape form */}
       <AnimatePresence>
         {showYape && (
           <YapeForm bookingId={bookingId} total={total} onSuccess={() => { reset(); onSuccess(); }} />
@@ -245,7 +417,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       </div>
 
       {/* Confirm button */}
-      {!showYape && (
+      {!showYape && !showCard && (
         <Button loading={loading} onClick={handleConfirm} className="w-full">
           Confirmar y Reservar
         </Button>
