@@ -6,6 +6,8 @@ export interface BookingContract {
   content: string;
   title: string;
   status: string;
+  issuedAt?: string;
+  createdAt?: string;
 }
 
 export const bookingsService = {

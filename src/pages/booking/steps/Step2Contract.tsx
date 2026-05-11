@@ -78,6 +78,8 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
     );
   }
 
+  const issuedDate = contract?.issuedAt ?? contract?.createdAt;
+
   return (
     <motion.div
       className="flex flex-col gap-5"
@@ -85,18 +87,26 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Contract HTML viewer */}
+      {/* Contract document viewer */}
       <div className="mx-5 mt-5 bg-white border border-ink-100 rounded-2xl overflow-hidden shadow-sm">
-        <div className="bg-ink-50 px-4 py-3 border-b border-ink-100">
-          <p className="text-xs font-semibold text-ink-700 uppercase tracking-wide">Contrato de arrendamiento</p>
-          {contract?.title && (
-            <p className="text-xs text-ink-500 mt-0.5">{contract.title}</p>
+        {/* Document header */}
+        <div className="px-5 pt-4 pb-3 border-b border-ink-100">
+          <p className="text-[9px] font-bold tracking-widest text-mishell-600 uppercase mb-1.5">Contrato Digital</p>
+          <h3 className="text-sm font-bold text-ink-900 leading-snug">
+            {contract?.title ?? 'Contrato de Arrendamiento'}
+          </h3>
+          {issuedDate && (
+            <p className="text-[11px] text-ink-400 mt-1">
+              Emitido el {new Date(issuedDate).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
           )}
         </div>
-        <div
-          className="px-4 py-4 text-xs text-ink-700 leading-relaxed max-h-64 overflow-y-auto"
-          dangerouslySetInnerHTML={{ __html: contract?.content ?? '' }}
-        />
+        {/* Document content — plain text with preserved line breaks */}
+        <div className="px-5 py-4 max-h-72 overflow-y-auto">
+          <pre className="text-[11px] text-ink-800 leading-relaxed whitespace-pre-wrap font-sans wrap-break-word">
+            {contract?.content}
+          </pre>
+        </div>
       </div>
 
       {/* Signature */}
