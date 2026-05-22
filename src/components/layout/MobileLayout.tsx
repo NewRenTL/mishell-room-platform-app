@@ -1,14 +1,14 @@
-import { Home, MessageCircle, Key, User, BookMarked, Clock, Building2 } from 'lucide-react';
+import { Home, MessageCircle, Key, User, Banknote, Clock, Building2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../../stores/authStore';
 
 const TABS_INQUILINO = [
-  { path: '/home',        icon: Home,          label: 'Inicio'    },
-  { path: '/properties',  icon: BookMarked,    label: 'Buscar'    },
-  { path: '/my-bookings', icon: Key,           label: 'Reservas'  },
-  { path: '/messages',    icon: MessageCircle, label: 'Mensajes'  },
-  { path: '/profile',     icon: User,          label: 'Perfil'    },
+  { path: '/home',         icon: Home,          label: 'Inicio'   },
+  { path: '/my-bookings',  icon: Key,           label: 'Reservas' },
+  { path: '/my-payments',  icon: Banknote,      label: 'Pagos'    },
+  { path: '/messages',     icon: MessageCircle, label: 'Mensajes' },
+  { path: '/profile',      icon: User,          label: 'Perfil'   },
 ];
 
 const TABS_SOCIO = [

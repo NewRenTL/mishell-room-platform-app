@@ -8,8 +8,38 @@ export type BookingStatus =
   | 'PAYMENT_PENDING'
   | 'CONFIRMED'
   | 'ACTIVE'
+  | 'OVERDUE'
   | 'COMPLETED'
   | 'CANCELLED';
+
+export type WeeklyPaymentStatus = 'PENDING' | 'PAID' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+export interface WeeklyPayment {
+  id: string;
+  bookingId: string;
+  weekNumber: number;
+  dueDate: string;
+  amount: number | string;
+  status: WeeklyPaymentStatus;
+  paidAt: string | null;
+  approvedAt: string | null;
+  rejectionReason: string | null;
+  cancelledAt: string | null;
+  createdAt: string;
+}
+
+export interface BookingWithPayments {
+  id: string;
+  referenceId: string;
+  checkIn: string;
+  checkOut: string | null;
+  departureNoticeDate: string | null;
+  paymentFrequencyDays: number;
+  status: BookingStatus;
+  totalAmount: number | string;
+  property: { title: string; address: string };
+  weeklyPayments: WeeklyPayment[];
+}
 export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE';
 
 export interface User {

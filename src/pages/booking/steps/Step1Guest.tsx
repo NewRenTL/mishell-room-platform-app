@@ -97,7 +97,7 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
             onChange={(val) => set('checkIn', val)}
           />
           <div className="flex gap-3">
-            {[1, 2, 4].map((w) => (
+            {[1, 2, 4, 7].map((w) => (
               <button
                 key={w}
                 type="button"

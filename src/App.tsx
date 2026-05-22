@@ -5,7 +5,6 @@ import { AuthLayout } from './components/layout/AuthLayout';
 import { MobileLayout } from './components/layout/MobileLayout';
 
 const LoginPage       = lazy(() => import('./pages/auth/LoginPage'));
-const RegisterPage    = lazy(() => import('./pages/auth/RegisterPage'));
 const HomePage        = lazy(() => import('./pages/marketplace/HomePage'));
 const MarketplacePage = lazy(() => import('./pages/marketplace/MarketplacePage'));
 const PropertyDetailPage = lazy(() => import('./pages/marketplace/PropertyDetailPage'));
@@ -13,6 +12,7 @@ const BookingFlowPage = lazy(() => import('./pages/booking/BookingFlowPage'));
 const BookingSuccessPage = lazy(() => import('./pages/booking/BookingSuccessPage'));
 const MpReturnPage = lazy(() => import('./pages/booking/MpReturnPage'));
 const MyBookingsPage  = lazy(() => import('./pages/tenant/MyBookingsPage'));
+const MyPaymentsPage  = lazy(() => import('./pages/tenant/MyPaymentsPage'));
 const MessagesPage        = lazy(() => import('./pages/messages/MessagesPage'));
 const AdminChatListPage   = lazy(() => import('./pages/admin/AdminChatListPage'));
 const AdminChatConvPage   = lazy(() => import('./pages/messages/ChatPage'));
@@ -62,9 +62,9 @@ export default function App() {
     <BrowserRouter>
       <Suspense fallback={<Fallback />}>
         <Routes>
-          {/* Public auth */}
+          {/* Public auth — un solo componente, tab dinámico */}
           <Route path="/login"    element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
+          <Route path="/register" element={<AuthLayout><LoginPage /></AuthLayout>} />
 
           {/* Tenant/Inquilino routes */}
           <Route path="/home" element={
@@ -87,6 +87,9 @@ export default function App() {
           } />
           <Route path="/my-bookings" element={
             <ProtectedRoute><MobileLayout><MyBookingsPage /></MobileLayout></ProtectedRoute>
+          } />
+          <Route path="/my-payments" element={
+            <ProtectedRoute><MobileLayout><MyPaymentsPage /></MobileLayout></ProtectedRoute>
           } />
           <Route path="/messages" element={
             <ProtectedRoute><MobileLayout><MessagesPage /></MobileLayout></ProtectedRoute>
