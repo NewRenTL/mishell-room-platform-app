@@ -270,8 +270,8 @@ function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
 // ─── Yape inline form ────────────────────────────────────────────────────────
 
 function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: number; onSuccess: () => void }) {
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
+  const [phone, setPhone] = useState(IS_SANDBOX ? '111111111' : '');
+  const [otp, setOtp]     = useState(IS_SANDBOX ? '123456' : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mpReady, setMpReady] = useState(false);
@@ -322,6 +322,11 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
       <div className="flex items-center gap-2">
         <Smartphone size={15} className="text-mishell-600" />
         <p className="text-sm font-semibold text-ink-900">Datos de Yape</p>
+        {IS_SANDBOX && (
+          <span className="ml-auto text-[10px] bg-blue-50 text-blue-600 border border-blue-100 rounded-lg px-2 py-1 flex items-center gap-1">
+            <Info size={10} /> Modo prueba — campos pre-rellenados
+          </span>
+        )}
       </div>
       <div>
         <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Número de celular</label>
@@ -345,11 +350,8 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
           <p className="text-xs text-mishell-700">{error}</p>
         </div>
       )}
-      <p className="text-[11px] text-ink-400 bg-ink-50 rounded-xl px-3 py-2">
-        <strong>Prueba:</strong> Celular <code>111111111</code> · OTP <code>123456</code>
-      </p>
       <Button loading={loading} onClick={handlePay}>
-        Pagar ${total.toFixed(0)} con Yape
+        Pagar S/ {total.toFixed(0)} con Yape
       </Button>
     </motion.div>
   );
