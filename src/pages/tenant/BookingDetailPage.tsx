@@ -8,6 +8,7 @@ import {
 import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { bookingsService } from '../../services/bookings.service';
+import { AMENITY_LABELS } from '../../utils/amenities';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING:          'Pendiente',
@@ -154,7 +155,7 @@ export default function BookingDetailPage() {
               <div className="flex flex-wrap gap-1.5">
                 {amenities.map((a) => (
                   <span key={a} className="text-[10px] text-mishell-700 bg-mishell-50 px-2 py-0.5 rounded-full border border-mishell-100 font-medium">
-                    {a}
+                    {AMENITY_LABELS[a] ?? a}
                   </span>
                 ))}
               </div>

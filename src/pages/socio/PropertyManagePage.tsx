@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import { propertiesService } from '../../services/properties.service';
 import { bookingsService } from '../../services/bookings.service';
+import { AMENITY_OPTIONS } from '../../utils/amenities';
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: 'bg-ink-100 text-ink-700',
@@ -33,12 +34,6 @@ const PROP_STATUSES = [
 ];
 
 const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
-const AMENITY_OPTIONS = [
-  { key: 'wifi',    label: 'Wifi rápido' },
-  { key: 'tv_hd',  label: 'TV HD' },
-  { key: 'ac',     label: 'Aire acond.' },
-  { key: 'cafetera', label: 'Cafetera' },
-];
 
 type Tab = 'reservas' | 'editar';
 

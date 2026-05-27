@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, Heart, Star, MapPin, Wifi, Tv, Wind, Coffee, Users, XCircle } from 'lucide-react';
+import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { GoogleMapView } from '../../components/ui/GoogleMapView';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -9,14 +9,7 @@ import { propertiesService } from '../../services/properties.service';
 import { useAuthStore } from '../../stores/authStore';
 import { useBookingStore } from '../../stores/bookingStore';
 import { useFavoritesStore } from '../../stores/favoritesStore';
-
-
-const AMENITY_ICONS: Record<string, typeof Wifi> = {
-  wifi: Wifi, tv_hd: Tv, ac: Wind, cafetera: Coffee,
-};
-const AMENITY_LABELS: Record<string, string> = {
-  wifi: 'Wifi rápido', tv_hd: 'Televisión HD', ac: 'Aire acondicionado', cafetera: 'Cafetera',
-};
+import { AMENITY_ICONS, AMENITY_LABELS } from '../../utils/amenities';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();

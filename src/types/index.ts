@@ -24,6 +24,8 @@ export interface WeeklyPayment {
   paidAt: string | null;
   approvedAt: string | null;
   rejectionReason: string | null;
+  voucherMethod: string | null;
+  voucherKey: string | null;
   cancelledAt: string | null;
   createdAt: string;
 }

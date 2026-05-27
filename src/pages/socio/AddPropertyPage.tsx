@@ -6,14 +6,9 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import api from '../../services/api';
+import { AMENITY_OPTIONS } from '../../utils/amenities';
 
 const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
-const AMENITY_OPTIONS = [
-  { key: 'wifi',     label: 'Wifi rápido' },
-  { key: 'tv_hd',   label: 'Televisión HD' },
-  { key: 'ac',      label: 'Aire acondicionado' },
-  { key: 'cafetera', label: 'Cafetera' },
-];
 
 export default function AddPropertyPage() {
   const navigate = useNavigate();
