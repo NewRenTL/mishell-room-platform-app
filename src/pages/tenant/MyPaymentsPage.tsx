@@ -176,10 +176,12 @@ function BookingCard({ booking, onPay, payingId, onDeparture }: {
 export default function MyPaymentsPage() {
   const queryClient = useQueryClient();
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const LIMIT = 10;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['my-payments'],
-    queryFn: () => weeklyPaymentsService.getMyPayments().then((r) => r.data.data),
+    queryKey: ['my-payments', page],
+    queryFn: () => weeklyPaymentsService.getMyPayments({ page, limit: LIMIT }).then((r) => r.data),
   });
 
   const markPaid = useMutation({
@@ -199,7 +201,8 @@ export default function MyPaymentsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-payments'] }),
   });
 
-  const bookings = data ?? [];
+  const bookings = data?.data ?? [];
+  const meta = data?.meta;
 
   return (
     <div className="flex flex-col min-h-full bg-ink-50">
@@ -223,7 +226,7 @@ export default function MyPaymentsPage() {
           <>
             {bookings.some((b) => b.status === 'OVERDUE') && (
               <div className="flex items-center gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
-                <AlertTriangle size={16} className="text-red-600 flex-shrink-0" />
+                <AlertTriangle size={16} className="text-red-600 shrink-0" />
                 <p className="text-xs text-red-700 font-medium">
                   Tienes pagos vencidos. Por favor, regulariza tu situación para evitar inconvenientes.
                 </p>
@@ -238,6 +241,25 @@ export default function MyPaymentsPage() {
                 onDeparture={(bookingId, date) => setDeparture.mutate({ bookingId, date })}
               />
             ))}
+            {meta && meta.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-ink-200 text-ink-700 disabled:opacity-40"
+                >
+                  Anterior
+                </button>
+                <span className="text-xs text-ink-500">{page} / {meta.totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+                  disabled={page === meta.totalPages}
+                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-ink-200 text-ink-700 disabled:opacity-40"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

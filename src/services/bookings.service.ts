@@ -38,6 +38,9 @@ export const bookingsService = {
   signContract: (bookingId: string, signatureId: string) =>
     api.patch<Booking>(`/bookings/${bookingId}/sign-contract`, { signatureId }),
 
+  getContractDownloadUrl: (bookingId: string) =>
+    api.get<{ url: string }>(`/bookings/${bookingId}/contract/download`),
+
   getSocioStats: () =>
     api.get<{ totalProperties: number; totalBookings: number; activeBookings: number; totalRevenue: number }>('/bookings/socio/stats'),
 };

@@ -32,8 +32,8 @@ export const propertiesService = {
   getOne: (id: string) =>
     api.get<Property>(`/properties/${id}`),
 
-  getMine: () =>
-    api.get<Property[]>('/properties/owner/mine'),
+  getMine: (params?: { page?: number; limit?: number }) =>
+    api.get<PaginatedResponse<Property>>('/properties/owner/mine', { params }),
 
   update: (id: string, data: UpdatePropertyData) =>
     api.patch<Property>(`/properties/${id}`, data),

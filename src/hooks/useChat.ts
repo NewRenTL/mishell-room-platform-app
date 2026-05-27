@@ -26,12 +26,13 @@ export function useChat() {
     setLoading(true);
     chatService.getMyConversation()
       .then((r) => {
-        const conv = r.data;
+        const conv = r.data as typeof r.data & { _messageTotal?: number };
         setConversation(conv);
         convIdRef.current = conv.id;
         const msgs = conv.messages ?? [];
+        const total = conv._messageTotal ?? msgs.length;
         setMessages(msgs);
-        setMsgMeta((m) => ({ ...m, total: msgs.length }));
+        setMsgMeta({ total, page: 1, limit: 30, totalPages: Math.ceil(total / 30) || 1 });
         chatService.markAsRead(conv.id).catch(() => {});
       })
       .finally(() => setLoading(false));

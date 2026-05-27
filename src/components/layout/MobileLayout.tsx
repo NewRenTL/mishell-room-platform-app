@@ -32,7 +32,7 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const tabs = user?.role === 'SOCIO' ? TABS_SOCIO : TABS_INQUILINO;
 
   return (
-    <div className="min-h-dvh flex flex-col max-w-[430px] mx-auto bg-ink-50 relative">
+    <div className="h-dvh flex flex-col max-w-[430px] mx-auto bg-ink-50 relative">
       {user?.status === 'INACTIVE' && (
         <div className="sticky top-0 z-40 flex items-center gap-2 px-4 py-2.5 bg-amber-50 border-b border-amber-200">
           <Clock size={14} className="text-amber-600 shrink-0" />

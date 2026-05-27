@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Home, TrendingUp, Calendar, ChevronRight, MapPin, Bell, Search } from 'lucide-react';
@@ -23,10 +24,16 @@ export default function SocioDashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
-  const { data: properties = [], isLoading: loadingProps } = useQuery({
-    queryKey: ['properties', 'mine'],
-    queryFn: () => propertiesService.getMine().then((r) => r.data),
+  const [propsPage, setPropsPage] = useState(1);
+  const PROPS_LIMIT = 10;
+
+  const { data: propsData, isLoading: loadingProps } = useQuery({
+    queryKey: ['properties', 'mine', propsPage],
+    queryFn: () => propertiesService.getMine({ page: propsPage, limit: PROPS_LIMIT }).then((r) => r.data),
   });
+
+  const properties = propsData?.data ?? [];
+  const propsMeta = propsData?.meta;
 
   const { data: stats } = useQuery({
     queryKey: ['socio-stats'],
@@ -194,7 +201,7 @@ export default function SocioDashboardPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                   {/* Photo */}
-                  <div className="w-24 h-24 flex-shrink-0 bg-ink-100">
+                  <div className="w-24 h-24 shrink-0 bg-ink-100">
                     {p.photoUrls?.[0]
                       ? <img src={p.photoUrls[0]} alt="" className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center"><Home size={20} className="text-ink-300" /></div>
@@ -206,7 +213,7 @@ export default function SocioDashboardPage() {
                     <div>
                       <div className="flex items-start justify-between gap-1">
                         <p className="text-sm font-bold text-ink-900 leading-tight truncate">{p.title}</p>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_CHIP[p.status] ?? 'bg-ink-100 text-ink-600'}`}>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${STATUS_CHIP[p.status] ?? 'bg-ink-100 text-ink-600'}`}>
                           {STATUS_LABEL[p.status] ?? p.status}
                         </span>
                       </div>
@@ -221,6 +228,25 @@ export default function SocioDashboardPage() {
                   </div>
                 </motion.button>
               ))}
+              {propsMeta && propsMeta.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 pt-1">
+                  <button
+                    onClick={() => setPropsPage((p) => Math.max(1, p - 1))}
+                    disabled={propsPage === 1}
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-ink-200 text-ink-700 disabled:opacity-40"
+                  >
+                    Anterior
+                  </button>
+                  <span className="text-xs text-ink-500">{propsPage} / {propsMeta.totalPages}</span>
+                  <button
+                    onClick={() => setPropsPage((p) => Math.min(propsMeta.totalPages, p + 1))}
+                    disabled={propsPage === propsMeta.totalPages}
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-ink-200 text-ink-700 disabled:opacity-40"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </motion.section>

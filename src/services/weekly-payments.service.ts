@@ -1,9 +1,9 @@
 import api from './api';
-import type { BookingWithPayments } from '../types';
+import type { BookingWithPayments, PaginatedResponse } from '../types';
 
 export const weeklyPaymentsService = {
-  getMyPayments: () =>
-    api.get<{ data: BookingWithPayments[] }>('/weekly-payments/my'),
+  getMyPayments: (params?: { page?: number; limit?: number }) =>
+    api.get<PaginatedResponse<BookingWithPayments>>('/weekly-payments/my', { params }),
 
   markPaid: (paymentId: string) =>
     api.patch(`/weekly-payments/${paymentId}/pay`),

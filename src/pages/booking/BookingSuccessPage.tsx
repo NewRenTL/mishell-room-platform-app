@@ -109,7 +109,7 @@ export default function BookingSuccessPage() {
         <div className="px-4 py-3.5 flex justify-between items-center">
           <span className="text-sm text-ink-600 font-medium">Total pagado</span>
           <span className="text-lg font-extrabold text-ink-900">
-            ${booking ? Number(booking.totalAmount).toFixed(0) : '—'}
+            S/ {booking ? Number(booking.totalAmount).toFixed(0) : '—'}
           </span>
         </div>
       </motion.div>

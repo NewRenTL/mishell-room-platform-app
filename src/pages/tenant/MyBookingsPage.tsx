@@ -12,6 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
   PAYMENT_PENDING: 'Pago pendiente',
   CONFIRMED: 'Confirmada',
   ACTIVE: 'Activa',
+  OVERDUE: 'En mora',
   COMPLETED: 'Completada',
   CANCELLED: 'Cancelada',
 };
@@ -23,6 +24,7 @@ const STATUS_COLORS: Record<string, string> = {
   PAYMENT_PENDING: 'bg-amber-100 text-amber-700',
   CONFIRMED: 'bg-mishell-100 text-mishell-700',
   ACTIVE: 'bg-green-100 text-green-700',
+  OVERDUE: 'bg-red-100 text-red-700',
   COMPLETED: 'bg-ink-100 text-ink-500',
   CANCELLED: 'bg-red-100 text-red-700',
 };
@@ -79,7 +81,7 @@ export default function MyBookingsPage() {
             : filtered.map((booking) => (
               <button
                 key={booking.id}
-                onClick={() => navigate(`/booking/success/${booking.id}`)}
+                onClick={() => navigate(`/my-bookings/${booking.id}`)}
                 className="w-full bg-white rounded-2xl border border-ink-100 p-4 text-left flex gap-3"
               >
                 <div className="flex-1 min-w-0">
