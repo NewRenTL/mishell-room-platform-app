@@ -20,6 +20,7 @@ const ProfilePage     = lazy(() => import('./pages/tenant/ProfilePage'));
 const SocioDashboardPage  = lazy(() => import('./pages/socio/SocioDashboardPage'));
 const PropertyManagePage  = lazy(() => import('./pages/socio/PropertyManagePage'));
 const AddPropertyPage     = lazy(() => import('./pages/socio/AddPropertyPage'));
+const VerificationPage    = lazy(() => import('./pages/tenant/VerificationPage'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -104,6 +105,9 @@ export default function App() {
           } />
           <Route path="/profile" element={
             <ProtectedRoute><MobileLayout><ProfilePage /></MobileLayout></ProtectedRoute>
+          } />
+          <Route path="/verification" element={
+            <ProtectedRoute><MobileLayout hideNav><VerificationPage /></MobileLayout></ProtectedRoute>
           } />
 
           {/* Socio routes */}

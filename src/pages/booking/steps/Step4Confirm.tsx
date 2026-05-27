@@ -364,8 +364,8 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
   const reset = useBookingStore((s) => s.reset);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showYape, setShowYape] = useState(false);
-  const [showCard, setShowCard] = useState(false);
+  const [showYape] = useState(paymentMethod === 'YAPE');
+  const [showCard] = useState(paymentMethod === 'CARD');
 
   const weeks = checkIn && checkOut
     ? Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (7 * 86400000)))
@@ -379,16 +379,6 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
 
   async function handleConfirm() {
     setError('');
-
-    if (paymentMethod === 'YAPE') {
-      setShowYape(true);
-      return;
-    }
-
-    if (paymentMethod === 'CARD') {
-      setShowCard(true);
-      return;
-    }
 
     if (paymentMethod === 'MERCADO_PAGO') {
       setLoading(true);

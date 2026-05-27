@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FileText, CheckCircle } from 'lucide-react';
+import { FileText, CheckCircle, Download, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { SignatureCanvas } from '../../../components/ui/SignatureCanvas';
 import { bookingsService } from '../../../services/bookings.service';
 import { signaturesService } from '../../../services/signatures.service';
+import { contractsService } from '../../../services/contracts.service';
 import { useBookingStore } from '../../../stores/bookingStore';
 
 interface Props {
@@ -17,9 +18,12 @@ interface Props {
 
 export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }: Props) {
   const setSignature = useBookingStore((s) => s.setSignature);
+  const contractId   = useBookingStore((s) => s.contractId);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [signed, setSigned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
   const [error, setError] = useState('');
 
   const { data: contract, isLoading } = useQuery({
@@ -56,7 +60,6 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       await bookingsService.signContract(bookingId, signatureId);
       setSignature(signatureDataUrl, signatureId);
       setSigned(true);
-      setTimeout(onNext, 800);
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Error al firmar el contrato');
     } finally {
@@ -65,15 +68,52 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
   }
 
   if (signed) {
+    async function handleDownload() {
+      if (!contractId) return;
+      setDownloading(true);
+      setDownloadError('');
+      try {
+        const res = await contractsService.getDownloadUrl(contractId);
+        const url = (res.data as any).data?.url ?? (res.data as any).url;
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.click();
+      } catch {
+        setDownloadError('El PDF aún se está generando. Intenta en unos segundos.');
+      } finally {
+        setDownloading(false);
+      }
+    }
+
     return (
       <motion.div
-        className="flex flex-col items-center justify-center py-16 gap-3"
+        className="flex flex-col items-center justify-center py-16 gap-4 px-5"
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       >
         <CheckCircle size={56} className="text-mishell-600" />
         <p className="text-base font-semibold text-ink-900">¡Contrato firmado!</p>
+        <p className="text-sm text-ink-500 text-center">Puedes descargar una copia con tu firma antes de continuar.</p>
+
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mishell-200 bg-mishell-50 text-mishell-700 text-sm font-medium hover:bg-mishell-100 transition-colors disabled:opacity-60"
+        >
+          {downloading
+            ? <Loader2 size={15} className="animate-spin" />
+            : <Download size={15} />}
+          {downloading ? 'Generando PDF...' : 'Descargar contrato PDF'}
+        </button>
+
+        {downloadError && (
+          <p className="text-xs text-mishell-600 text-center">{downloadError}</p>
+        )}
+
+        <Button onClick={onNext} className="w-full mt-2">Continuar</Button>
       </motion.div>
     );
   }

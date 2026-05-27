@@ -36,7 +36,12 @@ export default function PropertyDetailPage() {
 
   function handleReserve() {
     if (!isAuthenticated) { navigate('/login'); return; }
-    if (user?.status === 'INACTIVE') return; // banner in MobileLayout handles messaging
+    if (user?.status === 'INACTIVE') return;
+    const isDniUser = user?.email?.endsWith('@mishell.room');
+    if (isDniUser && user?.verificationStatus !== 'APPROVED') {
+      navigate('/verification');
+      return;
+    }
     setProperty(id!);
     navigate(`/booking/${id}`);
   }

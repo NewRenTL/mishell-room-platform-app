@@ -42,6 +42,8 @@ export interface BookingWithPayments {
 }
 export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE';
 
+export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'APPROVED' | 'OBSERVED';
+
 export interface User {
   id: string;
   email: string;
@@ -53,6 +55,7 @@ export interface User {
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
   mustChangePassword: boolean;
+  verificationStatus?: VerificationStatus;
 }
 
 export interface PropertyPhoto {

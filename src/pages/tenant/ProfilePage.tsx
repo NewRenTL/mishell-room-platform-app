@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Phone, CreditCard, LogOut, ChevronRight, FileText, Edit2, Check, X, Heart, Camera } from 'lucide-react';
+import { Mail, Phone, CreditCard, LogOut, ChevronRight, FileText, Edit2, Check, X, Heart, Camera, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { useAuthStore } from '../../stores/authStore';
@@ -71,9 +71,12 @@ export default function ProfilePage() {
     }
   }
 
+  const isDniUser = user?.email?.endsWith('@mishell.room');
+
   const menuItems = [
     { icon: FileText, label: 'Mis reservas', action: () => navigate('/my-bookings') },
     { icon: Heart,    label: 'Favoritos',    action: () => navigate('/properties') },
+    ...(isDniUser ? [{ icon: ShieldCheck, label: 'Verificación de identidad', action: () => navigate('/verification') }] : []),
   ];
 
   const initials = user?.firstName?.[0]?.toUpperCase() ?? 'U';
