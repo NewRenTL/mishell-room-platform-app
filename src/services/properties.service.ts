@@ -9,6 +9,7 @@ export interface PropertyFilters {
   rooms?: number;
   page?: number;
   limit?: number;
+  status?: string;
 }
 
 export interface UpdatePropertyData {

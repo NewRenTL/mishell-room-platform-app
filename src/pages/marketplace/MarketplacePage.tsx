@@ -18,7 +18,7 @@ export default function MarketplacePage() {
   const { data, isLoading } = useQuery({
     queryKey: ['properties', { search, city, page }],
     queryFn: () =>
-      propertiesService.getAll({ search: search || undefined, city: city || undefined, page, limit: 10 })
+      propertiesService.getAll({ search: search || undefined, city: city || undefined, page, limit: 10, status: 'AVAILABLE' })
         .then((r) => r.data),
   });
 

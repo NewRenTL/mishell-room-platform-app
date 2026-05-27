@@ -16,7 +16,7 @@ export default function HomePage() {
 
   const { data } = useQuery({
     queryKey: ['properties', 'home'],
-    queryFn: () => propertiesService.getAll({ limit: 10 }).then((r) => r.data),
+    queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
   });
 
   const properties = data?.data ?? [];
