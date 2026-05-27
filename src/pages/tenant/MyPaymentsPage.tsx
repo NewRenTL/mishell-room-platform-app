@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Banknote, Calendar, CheckCircle2, Clock, XCircle, AlertTriangle,
   LogOut, ChevronDown, ChevronUp, Smartphone, ArrowLeftRight, Coins,
-  Camera, X, Loader2, ChevronRight,
+  Camera, X, Loader2, ChevronRight, AlertCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -225,40 +225,47 @@ function PaymentRow({ payment, onOpenSheet }: {
   const canPay = payment.status === 'PENDING' || payment.status === 'REJECTED';
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-ink-50 last:border-0">
-      <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
-          <Icon size={14} />
+    <div className="border-b border-ink-50 last:border-0">
+      <div className="flex items-center justify-between py-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${cfg.color}`}>
+            <Icon size={14} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-ink-900">Semana {payment.weekNumber}</p>
+            <p className="text-[10px] text-ink-500">
+              Vence {new Date(payment.dueDate).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}
+            </p>
+            {payment.voucherMethod && payment.status === 'PAID' && (
+              <p className="text-[10px] text-blue-600 mt-0.5">
+                Vía {payment.voucherMethod.charAt(0) + payment.voucherMethod.slice(1).toLowerCase()}
+              </p>
+            )}
+          </div>
         </div>
-        <div>
-          <p className="text-xs font-semibold text-ink-900">Semana {payment.weekNumber}</p>
-          <p className="text-[10px] text-ink-500">
-            Vence {new Date(payment.dueDate).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}
-          </p>
-          {payment.voucherMethod && payment.status === 'PAID' && (
-            <p className="text-[10px] text-blue-600 mt-0.5">Vía {payment.voucherMethod.charAt(0) + payment.voucherMethod.slice(1).toLowerCase()}</p>
-          )}
-          {payment.rejectionReason && (
-            <p className="text-[10px] text-red-600 mt-0.5">Motivo: {payment.rejectionReason}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-right">
+            <p className="text-sm font-bold text-ink-900">S/ {Number(payment.amount).toFixed(0)}</p>
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.color}`}>
+              {cfg.label}
+            </span>
+          </div>
+          {canPay && (
+            <button
+              onClick={() => onOpenSheet(payment)}
+              className="ml-1 px-3 py-1.5 bg-mishell-600 text-white text-xs font-semibold rounded-xl active:scale-95 transition-transform"
+            >
+              {payment.status === 'REJECTED' ? 'Reenviar' : 'Pagar'}
+            </button>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="text-right">
-          <p className="text-sm font-bold text-ink-900">S/ {Number(payment.amount).toFixed(0)}</p>
-          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.color}`}>
-            {cfg.label}
-          </span>
+      {payment.rejectionReason && (
+        <div className="flex items-start gap-1.5 pb-2.5 pl-11 pr-1">
+          <AlertCircle size={11} className="text-red-500 mt-0.5 shrink-0" />
+          <p className="text-[10px] text-red-600 leading-snug">{payment.rejectionReason}</p>
         </div>
-        {canPay && (
-          <button
-            onClick={() => onOpenSheet(payment)}
-            className="ml-1 px-3 py-1.5 bg-mishell-600 text-white text-xs font-semibold rounded-xl active:scale-95 transition-transform"
-          >
-            {payment.status === 'REJECTED' ? 'Reenviar' : 'Pagar'}
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 }
