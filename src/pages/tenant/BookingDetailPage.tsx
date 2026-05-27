@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  MapPin, Calendar, CreditCard, FileText, ChevronRight,
+  MapPin, FileText, ChevronRight,
   BedDouble, Users, Navigation, Download, Loader2,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -45,16 +45,11 @@ function fmt(dateStr: string | null | undefined) {
   return new Date(dateStr).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 py-3 border-b border-ink-50 last:border-0">
-      <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[10px] text-ink-400 font-semibold uppercase tracking-wide">{label}</p>
-        <p className="text-sm font-semibold text-ink-900 mt-0.5">{value}</p>
-      </div>
+    <div className="flex items-center justify-between py-3 border-b border-ink-50 last:border-0 gap-4">
+      <p className="text-xs text-ink-400 font-medium shrink-0">{label}</p>
+      <p className="text-sm font-semibold text-ink-900 text-right">{value}</p>
     </div>
   );
 }
@@ -174,41 +169,21 @@ export default function BookingDetailPage() {
           </div>
 
           {/* Dates */}
-          <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden">
-            <InfoRow
-              icon={<Calendar size={14} className="text-ink-600" />}
-              label="Fecha de ingreso"
-              value={fmt(booking.checkIn)}
-            />
+          <div className="bg-white rounded-2xl border border-ink-100 px-4">
+            <InfoRow label="Fecha de ingreso" value={fmt(booking.checkIn)} />
             {booking.checkOut && (
-              <InfoRow
-                icon={<Calendar size={14} className="text-ink-400" />}
-                label="Fecha de salida"
-                value={fmt(booking.checkOut)}
-              />
+              <InfoRow label="Fecha de salida" value={fmt(booking.checkOut)} />
             )}
           </div>
 
           {/* Pricing */}
-          <div className="bg-white rounded-2xl border border-ink-100 overflow-hidden">
-            <InfoRow
-              icon={<CreditCard size={14} className="text-mishell-600" />}
-              label="Total"
-              value={`S/ ${Number(booking.totalAmount).toFixed(0)}`}
-            />
+          <div className="bg-white rounded-2xl border border-ink-100 px-4">
+            <InfoRow label="Total" value={`S/ ${Number(booking.totalAmount).toFixed(0)}`} />
             {property?.pricePerWeek != null && (
-              <InfoRow
-                icon={<CreditCard size={14} className="text-ink-400" />}
-                label="Precio por semana"
-                value={`S/ ${Number(property.pricePerWeek).toFixed(0)}`}
-              />
+              <InfoRow label="Precio por semana" value={`S/ ${Number(property.pricePerWeek).toFixed(0)}`} />
             )}
             {booking.paymentMethod && (
-              <InfoRow
-                icon={<CreditCard size={14} className="text-ink-400" />}
-                label="Método de pago"
-                value={PAYMENT_LABELS[booking.paymentMethod] ?? booking.paymentMethod}
-              />
+              <InfoRow label="Método de pago" value={PAYMENT_LABELS[booking.paymentMethod] ?? booking.paymentMethod} />
             )}
           </div>
 
