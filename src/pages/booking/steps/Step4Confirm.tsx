@@ -5,7 +5,6 @@ import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
 import { useBookingStore } from '../../../stores/bookingStore';
 import type { Property } from '../../../types';
-import type { CardPaymentPayload } from '../../../services/payments.service';
 
 function fmt(dateStr: string | null) {
   if (!dateStr) return '—';

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Mail, Lock, CreditCard, KeyRound,
   User, Phone, Camera, CheckCircle2, X,
@@ -177,7 +177,7 @@ export default function LoginPage() {
   const [dDni,      setDDni]      = useState('');
   const [dPin,      setDPin]      = useState('');
   const [dPinConf,  setDPinConf]  = useState('');
-  const [dPhone,    setDPhone]    = useState('');
+  const [dPhone]    = useState('');
   const [dPhoto,    setDPhoto]    = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
