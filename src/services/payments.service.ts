@@ -35,6 +35,6 @@ export const paymentsService = {
   processCard: (bookingId: string, payload: CardPaymentPayload) =>
     api.post<{ data: CardPaymentResponse }>('/payments/card', { bookingId, ...payload }),
 
-  processYape: (bookingId: string, yapeToken: string) =>
-    api.post<{ data: YapePaymentResponse }>('/payments/yape', { bookingId, yapeToken }),
+  processYape: (bookingId: string, otp: string, phoneNumber: string) =>
+    api.post<{ data: YapePaymentResponse }>('/payments/yape', { bookingId, otp, phoneNumber }),
 };

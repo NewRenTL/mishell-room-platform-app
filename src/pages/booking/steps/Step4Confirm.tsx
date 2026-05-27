@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
@@ -273,34 +273,13 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
   const [otp, setOtp]     = useState(IS_SANDBOX ? '123456' : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mpReady, setMpReady] = useState(false);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
-
-  useEffect(() => {
-    if ((window as any).MercadoPago) { setMpReady(true); return; }
-    const script = document.createElement('script');
-    script.src = 'https://sdk.mercadopago.com/js/v2';
-    script.async = true;
-    script.onload = () => setMpReady(true);
-    document.head.appendChild(script);
-    scriptRef.current = script;
-    return () => {
-      script.onload = null;
-      if (document.head.contains(script)) document.head.removeChild(script);
-    };
-  }, []);
 
   async function handlePay() {
     if (!phone.trim() || !otp.trim()) { setError('Ingresa tu número y el código OTP de Yape'); return; }
-    if (!mpReady) { setError('SDK de pago no cargó. Recarga la página.'); return; }
     setError('');
     setLoading(true);
     try {
-      const mp = new (window as any).MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, { locale: 'es-PE' });
-      const yape = mp.yape({ otp: Number(otp), phoneNumber: Number(phone) });
-      const tokenResult = await yape.create();
-      if (!tokenResult?.id) throw new Error('No se pudo generar el token de Yape');
-      const res = await paymentsService.processYape(bookingId, tokenResult.id);
+      const res = await paymentsService.processYape(bookingId, otp.trim(), phone.trim());
       const { status } = res.data.data ?? (res.data as any);
       if (status === 'approved') onSuccess();
       else setError('El pago fue rechazado. Verifica tu saldo o intenta de nuevo.');
@@ -446,13 +425,13 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
         </div>
         <div className="px-4 py-3.5 border-b border-ink-100 flex justify-between">
           <span className="text-sm text-ink-700 font-medium">Precio por semana</span>
-          <span className="text-sm font-semibold text-ink-900">${pricePerWeek.toFixed(0)}</span>
+          <span className="text-sm font-semibold text-ink-900">S/ {pricePerWeek.toFixed(0)}</span>
         </div>
 
         {/* Total */}
         <div className="px-4 py-4 flex justify-between items-center">
           <span className="text-sm font-bold text-ink-900">Total a pagar</span>
-          <span className="text-2xl font-extrabold text-mishell-600">${total.toFixed(0)}</span>
+          <span className="text-2xl font-extrabold text-mishell-600">S/ {total.toFixed(0)}</span>
         </div>
       </div>
 
