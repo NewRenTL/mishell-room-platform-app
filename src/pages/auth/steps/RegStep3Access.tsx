@@ -36,7 +36,8 @@ export default function RegStep3Access({
   loading, error, onSubmit,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [legalOpen, setLegalOpen] = useState<LegalType>(null);
+  const [legalOpen,  setLegalOpen]  = useState<LegalType>(null);
+  const [fileError,  setFileError]  = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPin,      setShowPin]      = useState(false);
   const [showPinConf,  setShowPinConf]  = useState(false);
@@ -156,22 +157,34 @@ export default function RegStep3Access({
               ) : (
                 <>
                   <Camera size={22} className="text-ink-400" />
-                  <p className="text-sm font-medium text-ink-700">Subir foto de DNI</p>
+                  <p className="text-sm font-medium text-ink-700">Subir foto o escáner del DNI</p>
                   <p className="text-xs text-ink-400 text-center px-4">
-                    Ayuda al administrador a verificar tu identidad
+                    JPG, PNG o PDF · Ayuda al admin a verificar tu identidad
                   </p>
                 </>
               )}
             </button>
+            {fileError && <p className="mt-1.5 text-xs text-red-500">{fileError}</p>}
             <input
               ref={fileRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
               capture="environment"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
+                if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(f.type)) {
+                  setFileError('Solo se aceptan imágenes (JPG, PNG, WEBP) o PDF');
+                  onPhoto(null);
+                  return;
+                }
+                if (f.size > 5 * 1024 * 1024) {
+                  setFileError('La foto no puede superar 5 MB');
+                  onPhoto(null);
+                  return;
+                }
+                setFileError('');
                 onPhoto(f);
               }}
             />

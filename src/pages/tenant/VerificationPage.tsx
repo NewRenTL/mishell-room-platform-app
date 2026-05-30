@@ -145,12 +145,31 @@ export default function VerificationPage() {
 
             {data.user.dniPhotoUrl && (
               <div>
-                <p className="text-xs text-ink-500 mb-2">Foto de DNI</p>
-                <img
-                  src={data.user.dniPhotoUrl}
-                  alt="DNI"
-                  className="w-full rounded-xl border border-ink-100 object-cover max-h-40"
-                />
+                <p className="text-xs text-ink-500 mb-2">Documento de DNI adjunto</p>
+                {data.user.dniPhotoUrl.includes('.pdf') ? (
+                  <a
+                    href={data.user.dniPhotoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-xl border border-ink-100 bg-ink-50 active:bg-ink-100 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V7.414A2 2 0 0017.414 6L14 2.586A2 2 0 0012.586 2H6a2 2 0 00-2 2v1zm0 2h8v3a1 1 0 001 1h3v7H4V5zm9-1.586L15.586 6H13V3.414z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-ink-900">Documento PDF</p>
+                      <p className="text-xs text-ink-500">Toca para ver</p>
+                    </div>
+                  </a>
+                ) : (
+                  <img
+                    src={data.user.dniPhotoUrl}
+                    alt="DNI"
+                    className="w-full rounded-xl border border-ink-100 object-cover max-h-40"
+                  />
+                )}
               </div>
             )}
           </div>

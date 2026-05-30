@@ -46,8 +46,6 @@ export const authService = {
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append('file', file);
-    return api.post<User & { avatarUrl: string }>('/auth/avatar', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    return api.post<User & { avatarUrl: string }>('/auth/avatar', form);
   },
 };
