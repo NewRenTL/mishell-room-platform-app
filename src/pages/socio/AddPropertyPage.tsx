@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, DollarSign, Users, FileText } from 'lucide-react';
+import { Home, MapPin, Users, FileText } from 'lucide-react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -142,7 +142,7 @@ export default function AddPropertyPage() {
           <h2 className="text-sm font-bold text-ink-900 mb-3">Precio y capacidad</h2>
           <div className="flex flex-col gap-3">
             <Input
-              icon={<DollarSign size={16} />}
+              icon={<span className="text-xs font-bold text-ink-500">S/</span>}
               placeholder="Precio por semana (S/) *"
               value={form.pricePerWeek}
               onChange={(e) => set('pricePerWeek', e.target.value)}

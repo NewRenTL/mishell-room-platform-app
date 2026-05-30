@@ -42,7 +42,7 @@ export interface BookingWithPayments {
   property: { title: string; address: string };
   weeklyPayments: WeeklyPayment[];
 }
-export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE';
+export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE' | 'TRANSFERENCIA' | 'EFECTIVO';
 
 export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'APPROVED' | 'OBSERVED';
 

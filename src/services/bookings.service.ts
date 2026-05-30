@@ -11,7 +11,7 @@ export interface BookingContract {
 }
 
 export const bookingsService = {
-  create: (data: { propertyId: string; checkIn: string; checkOut?: string; notes?: string }) =>
+  create: (data: { propertyId: string; checkIn: string; checkOut?: string; notes?: string; guestName?: string; guestDni?: string }) =>
     api.post<Booking>('/bookings', data),
 
   getMine: (params?: { status?: string; page?: number; limit?: number }) =>

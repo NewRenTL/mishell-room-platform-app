@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info } from 'lucide-react';
+import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Building2, Banknote, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
@@ -342,8 +342,9 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
   const reset = useBookingStore((s) => s.reset);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showYape] = useState(paymentMethod === 'YAPE');
-  const [showCard] = useState(paymentMethod === 'CARD');
+  const [showYape]   = useState(paymentMethod === 'YAPE');
+  const [showCard]   = useState(paymentMethod === 'CARD');
+  const [showManual] = useState(paymentMethod === 'TRANSFERENCIA' || paymentMethod === 'EFECTIVO');
 
   const weeks = checkIn && checkOut
     ? Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (7 * 86400000)))
@@ -464,18 +465,69 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
         )}
       </AnimatePresence>
 
-      {/* Terms */}
-      <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-        <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-700 leading-relaxed">
-          Al pulsar el botón, aceptas nuestros{' '}
-          <span className="underline font-medium">términos de servicio</span>{' '}
-          y <span className="underline font-medium">políticas de privacidad</span>.
-        </p>
-      </div>
+      {/* Manual payment instructions */}
+      <AnimatePresence>
+        {showManual && (
+          <motion.div
+            className="flex flex-col gap-3 pt-3 border-t border-ink-100"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center gap-2">
+              {paymentMethod === 'TRANSFERENCIA'
+                ? <Building2 size={15} className="text-mishell-600" />
+                : <Banknote size={15} className="text-mishell-600" />}
+              <p className="text-sm font-semibold text-ink-900">
+                {paymentMethod === 'TRANSFERENCIA' ? 'Instrucciones de transferencia' : 'Pago en efectivo'}
+              </p>
+            </div>
 
-      {/* Confirm button */}
-      {!showYape && !showCard && (
+            {paymentMethod === 'TRANSFERENCIA' ? (
+              <div className="bg-ink-50 rounded-2xl p-4 flex flex-col gap-2 text-sm">
+                <p className="text-xs text-ink-500 font-semibold uppercase tracking-wide">Datos bancarios</p>
+                <div className="flex justify-between"><span className="text-ink-600">Banco</span><span className="font-semibold text-ink-900">BCP</span></div>
+                <div className="flex justify-between"><span className="text-ink-600">Cuenta</span><span className="font-semibold text-ink-900">191-XXXXXXXX-0-XX</span></div>
+                <div className="flex justify-between"><span className="text-ink-600">CCI</span><span className="font-semibold text-ink-900">002-191-XXXXXXXXXX-XX</span></div>
+                <div className="flex justify-between"><span className="text-ink-600">Titular</span><span className="font-semibold text-ink-900">Daniel N. Quispe</span></div>
+                <div className="flex justify-between"><span className="text-ink-600">Monto</span><span className="font-bold text-mishell-600">S/ {total.toFixed(0)}</span></div>
+              </div>
+            ) : (
+              <div className="bg-ink-50 rounded-2xl p-4 text-sm text-ink-700">
+                Comunícate con el encargado para coordinar el pago en efectivo por <strong>S/ {total.toFixed(0)}</strong>.
+              </div>
+            )}
+
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl p-3">
+              <Clock size={13} className="text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700">
+                {paymentMethod === 'TRANSFERENCIA'
+                  ? 'Realiza la transferencia y sube el comprobante desde la sección "Mis Pagos". El administrador confirmará tu reserva.'
+                  : 'Tu reserva quedará pendiente hasta que el administrador registre el pago.'}
+              </p>
+            </div>
+
+            <Button onClick={() => { reset(); onSuccess(); }}>
+              Entendido — Ver mis pagos
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Terms */}
+      {!showManual && (
+        <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+          <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-blue-700 leading-relaxed">
+            Al pulsar el botón, aceptas nuestros{' '}
+            <span className="underline font-medium">términos de servicio</span>{' '}
+            y <span className="underline font-medium">políticas de privacidad</span>.
+          </p>
+        </div>
+      )}
+
+      {/* Confirm button — only for gateway methods */}
+      {!showYape && !showCard && !showManual && (
         <Button loading={loading} onClick={handleConfirm} className="w-full">
           Confirmar y Reservar
         </Button>

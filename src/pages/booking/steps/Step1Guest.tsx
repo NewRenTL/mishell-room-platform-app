@@ -61,6 +61,8 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
         checkIn: form.checkIn,
         checkOut,
         notes: `Huésped: ${form.name}, DNI: ${form.dni}`,
+        guestName: form.name,
+        guestDni: form.dni,
       });
       const booking = res.data;
       setBookingIds(booking.id, booking.contract?.id ?? null);

@@ -24,7 +24,7 @@ export const authService = {
   }) => api.post<AuthResponse>('/auth/register', data),
 
   registerByDni: (
-    data: { firstName: string; lastName: string; dni: string; pin: string; phone?: string },
+    data: { firstName: string; lastName: string; dni: string; pin: string; phone?: string; role?: 'INQUILINO' | 'SOCIO' },
     dniPhoto?: File,
   ) => {
     const form = new FormData();
@@ -33,6 +33,7 @@ export const authService = {
     form.append('dni', data.dni);
     form.append('pin', data.pin);
     if (data.phone) form.append('phone', data.phone);
+    if (data.role) form.append('role', data.role);
     if (dniPhoto) form.append('dniPhoto', dniPhoto);
     return api.post<AuthResponse>('/auth/register-dni', form);
   },

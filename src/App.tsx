@@ -4,7 +4,8 @@ import { useAuthStore } from './stores/authStore';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { MobileLayout } from './components/layout/MobileLayout';
 
-const LoginPage       = lazy(() => import('./pages/auth/LoginPage'));
+const LoginPage          = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterFlowPage   = lazy(() => import('./pages/auth/RegisterFlowPage'));
 const HomePage        = lazy(() => import('./pages/marketplace/HomePage'));
 const MarketplacePage = lazy(() => import('./pages/marketplace/MarketplacePage'));
 const PropertyDetailPage = lazy(() => import('./pages/marketplace/PropertyDetailPage'));
@@ -66,7 +67,7 @@ export default function App() {
         <Routes>
           {/* Public auth — un solo componente, tab dinámico */}
           <Route path="/login"    element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<AuthLayout><LoginPage /></AuthLayout>} />
+          <Route path="/register" element={<RegisterFlowPage />} />
 
           {/* Tenant/Inquilino routes */}
           <Route path="/home" element={
