@@ -9,7 +9,7 @@ interface StepperProps {
 
 export function Stepper({ steps, current }: StepperProps) {
   return (
-    <div className="flex items-center justify-center px-5 py-3 bg-white border-b border-ink-100 overflow-x-auto">
+    <div className="flex items-center justify-center px-3 py-3 bg-white border-b border-ink-100 overflow-hidden">
       {steps.map((step, i) => {
         const done   = i < current;
         const active = i === current;
@@ -37,7 +37,7 @@ export function Stepper({ steps, current }: StepperProps) {
               </span>
             </div>
             {i < steps.length - 1 && (
-              <div className="w-5 h-px bg-ink-200 mx-2 shrink-0" />
+              <div className="w-3 h-px bg-ink-200 mx-1.5 shrink-0" />
             )}
           </div>
         );
