@@ -139,7 +139,7 @@ export default function RegStep3Access({
           {/* DNI photo */}
           <div>
             <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
-              Foto del DNI (opcional)
+              Foto o escáner del DNI *
             </p>
             <button
               type="button"
@@ -190,7 +190,12 @@ export default function RegStep3Access({
             />
           </div>
 
-          {role === 'INQUILINO' && (
+          {!photo && (
+            <p className="text-xs text-red-400 text-center -mt-1">
+              La foto o escáner del DNI es obligatoria para registrarte
+            </p>
+          )}
+          {photo && role === 'INQUILINO' && (
             <p className="text-xs text-ink-400 text-center -mt-1">
               Podrás ver propiedades. Para reservar, el administrador debe verificar tu cuenta.
             </p>
@@ -208,7 +213,12 @@ export default function RegStep3Access({
         </motion.p>
       )}
 
-      <Button loading={loading} onClick={onSubmit} className="mt-1">
+      <Button
+        loading={loading}
+        onClick={onSubmit}
+        disabled={regMethod === 'dni' && !photo}
+        className="mt-1"
+      >
         {role === 'SOCIO' ? 'Crear cuenta como Socio' : 'Crear cuenta'}
       </Button>
 
