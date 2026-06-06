@@ -52,7 +52,22 @@ export default function RegisterFlowPage() {
   async function handleSubmit() {
     setError('');
 
+    if (regMethod === 'email') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError('Ingresa un correo electrónico válido');
+        return;
+      }
+      if (password.length < 8) {
+        setError('La contraseña debe tener al menos 8 caracteres');
+        return;
+      }
+    }
+
     if (regMethod === 'dni') {
+      if (!/^\d{8}$/.test(dni)) {
+        setError('El DNI debe tener exactamente 8 dígitos');
+        return;
+      }
       if (pin !== pinConf) { setError('Los PINs no coinciden'); return; }
       if (!/^\d{4,6}$/.test(pin)) { setError('El PIN debe tener entre 4 y 6 dígitos'); return; }
     }
@@ -95,7 +110,7 @@ export default function RegisterFlowPage() {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto flex flex-col min-h-dvh bg-white">
+    <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
       <AppHeader title="Crear cuenta" onBack={handleBack} />
 
       <Stepper steps={STEPS} current={step - 1} />

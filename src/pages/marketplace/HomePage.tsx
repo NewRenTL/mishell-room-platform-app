@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { PropertyCard } from '../../components/ui/PropertyCard';
 import { TabSwitcher } from '../../components/ui/TabSwitcher';
 import { HorizontalCarousel } from '../../components/ui/HorizontalCarousel';
+import { PageTutorial } from '../../components/ui/PageTutorial';
 import { propertiesService } from '../../services/properties.service';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -19,12 +20,25 @@ export default function HomePage() {
     queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
   });
 
+  const { data: recentData, isLoading: recentLoading } = useQuery({
+    queryKey: ['properties', 'recent'],
+    queryFn: () =>
+      propertiesService
+        .getAll({ limit: 20, status: 'AVAILABLE', sortBy: 'createdAt', order: 'desc' })
+        .then((r) => r.data),
+  });
+
   const properties = data?.data ?? [];
+
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  const recentProperties = (recentData?.data ?? []).filter(
+    (p) => new Date(p.createdAt) >= threeDaysAgo,
+  );
 
   return (
     <div className="bg-ink-50 pb-4">
       {/* Sticky header */}
-      <div className="bg-white sticky top-0 z-20 shadow-sm">
+      <div className="bg-white/90 backdrop-blur-md sticky top-0 z-20 border-b border-ink-100/60">
         <div className="px-5 pt-12 pb-4">
           {/* Greeting row */}
           <div className="flex items-start justify-between mb-4">
@@ -36,7 +50,7 @@ export default function HomePage() {
               <h1 className="text-xl font-bold text-ink-900 leading-tight">
                 {user ? (
                   <span className="flex items-center gap-2">
-                    <Smile size={18} className="text-mishell-600 flex-shrink-0" />
+                    <Smile size={18} className="text-mishell-600 shrink-0" />
                     Hola, {user.firstName}
                   </span>
                 ) : (
@@ -58,7 +72,7 @@ export default function HomePage() {
             onClick={() => navigate('/properties')}
             className="w-full flex items-center gap-2.5 bg-ink-50 border border-ink-100 rounded-2xl px-4 py-3 text-sm text-ink-400 text-left"
           >
-            <Search size={15} className="text-ink-400 flex-shrink-0" />
+            <Search size={15} className="text-ink-400 shrink-0" />
             Buscar habitaciones en Lima...
           </button>
         </div>
@@ -152,20 +166,20 @@ export default function HomePage() {
             </button>
           </div>
 
-          {isLoading ? (
+          {recentLoading ? (
             <HorizontalCarousel>
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm shrink-0 animate-pulse" />
               ))}
             </HorizontalCarousel>
-          ) : properties.length === 0 ? (
+          ) : recentProperties.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
               <Building2 size={28} className="text-ink-200" />
-              <p className="text-sm text-ink-400">Aún no hay propiedades publicadas</p>
+              <p className="text-sm text-ink-400">No hay publicaciones nuevas en los últimos 3 días</p>
             </div>
           ) : (
             <HorizontalCarousel>
-              {properties.slice(0, 4).map((p, i) => (
+              {recentProperties.slice(0, 4).map((p, i) => (
                 <motion.div
                   key={p.id}
                   initial={{ opacity: 0, x: 20 }}
@@ -183,6 +197,17 @@ export default function HomePage() {
           )}
         </motion.section>
       </div>
+
+      <PageTutorial
+        id="home"
+        steps={[
+          { title: 'Bienvenido a Mishell Room', content: 'Aquí encontrarás habitaciones disponibles para alquilar. Explora las opciones y reserva la que más te guste.' },
+          { title: 'Disponibles ahora', content: 'Esta sección muestra habitaciones listas para reservar hoy. Desliza horizontalmente para ver más opciones.' },
+          { title: 'Recién publicadas', content: 'Habitaciones añadidas en los últimos 3 días. ¡Sé de los primeros en verlas y reservar!' },
+          { title: 'Guardar favoritos', content: 'Toca el corazón ❤️ en cualquier habitación para guardarla. Puedes revisar tus favoritos cuando quieras.' },
+          { title: 'Buscar y filtrar', content: 'Toca la barra de búsqueda para filtrar por ciudad, precio o número de habitaciones. Encuentra exactamente lo que necesitas.' },
+        ]}
+      />
     </div>
   );
 }

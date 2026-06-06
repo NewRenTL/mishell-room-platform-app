@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { User, Phone } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
@@ -12,8 +13,22 @@ interface Props {
   onNext: () => void;
 }
 
+const PHONE_RE = /^9\d{8}$/;
+
 export default function RegStep2Data({ firstName, lastName, phone, onFirstName, onLastName, onPhone, onNext }: Props) {
-  const canContinue = firstName.trim().length >= 2 && lastName.trim().length >= 2;
+  const [phoneError, setPhoneError] = useState('');
+
+  const phoneValid = !phone.trim() || PHONE_RE.test(phone.replace(/\s/g, ''));
+  const canContinue = firstName.trim().length >= 2 && lastName.trim().length >= 2 && phoneValid;
+
+  function handlePhone(v: string) {
+    onPhone(v);
+    if (v.trim() && !PHONE_RE.test(v.replace(/\s/g, ''))) {
+      setPhoneError('Número inválido (9 dígitos, empieza con 9)');
+    } else {
+      setPhoneError('');
+    }
+  }
 
   return (
     <div className="px-5 pt-8 pb-6 flex flex-col gap-5">
@@ -38,13 +53,19 @@ export default function RegStep2Data({ firstName, lastName, phone, onFirstName, 
           onChange={(e) => onLastName(e.target.value)}
           required
         />
-        <Input
-          icon={<Phone size={16} />}
-          placeholder="Teléfono (opcional)"
-          value={phone}
-          onChange={(e) => onPhone(e.target.value)}
-          inputMode="tel"
-        />
+        <div>
+          <Input
+            icon={<Phone size={16} />}
+            placeholder="Teléfono (opcional)"
+            value={phone}
+            onChange={(e) => handlePhone(e.target.value)}
+            inputMode="tel"
+            maxLength={9}
+          />
+          {phoneError && (
+            <p className="mt-1 text-xs text-red-500 pl-1">{phoneError}</p>
+          )}
+        </div>
       </div>
 
       <Button onClick={onNext} disabled={!canContinue} className="mt-2">

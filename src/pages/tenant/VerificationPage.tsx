@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, IdCard, Phone, User } from 'lucide-react';
+import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, IdCard, Phone, User, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Button } from '../../components/ui/Button';
 import { DniDocViewer } from '../../components/ui/DniDocViewer';
 import { verificationService } from '../../services/verification.service';
+import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const STATUS_CONFIG = {
   UNVERIFIED: {
@@ -45,6 +47,7 @@ const STATUS_CONFIG = {
 export default function VerificationPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [submitError, setSubmitError] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['verification-status'],
@@ -58,7 +61,13 @@ export default function VerificationPage() {
 
   const submit = useMutation({
     mutationFn: () => verificationService.submit(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['verification-status'] }),
+    onSuccess: () => {
+      setSubmitError('');
+      queryClient.invalidateQueries({ queryKey: ['verification-status'] });
+    },
+    onError: (err: any) => {
+      setSubmitError(err.response?.data?.message ?? 'Error al enviar la solicitud. Intenta de nuevo.');
+    },
   });
 
   if (isLoading) {
@@ -157,6 +166,17 @@ export default function VerificationPage() {
           </div>
         )}
 
+        {/* Submit error */}
+        {submitError && (
+          <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+            <AlertCircle size={14} className="text-red-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-red-700 flex-1">{submitError}</p>
+            <button onClick={() => setSubmitError('')} className="text-red-400 hover:text-red-600 ml-1">
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
         {/* Submit button */}
         {canSubmit && (
           <Button
@@ -188,6 +208,16 @@ export default function VerificationPage() {
           </p>
         )}
       </div>
+
+      <PageTutorial
+        id="verification"
+        steps={[
+          { title: '¿Por qué verificar tu identidad?', content: 'La verificación es un paso único y obligatorio para reservar habitaciones. Protege tanto a los inquilinos como a los propietarios.' },
+          { title: 'Cómo funciona', content: 'Toca "Enviar solicitud de verificación" y el administrador revisará tu información (nombre, DNI y foto). El proceso suele tardar unas horas.' },
+          { title: 'Actualización automática', content: 'Esta página se actualiza automáticamente cada 5 segundos cuando tu solicitud está en revisión. No necesitas recargar la página.' },
+          { title: 'Cuando te aprueben', content: 'Al ser aprobado, aparecerá el botón "Continuar" para acceder a todas las funciones: reservar habitaciones, ver contratos y más.' },
+        ]}
+      />
     </div>
   );
 }

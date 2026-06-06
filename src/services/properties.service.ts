@@ -10,6 +10,9 @@ export interface PropertyFilters {
   page?: number;
   limit?: number;
   status?: string;
+  sortBy?: string;
+  order?: 'asc' | 'desc';
+  createdAfter?: string;
 }
 
 export interface UpdatePropertyData {

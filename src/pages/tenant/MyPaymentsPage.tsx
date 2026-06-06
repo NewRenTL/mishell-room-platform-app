@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { weeklyPaymentsService } from '../../services/weekly-payments.service';
 import type { BookingWithPayments, WeeklyPayment } from '../../types';
+import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const STATUS_CONFIG = {
   PENDING:   { label: 'Pendiente',   color: 'bg-amber-100 text-amber-700',  icon: Clock },
@@ -376,11 +377,13 @@ export default function MyPaymentsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [sheetPayment, setSheetPayment] = useState<WeeklyPayment | null>(null);
+  const [mutationError, setMutationError] = useState('');
   const LIMIT = 10;
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-payments', page],
     queryFn: () => weeklyPaymentsService.getMyPayments({ page, limit: LIMIT }).then((r) => r.data),
+    refetchOnWindowFocus: true,
   });
 
   const markPaid = useMutation({
@@ -388,14 +391,24 @@ export default function MyPaymentsPage() {
       weeklyPaymentsService.markPaid(id, { voucherMethod: method, voucherKey }),
     onSuccess: () => {
       setSheetPayment(null);
+      setMutationError('');
       queryClient.invalidateQueries({ queryKey: ['my-payments'] });
+    },
+    onError: (err: any) => {
+      setMutationError(err.response?.data?.message ?? 'Error al registrar el pago. Intenta de nuevo.');
     },
   });
 
   const setDeparture = useMutation({
     mutationFn: ({ bookingId, date }: { bookingId: string; date: string }) =>
       weeklyPaymentsService.setDepartureNotice(bookingId, date),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-payments'] }),
+    onSuccess: () => {
+      setMutationError('');
+      queryClient.invalidateQueries({ queryKey: ['my-payments'] });
+    },
+    onError: (err: any) => {
+      setMutationError(err.response?.data?.message ?? 'Error al notificar la fecha de salida. Intenta de nuevo.');
+    },
   });
 
   const bookings = data?.data ?? [];
@@ -404,6 +417,16 @@ export default function MyPaymentsPage() {
   return (
     <div className="flex flex-col min-h-full bg-ink-50">
       <AppHeader title="Mis Pagos" />
+
+      {mutationError && (
+        <div className="mx-5 mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+          <AlertCircle size={14} className="text-red-600 mt-0.5 shrink-0" />
+          <p className="text-xs text-red-700 flex-1">{mutationError}</p>
+          <button onClick={() => setMutationError('')} className="text-red-400 hover:text-red-600 ml-1">
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       <div className="px-5 py-4 flex flex-col gap-3">
         {isLoading ? (
@@ -472,6 +495,17 @@ export default function MyPaymentsPage() {
           />
         )}
       </AnimatePresence>
+
+      <PageTutorial
+        id="my-payments"
+        steps={[
+          { title: 'Tus pagos semanales', content: 'Aquí ves todos los pagos de tus reservas activas, organizados por propiedad. Los pagos se generan semana a semana.' },
+          { title: 'Cómo registrar un pago', content: 'Toca el botón "Pagar" en la semana que corresponde. Puedes pagar por Yape, transferencia o efectivo.' },
+          { title: 'Adjuntar comprobante', content: 'Si pagas por Yape o transferencia, adjunta una captura de pantalla del comprobante para que el administrador pueda verificarlo.' },
+          { title: 'Estados de pago', content: 'Pendiente = aún no pagado. En revisión = pago enviado, esperando aprobación. Aprobado = confirmado por el administrador.' },
+          { title: 'Notificar tu salida', content: 'Si planeas dejar la habitación, toca "Notificar fecha de salida" con anticipación. Esto es importante para cerrar tu reserva correctamente.' },
+        ]}
+      />
     </div>
   );
 }

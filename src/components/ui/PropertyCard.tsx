@@ -9,10 +9,15 @@ interface PropertyCardProps {
   onClick?: () => void;
 }
 
+const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+
 export function PropertyCard({ property, compact = false, onClick }: PropertyCardProps) {
   const img = property.photoUrls?.[0];
   const toggle = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.has(property.id));
+  const isNew = property.createdAt
+    ? Date.now() - new Date(property.createdAt).getTime() < THREE_DAYS
+    : false;
 
   function handleFav(e: React.MouseEvent) {
     e.stopPropagation();
@@ -30,10 +35,17 @@ export function PropertyCard({ property, compact = false, onClick }: PropertyCar
             ? <img src={img} alt={property.title} className="w-full h-full object-cover" />
             : <div className="w-full h-full bg-ink-100 flex items-center justify-center text-ink-400 text-xs">Sin foto</div>
           }
+          {isNew && (
+            <div className="absolute top-2 left-2 bg-mishell-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+              Nuevo
+            </div>
+          )}
           <motion.button
             className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm"
             onClick={handleFav}
-            whileTap={{ scale: 0.8 }}
+            whileTap={{ scale: 0.75 }}
+            animate={isFav ? { scale: [1, 1.4, 0.9, 1.1, 1] } : { scale: 1 }}
+            transition={{ duration: 0.4 }}
           >
             <Heart
               size={14}
@@ -64,10 +76,17 @@ export function PropertyCard({ property, compact = false, onClick }: PropertyCar
           ? <img src={img} alt={property.title} className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-ink-100 flex items-center justify-center text-ink-400 text-sm">Sin foto</div>
         }
+        {isNew && (
+          <div className="absolute top-3 left-3 bg-mishell-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+            Nuevo
+          </div>
+        )}
         <motion.button
           className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm"
           onClick={handleFav}
-          whileTap={{ scale: 0.8 }}
+          whileTap={{ scale: 0.75 }}
+          animate={isFav ? { scale: [1, 1.4, 0.9, 1.1, 1] } : { scale: 1 }}
+          transition={{ duration: 0.4 }}
         >
           <Heart
             size={16}

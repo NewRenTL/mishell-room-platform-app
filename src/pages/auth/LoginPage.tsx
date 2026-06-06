@@ -37,6 +37,27 @@ export default function LoginPage() {
       return;
     }
 
+    if (credType === null) {
+      setError('Ingresa un correo electrónico o DNI válido');
+      return;
+    }
+
+    if (credType === 'email') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credential.trim())) {
+        setError('Ingresa un correo electrónico válido');
+        return;
+      }
+      if (secret.length < 8) {
+        setError('La contraseña debe tener al menos 8 caracteres');
+        return;
+      }
+    }
+
+    if (credType === 'dni' && !/^\d{8}$/.test(credential.trim())) {
+      setError('El DNI debe tener exactamente 8 dígitos');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = credType === 'dni'

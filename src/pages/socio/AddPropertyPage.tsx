@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, Users, FileText, Camera, X, ImagePlus } from 'lucide-react';
+import { Home, MapPin, Users, FileText, Camera, X, ImagePlus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -8,6 +9,7 @@ import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
+import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
 
@@ -29,6 +31,7 @@ export default function AddPropertyPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState('');
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function set(key: keyof typeof form, val: string) {
@@ -62,6 +65,18 @@ export default function AddPropertyPage() {
       setError('Título, dirección y precio son obligatorios');
       return;
     }
+    if (Number(form.pricePerWeek) <= 0) {
+      setError('El precio debe ser mayor a 0');
+      return;
+    }
+    if (Number(form.rooms) < 1) {
+      setError('El número de habitaciones debe ser al menos 1');
+      return;
+    }
+    if (Number(form.maxCapacity) < 1) {
+      setError('La capacidad máxima debe ser al menos 1');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
@@ -81,7 +96,7 @@ export default function AddPropertyPage() {
       for (const photo of photos) {
         await propertiesService.addPhoto(created.id, photo);
       }
-      navigate('/socio', { replace: true });
+      setCreatedId(created.id);
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Error al publicar la propiedad');
     } finally {
@@ -89,8 +104,66 @@ export default function AddPropertyPage() {
     }
   }
 
+  if (createdId) {
+    return (
+      <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white items-center justify-center px-8 text-center gap-6">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', damping: 14, stiffness: 200 }}
+          className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center"
+        >
+          <CheckCircle2 size={40} className="text-green-600" />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col gap-2"
+        >
+          <h2 className="text-xl font-bold text-ink-900">¡Propiedad publicada!</h2>
+          <p className="text-sm text-ink-600 leading-relaxed">
+            Tu propiedad está en revisión.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="w-full flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3.5 text-left"
+        >
+          <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800">
+            Recuerda indicar el estado de tu propiedad:{' '}
+            <span className="font-semibold">Disponible, Ocupada u otro</span>,
+            para que los inquilinos la encuentren correctamente.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="flex flex-col gap-3 w-full"
+        >
+          <Button onClick={() => navigate(`/socio/properties/${createdId}`)}>
+            Gestionar propiedad
+          </Button>
+          <button
+            onClick={() => navigate('/socio', { replace: true })}
+            className="text-sm text-ink-500 font-medium py-2"
+          >
+            Ir al inicio
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[430px] mx-auto flex flex-col min-h-dvh bg-white">
+    <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
       <AppHeader title="Nueva propiedad" />
 
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-5 pb-28">
@@ -271,12 +344,24 @@ export default function AddPropertyPage() {
       </div>
 
       {/* FAB */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50">
+      <div className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50">
         <Button loading={loading} onClick={handleSubmit}>
           <FileText size={16} className="mr-2" />
           Publicar propiedad
         </Button>
       </div>
+
+      <PageTutorial
+        id="add-property"
+        buttonBottom="bottom-20"
+        steps={[
+          { title: 'Información básica', content: 'Escribe un título descriptivo y una descripción atractiva. Un buen título ayuda a los inquilinos a encontrar tu propiedad.' },
+          { title: 'Fotos de la propiedad', content: 'Sube hasta 5 fotos. La primera foto será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!' },
+          { title: 'Precio y ubicación', content: 'Indica el precio semanal en soles. Marca la ubicación en el mapa para que los inquilinos vean exactamente dónde está.' },
+          { title: 'Servicios disponibles', content: 'Selecciona los servicios que incluye la habitación: WiFi, agua caliente, cocina, etc. Más servicios = más atractivo.' },
+          { title: 'Después de publicar', content: 'Importante: recuerda cambiar el estado de tu propiedad a "Disponible" para que los inquilinos puedan encontrarla y reservarla.' },
+        ]}
+      />
     </div>
   );
 }
