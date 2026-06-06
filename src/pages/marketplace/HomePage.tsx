@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Search, Home as HomeIcon, Zap, Smile, MapPin } from 'lucide-react';
+import { Bell, Search, Home as HomeIcon, Zap, Smile, MapPin, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PropertyCard } from '../../components/ui/PropertyCard';
 import { TabSwitcher } from '../../components/ui/TabSwitcher';
@@ -14,7 +14,7 @@ export default function HomePage() {
   const user = useAuthStore((s) => s.user);
   const [section, setSection] = useState('alquileres');
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['properties', 'home'],
     queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
   });
@@ -96,27 +96,41 @@ export default function HomePage() {
             </button>
           </div>
 
-          <HorizontalCarousel>
-            {properties.length === 0
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm flex-shrink-0 animate-pulse" />
-                ))
-              : properties.slice(0, 6).map((p, i) => (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.12 + i * 0.07 }}
-                  >
-                    <PropertyCard
-                      property={p}
-                      compact
-                      onClick={() => navigate(`/properties/${p.id}`)}
-                    />
-                  </motion.div>
-                ))
-            }
-          </HorizontalCarousel>
+          {isLoading ? (
+            <HorizontalCarousel>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm shrink-0 animate-pulse" />
+              ))}
+            </HorizontalCarousel>
+          ) : properties.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
+              <Building2 size={28} className="text-ink-200" />
+              <p className="text-sm text-ink-400">No hay habitaciones disponibles ahora</p>
+              <button
+                onClick={() => navigate('/properties')}
+                className="text-xs font-semibold text-mishell-600 underline"
+              >
+                Ver todas las propiedades
+              </button>
+            </div>
+          ) : (
+            <HorizontalCarousel>
+              {properties.slice(0, 6).map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.12 + i * 0.07 }}
+                >
+                  <PropertyCard
+                    property={p}
+                    compact
+                    onClick={() => navigate(`/properties/${p.id}`)}
+                  />
+                </motion.div>
+              ))}
+            </HorizontalCarousel>
+          )}
         </motion.section>
 
         {/* Recién publicadas */}
@@ -138,22 +152,35 @@ export default function HomePage() {
             </button>
           </div>
 
-          <HorizontalCarousel>
-            {properties.slice(0, 4).map((p, i) => (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.07 }}
-              >
-                <PropertyCard
-                  property={p}
-                  compact
-                  onClick={() => navigate(`/properties/${p.id}`)}
-                />
-              </motion.div>
-            ))}
-          </HorizontalCarousel>
+          {isLoading ? (
+            <HorizontalCarousel>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm shrink-0 animate-pulse" />
+              ))}
+            </HorizontalCarousel>
+          ) : properties.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
+              <Building2 size={28} className="text-ink-200" />
+              <p className="text-sm text-ink-400">Aún no hay propiedades publicadas</p>
+            </div>
+          ) : (
+            <HorizontalCarousel>
+              {properties.slice(0, 4).map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.07 }}
+                >
+                  <PropertyCard
+                    property={p}
+                    compact
+                    onClick={() => navigate(`/properties/${p.id}`)}
+                  />
+                </motion.div>
+              ))}
+            </HorizontalCarousel>
+          )}
         </motion.section>
       </div>
     </div>
