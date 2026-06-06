@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Home, TrendingUp, Calendar, ChevronRight, MapPin, Bell, Search } from 'lucide-react';
+import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, MapPin, Bell, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import { propertiesService } from '../../services/properties.service';
 import { bookingsService } from '../../services/bookings.service';
@@ -223,7 +223,9 @@ export default function SocioDashboardPage() {
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-sm font-bold text-mishell-600">S/ {Number(p.pricePerWeek).toFixed(0)}<span className="text-xs font-normal text-ink-500">/sem</span></p>
-                      <ChevronRight size={15} className="text-ink-300" />
+                      <span className="w-7 h-7 rounded-full bg-mishell-50 flex items-center justify-center shrink-0">
+                        <ArrowRight size={14} className="text-mishell-600" />
+                      </span>
                     </div>
                   </div>
                 </motion.button>

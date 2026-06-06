@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, IdCard, Phone, User } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Button } from '../../components/ui/Button';
 import { DniDocViewer } from '../../components/ui/DniDocViewer';
@@ -43,6 +44,7 @@ const STATUS_CONFIG = {
 
 export default function VerificationPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery({
     queryKey: ['verification-status'],
@@ -50,6 +52,8 @@ export default function VerificationPage() {
       const d = (r.data as any).data ?? r.data;
       return d as import('../../services/verification.service').VerificationStatus;
     }),
+    refetchInterval: (query) =>
+      query.state.data?.verificationStatus === 'PENDING' ? 5000 : false,
   });
 
   const submit = useMutation({
@@ -160,6 +164,21 @@ export default function VerificationPage() {
             onClick={() => submit.mutate()}
           >
             {status === 'OBSERVED' ? 'Reenviar solicitud' : 'Enviar solicitud de verificación'}
+          </Button>
+        )}
+
+        {/* Pending — auto-refreshing hint */}
+        {status === 'PENDING' && (
+          <div className="flex items-center justify-center gap-2 py-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <p className="text-xs text-ink-400">Esperando aprobación del administrador…</p>
+          </div>
+        )}
+
+        {/* Approved — continue button */}
+        {status === 'APPROVED' && (
+          <Button onClick={() => navigate('/home')}>
+            Continuar
           </Button>
         )}
 

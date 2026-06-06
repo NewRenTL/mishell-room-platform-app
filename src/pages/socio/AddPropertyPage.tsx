@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, Users, FileText } from 'lucide-react';
+import { Home, MapPin, Users, FileText, Camera, X, ImagePlus } from 'lucide-react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import api from '../../services/api';
+import { propertiesService } from '../../services/properties.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
 
 const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
@@ -26,6 +27,9 @@ export default function AddPropertyPage() {
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoError, setPhotoError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function set(key: keyof typeof form, val: string) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -37,6 +41,22 @@ export default function AddPropertyPage() {
     );
   }
 
+  function handlePhotoFiles(files: FileList | null) {
+    if (!files) return;
+    setPhotoError('');
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    const incoming = Array.from(files).filter((f) => {
+      if (!allowed.includes(f.type)) { setPhotoError('Solo se aceptan JPG, PNG o WEBP'); return false; }
+      if (f.size > 5 * 1024 * 1024) { setPhotoError('Cada foto no puede superar 5 MB'); return false; }
+      return true;
+    });
+    setPhotos((prev) => [...prev, ...incoming].slice(0, 5));
+  }
+
+  function removePhoto(idx: number) {
+    setPhotos((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   async function handleSubmit() {
     if (!form.title.trim() || !form.address.trim() || !form.pricePerWeek) {
       setError('Título, dirección y precio son obligatorios');
@@ -45,7 +65,7 @@ export default function AddPropertyPage() {
     setError('');
     setLoading(true);
     try {
-      await api.post('/properties', {
+      const { data: created } = await api.post<{ id: string }>('/properties', {
         title: form.title,
         description: form.description || undefined,
         address: form.address,
@@ -58,6 +78,9 @@ export default function AddPropertyPage() {
         latitude:  coords?.lat,
         longitude: coords?.lng,
       });
+      for (const photo of photos) {
+        await propertiesService.addPhoto(created.id, photo);
+      }
       navigate('/socio', { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Error al publicar la propiedad');
@@ -169,6 +192,59 @@ export default function AddPropertyPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Photos */}
+        <section>
+          <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos de la propiedad</h2>
+          <p className="text-xs text-ink-500 mb-3">Sube hasta 5 fotos. La primera será la portada.</p>
+
+          <div className="flex gap-3 flex-wrap">
+            {photos.map((file, idx) => (
+              <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-ink-100 shrink-0">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+                {idx === 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold text-center py-0.5">
+                    Portada
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(idx)}
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center"
+                >
+                  <X size={11} className="text-white" />
+                </button>
+              </div>
+            ))}
+
+            {photos.length < 5 && (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="w-24 h-24 rounded-2xl border-2 border-dashed border-ink-200 bg-ink-50 flex flex-col items-center justify-center gap-1.5 text-ink-400 active:bg-ink-100 transition-colors shrink-0"
+              >
+                <ImagePlus size={22} />
+                <span className="text-[10px] font-medium">Agregar foto</span>
+              </button>
+            )}
+          </div>
+
+          {photoError && <p className="mt-2 text-xs text-mishell-600">{photoError}</p>}
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            capture="environment"
+            className="hidden"
+            onChange={(e) => handlePhotoFiles(e.target.files)}
+          />
         </section>
 
         {/* Amenities */}

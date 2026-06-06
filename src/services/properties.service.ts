@@ -41,9 +41,7 @@ export const propertiesService = {
   addPhoto: (id: string, file: File) => {
     const form = new FormData();
     form.append('file', file);
-    return api.post<PropertyPhoto>(`/properties/${id}/photos`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    return api.post<PropertyPhoto>(`/properties/${id}/photos`, form);
   },
 
   deletePhoto: (propertyId: string, photoId: string) =>
