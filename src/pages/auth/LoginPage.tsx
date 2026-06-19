@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, CreditCard, KeyRound } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Input } from '../../components/ui/Input';
@@ -18,6 +18,8 @@ function detectCredentialType(value: string): 'email' | 'dni' | null {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: string } | null)?.from;
   const setAuth  = useAuthStore((s) => s.setAuth);
 
   const [credential, setCredential] = useState('');
@@ -42,15 +44,9 @@ export default function LoginPage() {
       return;
     }
 
-    if (credType === 'email') {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credential.trim())) {
-        setError('Ingresa un correo electrónico válido');
-        return;
-      }
-      if (secret.length < 8) {
-        setError('La contraseña debe tener al menos 8 caracteres');
-        return;
-      }
+    if (credType === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credential.trim())) {
+      setError('Ingresa un correo electrónico válido');
+      return;
     }
 
     if (credType === 'dni' && !/^\d{8}$/.test(credential.trim())) {
@@ -65,7 +61,8 @@ export default function LoginPage() {
         : await authService.login(credential.trim(), secret);
       const { accessToken, user } = res.data;
       setAuth(accessToken, user);
-      navigate(user.role === 'ADMIN' ? '/admin-chat' : user.role === 'SOCIO' ? '/socio' : '/home');
+      const defaultPath = user.role === 'ADMIN' ? '/admin-chat' : user.role === 'SOCIO' ? '/socio' : '/home';
+      navigate(fromPath ?? defaultPath, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Credenciales incorrectas');
     } finally {
@@ -151,7 +148,7 @@ export default function LoginPage() {
         <span className="text-sm text-ink-500">¿No tienes cuenta?</span>
         <button
           type="button"
-          onClick={() => navigate('/register')}
+          onClick={() => navigate('/register', { state: { from: fromPath } })}
           className="text-sm font-semibold text-mishell-600 hover:underline"
         >
           Regístrate

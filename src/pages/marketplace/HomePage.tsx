@@ -69,6 +69,7 @@ export default function HomePage() {
 
           {/* Search shortcut */}
           <button
+            data-tutorial="search"
             onClick={() => navigate('/properties')}
             className="w-full flex items-center gap-2.5 bg-ink-50 border border-ink-100 rounded-2xl px-4 py-3 text-sm text-ink-400 text-left"
           >

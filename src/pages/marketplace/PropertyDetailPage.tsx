@@ -10,6 +10,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useBookingStore } from '../../stores/bookingStore';
 import { useFavoritesStore } from '../../stores/favoritesStore';
 import { AMENITY_ICONS, AMENITY_LABELS } from '../../utils/amenities';
+import { AuthPromptSheet } from '../../components/ui/AuthPromptSheet';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ export default function PropertyDetailPage() {
   const toggle = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.has(id ?? ''));
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [authSheetOpen, setAuthSheetOpen] = useState(false);
 
   const { data: property, isLoading } = useQuery({
     queryKey: ['property', id],
@@ -28,7 +30,7 @@ export default function PropertyDetailPage() {
   });
 
   function handleReserve() {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { setAuthSheetOpen(true); return; }
     if (user?.status === 'INACTIVE') return;
     const isDniUser = user?.email?.endsWith('@mishell.room');
     if (isDniUser && user?.verificationStatus !== 'APPROVED') {
@@ -236,6 +238,13 @@ export default function PropertyDetailPage() {
           Reservar ahora
         </motion.button>
       </motion.div>
+
+      <AuthPromptSheet
+        open={authSheetOpen}
+        onClose={() => setAuthSheetOpen(false)}
+        redirectTo={`/properties/${id}`}
+        description={`Crea tu cuenta o inicia sesión para reservar "${property.title}".`}
+      />
     </div>
   );
 }

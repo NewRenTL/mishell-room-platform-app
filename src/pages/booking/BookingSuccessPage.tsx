@@ -1,7 +1,9 @@
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { CheckCircle2, MapPin, Calendar, ArrowRight, Clock, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { toPng } from 'html-to-image';
 import { Button } from '../../components/ui/Button';
 import { bookingsService } from '../../services/bookings.service';
 
@@ -10,9 +12,16 @@ function fmt(dateStr: string | null | undefined) {
   return new Date(dateStr).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function fmtTime(dateStr: string | null | undefined) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 export default function BookingSuccessPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
 
   const { data: booking, isError } = useQuery({
     queryKey: ['booking', id],
@@ -23,10 +32,50 @@ export default function BookingSuccessPage() {
   const dateRange = booking
     ? `${fmt(booking.checkIn)}${booking.checkOut ? ` - ${fmt(booking.checkOut)}` : ''}`
     : '—';
+  const bookingTime = fmtTime(booking?.createdAt);
+
+  async function handleShare() {
+    if (!cardRef.current || !booking) return;
+    setSharing(true);
+    try {
+      const summary =
+        `🏠 ¡Reserva confirmada en Mishell Room!\n` +
+        `📍 ${booking.property?.title ?? ''}\n` +
+        `📅 ${dateRange}  ·  🕒 ${bookingTime}\n` +
+        `💳 Total: S/ ${Number(booking.totalAmount).toFixed(0)}\n` +
+        (booking.referenceId ? `🔖 ID: ${booking.referenceId}` : '');
+
+      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, backgroundColor: '#ffffff' });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `reserva-${booking.referenceId ?? booking.id}.png`, { type: 'image/png' });
+
+      const canShareFiles =
+        typeof navigator !== 'undefined' &&
+        typeof navigator.canShare === 'function' &&
+        navigator.canShare({ files: [file] });
+
+      if (canShareFiles && navigator.share) {
+        await navigator.share({ files: [file], text: summary, title: 'Mi reserva' });
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(summary)}`, '_blank');
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(
+            `Mi reserva en Mishell Room - ID ${booking.referenceId ?? booking.id}`,
+          )}`,
+          '_blank',
+        );
+      }
+    } finally {
+      setSharing(false);
+    }
+  }
 
   if (isError) {
     return (
-      <div className="max-w-[430px] mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-6 text-center gap-4">
+      <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-6 text-center gap-4">
         <p className="text-ink-500 text-sm">No se pudo cargar la reserva. Por favor revisa tu perfil.</p>
         <button onClick={() => navigate('/profile')} className="text-sm font-semibold text-mishell-600 underline">
           Ir a mi perfil
@@ -36,7 +85,7 @@ export default function BookingSuccessPage() {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-6 text-center gap-6">
+    <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-6 text-center gap-6">
 
       {/* Checkmark */}
       <motion.div
@@ -68,6 +117,7 @@ export default function BookingSuccessPage() {
 
       {/* Booking summary card */}
       <motion.div
+        ref={cardRef}
         className="w-full bg-white border border-ink-100 rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -96,12 +146,18 @@ export default function BookingSuccessPage() {
           </div>
         </div>
 
-        {/* Date */}
+        {/* Date + time */}
         <div className="px-4 py-3.5 border-b border-ink-100">
           <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wide mb-1.5">Fecha</p>
-          <div className="flex items-center gap-2">
-            <Calendar size={14} className="text-ink-500 shrink-0" />
-            <p className="text-sm font-medium text-ink-900">{dateRange}</p>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar size={14} className="text-ink-500 shrink-0" />
+              <p className="text-sm font-medium text-ink-900">{dateRange}</p>
+            </div>
+            <div className="flex items-center gap-1.5 bg-ink-50 px-2 py-0.5 rounded-md">
+              <Clock size={12} className="text-ink-500" />
+              <p className="text-xs font-semibold text-ink-700">Hora: {bookingTime}</p>
+            </div>
           </div>
         </div>
 
@@ -121,15 +177,22 @@ export default function BookingSuccessPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.65, duration: 0.4 }}
       >
-        <Button onClick={() => navigate('/profile')}>
-          Ir a mi perfil
+        <Button onClick={handleShare} loading={sharing}>
+          <Share2 size={16} className="mr-2" />
+          Compartir por WhatsApp
         </Button>
         <button
+          onClick={() => navigate('/profile')}
+          className="flex items-center justify-center gap-1.5 text-sm font-semibold text-ink-700 py-2 hover:text-ink-900 transition-colors"
+        >
+          Ir a mi perfil
+          <ArrowRight size={15} />
+        </button>
+        <button
           onClick={() => navigate('/home')}
-          className="flex items-center justify-center gap-1.5 text-sm font-semibold text-ink-700 py-3 hover:text-ink-900 transition-colors"
+          className="text-xs text-ink-400 hover:text-ink-600 transition-colors"
         >
           Volver al inicio
-          <ArrowRight size={15} />
         </button>
       </motion.div>
     </div>

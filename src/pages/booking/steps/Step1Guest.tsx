@@ -42,8 +42,10 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
-  const checkOut = addWeeks(new Date(form.checkIn), Number(form.weeks) || 1);
-  const total = property ? Number(property.pricePerWeek) * (Number(form.weeks) || 1) : 0;
+  const isLibre = form.weeks === 'libre';
+  const weeksNum = isLibre ? 52 : (Number(form.weeks) || 1);
+  const checkOut = addWeeks(new Date(form.checkIn), weeksNum);
+  const total = property ? Number(property.pricePerWeek) * weeksNum : 0;
 
   async function handleNext() {
     if (!form.name.trim() || !form.dni.trim() || !form.checkIn) {
@@ -99,21 +101,29 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
             onChange={(val) => set('checkIn', val)}
           />
           <div className="flex gap-3">
-            {[1, 2, 4, 7].map((w) => (
+            {([
+              { v: '1',     label: '1 semana'  },
+              { v: '2',     label: '2 semanas' },
+              { v: 'libre', label: 'LIBRE'     },
+            ] as const).map((opt) => (
               <button
-                key={w}
+                key={opt.v}
                 type="button"
-                onClick={() => set('weeks', String(w))}
+                onClick={() => set('weeks', opt.v)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors
-                  ${form.weeks === String(w)
+                  ${form.weeks === opt.v
                     ? 'bg-mishell-600 text-white border-mishell-600'
                     : 'bg-white text-ink-700 border-ink-100'}`}
               >
-                {w} {w === 1 ? 'semana' : 'semanas'}
+                {opt.label}
               </button>
             ))}
           </div>
-          <p className="text-xs text-ink-600">Salida estimada: <strong>{checkOut}</strong></p>
+          <p className="text-xs text-ink-600">
+            {isLibre
+              ? <>Sin fecha de salida fija — paga semana a semana. Notifica tu salida cuando decidas dejar la habitación.</>
+              : <>Salida estimada: <strong>{checkOut}</strong></>}
+          </p>
         </div>
       </section>
 
@@ -145,13 +155,20 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
         </div>
       </section>
 
-      {total > 0 && (
+      {property && (
         <div className="bg-mishell-50 border border-mishell-100 rounded-2xl p-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-ink-600">{form.weeks || 1} {Number(form.weeks) === 1 ? 'semana' : 'semanas'}</span>
-            <span className="text-lg font-bold text-ink-900">S/ {total.toFixed(0)}</span>
+            <span className="text-sm text-ink-600">
+              {isLibre ? 'Tarifa semanal' : `${form.weeks} ${Number(form.weeks) === 1 ? 'semana' : 'semanas'}`}
+            </span>
+            <span className="text-lg font-bold text-ink-900">
+              S/ {isLibre ? Number(property.pricePerWeek).toFixed(0) : total.toFixed(0)}
+              {isLibre && <span className="text-xs font-normal text-ink-500"> /sem</span>}
+            </span>
           </div>
-          <p className="text-xs text-ink-400 mt-0.5">Total estimado del alojamiento</p>
+          <p className="text-xs text-ink-400 mt-0.5">
+            {isLibre ? 'Pago semanal sin tiempo fijo' : 'Total estimado del alojamiento'}
+          </p>
         </div>
       )}
 

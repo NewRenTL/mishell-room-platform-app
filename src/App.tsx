@@ -26,6 +26,8 @@ const VerificationPage    = lazy(() => import('./pages/tenant/VerificationPage')
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  if (!hasHydrated) return <Fallback />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
@@ -33,6 +35,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function SocioRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  if (!hasHydrated) return <Fallback />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== 'SOCIO') return <Navigate to="/home" replace />;
   return <>{children}</>;
@@ -41,6 +45,8 @@ function SocioRoute({ children }: { children: React.ReactNode }) {
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  if (!hasHydrated) return <Fallback />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== 'ADMIN') return <Navigate to="/home" replace />;
   return <>{children}</>;
@@ -49,9 +55,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function RootRedirect() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role === 'ADMIN') return <Navigate to="/admin-chat" replace />;
-  return <Navigate to={user?.role === 'SOCIO' ? '/socio' : '/home'} replace />;
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  if (!hasHydrated) return <Fallback />;
+  if (isAuthenticated && user?.role === 'ADMIN') return <Navigate to="/admin-chat" replace />;
+  if (isAuthenticated && user?.role === 'SOCIO') return <Navigate to="/socio" replace />;
+  // Guests and authenticated INQUILINOs land on the public marketplace
+  return <Navigate to="/home" replace />;
 }
 
 const Fallback = () => (
@@ -69,15 +78,15 @@ export default function App() {
           <Route path="/login"    element={<AuthLayout><LoginPage /></AuthLayout>} />
           <Route path="/register" element={<RegisterFlowPage />} />
 
-          {/* Tenant/Inquilino routes */}
+          {/* Public marketplace — anyone can browse without an account */}
           <Route path="/home" element={
-            <ProtectedRoute><MobileLayout><HomePage /></MobileLayout></ProtectedRoute>
+            <MobileLayout><HomePage /></MobileLayout>
           } />
           <Route path="/properties" element={
-            <ProtectedRoute><MobileLayout><MarketplacePage /></MobileLayout></ProtectedRoute>
+            <MobileLayout><MarketplacePage /></MobileLayout>
           } />
           <Route path="/properties/:id" element={
-            <ProtectedRoute><MobileLayout hideNav><PropertyDetailPage /></MobileLayout></ProtectedRoute>
+            <MobileLayout hideNav><PropertyDetailPage /></MobileLayout>
           } />
           <Route path="/booking/:propertyId" element={
             <ProtectedRoute><BookingFlowPage /></ProtectedRoute>

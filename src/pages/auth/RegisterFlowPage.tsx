@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Stepper } from '../../components/ui/Stepper';
@@ -10,7 +10,6 @@ import RegStep2Data from './steps/RegStep2Data';
 import RegStep3Access from './steps/RegStep3Access';
 
 export type RegRole = 'INQUILINO' | 'SOCIO';
-export type RegMethod = 'email' | 'dni';
 
 const STEPS = [
   { label: 'Tipo' },
@@ -20,6 +19,8 @@ const STEPS = [
 
 export default function RegisterFlowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: string } | null)?.from;
   const setAuth = useAuthStore((s) => s.setAuth);
   const [step, setStep] = useState(1);
 
@@ -29,13 +30,11 @@ export default function RegisterFlowPage() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
 
-  const [regMethod, setRegMethod] = useState<RegMethod>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [dni, setDni] = useState('');
-  const [pin, setPin] = useState('');
-  const [pinConf, setPinConf] = useState('');
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoFront, setPhotoFront] = useState<File | null>(null);
+  const [photoBack,  setPhotoBack]  = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -52,56 +51,45 @@ export default function RegisterFlowPage() {
   async function handleSubmit() {
     setError('');
 
-    if (regMethod === 'email') {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError('Ingresa un correo electrónico válido');
-        return;
-      }
-      if (password.length < 8) {
-        setError('La contraseña debe tener al menos 8 caracteres');
-        return;
-      }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Ingresa un correo electrónico válido');
+      return;
+    }
+    if (!password) {
+      setError('Ingresa una contraseña');
+      return;
     }
 
-    if (regMethod === 'dni') {
-      if (!/^\d{8}$/.test(dni)) {
-        setError('El DNI debe tener exactamente 8 dígitos');
+    const isInquilino = role === 'INQUILINO';
+    if (isInquilino) {
+      if (!dni.trim()) {
+        setError('El DNI es obligatorio');
         return;
       }
-      if (pin !== pinConf) { setError('Los PINs no coinciden'); return; }
-      if (!/^\d{4,6}$/.test(pin)) { setError('El PIN debe tener entre 4 y 6 dígitos'); return; }
+      if (!photoFront || !photoBack) {
+        setError('Debes subir el anverso y reverso del documento');
+        return;
+      }
     }
 
     setLoading(true);
     try {
-      if (regMethod === 'email') {
-        const res = await authService.register({
+      const res = await authService.register(
+        {
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email,
           password,
           phone: phone || undefined,
+          dni: dni.trim() || undefined,
           role: role ?? 'INQUILINO',
-        });
-        const { accessToken, user } = res.data;
-        setAuth(accessToken, user);
-        navigate(user.role === 'SOCIO' ? '/socio' : '/home', { replace: true });
-      } else {
-        const res = await authService.registerByDni(
-          {
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            dni,
-            pin,
-            phone: phone || undefined,
-            role: role ?? 'INQUILINO',
-          },
-          photo ?? undefined,
-        );
-        const { accessToken, user } = res.data;
-        setAuth(accessToken, user);
-        navigate(user.role === 'SOCIO' ? '/socio' : '/home', { replace: true });
-      }
+        },
+        photoFront ?? undefined,
+        photoBack ?? undefined,
+      );
+      const { accessToken, user } = res.data;
+      setAuth(accessToken, user);
+      navigate(fromPath ?? (user.role === 'SOCIO' ? '/socio' : '/home'), { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message ?? 'Error al crear la cuenta');
     } finally {
@@ -160,20 +148,16 @@ export default function RegisterFlowPage() {
             >
               <RegStep3Access
                 role={role!}
-                regMethod={regMethod}
-                onRegMethod={setRegMethod}
                 email={email}
                 onEmail={setEmail}
                 password={password}
                 onPassword={setPassword}
                 dni={dni}
                 onDni={setDni}
-                pin={pin}
-                onPin={setPin}
-                pinConf={pinConf}
-                onPinConf={setPinConf}
-                photo={photo}
-                onPhoto={setPhoto}
+                photoFront={photoFront}
+                onPhotoFront={setPhotoFront}
+                photoBack={photoBack}
+                onPhotoBack={setPhotoBack}
                 loading={loading}
                 error={error}
                 onSubmit={handleSubmit}

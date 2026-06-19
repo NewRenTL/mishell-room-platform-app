@@ -29,9 +29,12 @@
 }
 
 html {
-  /* Firefox scrollbar */
+  /* Firefox scrollbar — nearly invisible */
   scrollbar-width: thin;
-  scrollbar-color: #E8272A #E5E5E5;
+  scrollbar-color: transparent transparent;
+}
+html:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 body {
@@ -47,30 +50,32 @@ body {
   min-height: 100svh;
 }
 
-/* ── Custom Scrollbars (Webkit) ────────────────── */
+/* ── Custom Scrollbars (Webkit) — overlay, nearly invisible ─────── */
 
-/* Vertical (Y) */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: #E5E5E5;
-  border-radius: 9999px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E8272A;
+  background: transparent;
   border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+/* Show subtle thumb only on hover/scroll, never colored brand red */
+*:hover::-webkit-scrollbar-thumb,
+*:active::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C41F22;
-}
-
-::-webkit-scrollbar-thumb:active {
-  background: #C41F22;
+  background: rgba(0, 0, 0, 0.28);
 }
 
 ::-webkit-scrollbar-corner {

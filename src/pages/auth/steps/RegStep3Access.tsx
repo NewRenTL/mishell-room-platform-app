@@ -1,207 +1,193 @@
 import { useRef, useState } from 'react';
-import { Mail, Lock, CreditCard, KeyRound, Camera, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, CreditCard, Camera, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { LegalModal } from '../../../components/ui/LegalModal';
 import type { LegalType } from '../../../components/ui/LegalModal';
-import type { RegRole, RegMethod } from '../RegisterFlowPage';
+import type { RegRole } from '../RegisterFlowPage';
 
 interface Props {
   role: RegRole;
-  regMethod: RegMethod;
-  onRegMethod: (m: RegMethod) => void;
   email: string;
   onEmail: (v: string) => void;
   password: string;
   onPassword: (v: string) => void;
   dni: string;
   onDni: (v: string) => void;
-  pin: string;
-  onPin: (v: string) => void;
-  pinConf: string;
-  onPinConf: (v: string) => void;
-  photo: File | null;
-  onPhoto: (f: File | null) => void;
+  photoFront: File | null;
+  onPhotoFront: (f: File | null) => void;
+  photoBack: File | null;
+  onPhotoBack: (f: File | null) => void;
   loading: boolean;
   error: string;
   onSubmit: () => void;
 }
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+const MAX_SIZE = 5 * 1024 * 1024;
+
+function PhotoUpload({
+  label,
+  file,
+  onFile,
+  error,
+  onError,
+}: {
+  label: string;
+  file: File | null;
+  onFile: (f: File | null) => void;
+  error: string;
+  onError: (e: string) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        className={`w-full flex flex-col items-center gap-2 border-2 border-dashed rounded-2xl py-4 transition-colors ${
+          file ? 'border-mishell-400 bg-mishell-50' : 'border-ink-200 bg-white hover:border-ink-300'
+        }`}
+      >
+        {file ? (
+          <>
+            <CheckCircle2 size={22} className="text-mishell-600" />
+            <p className="text-sm font-medium text-mishell-700">Foto cargada</p>
+            <span className="text-xs text-ink-500 underline">Cambiar foto</span>
+          </>
+        ) : (
+          <>
+            <Camera size={22} className="text-ink-400" />
+            <p className="text-sm font-medium text-ink-700">{label}</p>
+            <p className="text-xs text-ink-400 text-center px-4">
+              JPG, PNG o PDF · Ayuda al admin a verificar tu identidad
+            </p>
+          </>
+        )}
+      </button>
+      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+      <input
+        ref={ref}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (!f) return;
+          if (!ALLOWED_TYPES.includes(f.type)) {
+            onError('Solo se aceptan imágenes (JPG, PNG, WEBP) o PDF');
+            onFile(null);
+            return;
+          }
+          if (f.size > MAX_SIZE) {
+            onError('La foto no puede superar 5 MB');
+            onFile(null);
+            return;
+          }
+          onError('');
+          onFile(f);
+        }}
+      />
+    </div>
+  );
+}
+
 export default function RegStep3Access({
-  role, regMethod, onRegMethod,
-  email, onEmail, password, onPassword,
-  dni, onDni, pin, onPin, pinConf, onPinConf,
-  photo, onPhoto,
+  role,
+  email, onEmail,
+  password, onPassword,
+  dni, onDni,
+  photoFront, onPhotoFront,
+  photoBack,  onPhotoBack,
   loading, error, onSubmit,
 }: Props) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [legalOpen,  setLegalOpen]  = useState<LegalType>(null);
-  const [fileError,  setFileError]  = useState('');
+  const [legalOpen, setLegalOpen] = useState<LegalType>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [showPin,      setShowPin]      = useState(false);
-  const [showPinConf,  setShowPinConf]  = useState(false);
+  const [frontError, setFrontError] = useState('');
+  const [backError,  setBackError]  = useState('');
 
-  function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
-    return (
-      <button type="button" onClick={onToggle} className="text-ink-400 hover:text-ink-600 transition-colors p-0.5">
-        {show ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    );
-  }
+  const isInquilino = role === 'INQUILINO';
+  // For tenants both photos are required; for owners they're optional.
+  const photosOk = !isInquilino || (!!photoFront && !!photoBack);
 
   return (
     <div className="px-5 pt-8 pb-6 flex flex-col gap-4">
       {/* Step heading */}
       <div className="mb-1">
-        <h2 className="text-xl font-bold text-ink-900">Elige cómo acceder</h2>
-        <p className="text-sm text-ink-500 mt-1">Selecciona tu método de inicio de sesión</p>
+        <h2 className="text-xl font-bold text-ink-900">Datos de acceso</h2>
+        <p className="text-sm text-ink-500 mt-1">Completa tus credenciales y documento</p>
       </div>
 
-      {/* Method selector */}
-      <div className="flex gap-2">
-        {(['email', 'dni'] as RegMethod[]).map((m) => (
+      {/* Email */}
+      <Input
+        icon={<Mail size={16} />}
+        type="email"
+        placeholder="Correo electrónico *"
+        value={email}
+        onChange={(e) => onEmail(e.target.value)}
+        required
+        autoComplete="email"
+      />
+
+      {/* Password */}
+      <Input
+        icon={<Lock size={16} />}
+        type={showPassword ? 'text' : 'password'}
+        placeholder="Contraseña *"
+        value={password}
+        onChange={(e) => onPassword(e.target.value)}
+        required
+        autoComplete="new-password"
+        rightElement={
           <button
-            key={m}
             type="button"
-            onClick={() => onRegMethod(m)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
-              regMethod === m
-                ? 'border-mishell-600 bg-mishell-50 text-mishell-700'
-                : 'border-ink-200 bg-white text-ink-500 hover:border-ink-300'
-            }`}
+            onClick={() => setShowPassword((v) => !v)}
+            className="text-ink-400 hover:text-ink-600 transition-colors p-0.5"
           >
-            {m === 'email' ? 'Correo' : 'DNI + PIN'}
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
-        ))}
+        }
+      />
+
+      {/* DNI / Carnet Ext. */}
+      <Input
+        icon={<CreditCard size={16} />}
+        placeholder={`Número de DNI / Carnet Ext.${isInquilino ? ' *' : ' (opcional)'}`}
+        value={dni}
+        onChange={(e) => onDni(e.target.value)}
+        inputMode="numeric"
+        maxLength={12}
+      />
+
+      {/* Document photos */}
+      <div>
+        <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-2">
+          Foto del documento{isInquilino ? ' *' : ' (opcional)'}
+        </p>
+        <div className="flex flex-col gap-3">
+          <PhotoUpload
+            label="Subir foto ANVERSO del DNI / Carnet Ext."
+            file={photoFront}
+            onFile={onPhotoFront}
+            error={frontError}
+            onError={setFrontError}
+          />
+          <PhotoUpload
+            label="Subir foto REVERSO del DNI / Carnet Ext."
+            file={photoBack}
+            onFile={onPhotoBack}
+            error={backError}
+            onError={setBackError}
+          />
+        </div>
+        {isInquilino && !photosOk && (
+          <p className="mt-2 text-xs text-red-400 text-center">
+            Las dos fotos del documento son obligatorias para registrarte
+          </p>
+        )}
       </div>
-
-      {/* Email fields */}
-      {regMethod === 'email' && (
-        <>
-          <Input
-            icon={<Mail size={16} />}
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => onEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <Input
-            icon={<Lock size={16} />}
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Contraseña (mín. 8 caracteres)"
-            value={password}
-            onChange={(e) => onPassword(e.target.value)}
-            required
-            autoComplete="new-password"
-            rightElement={<EyeToggle show={showPassword} onToggle={() => setShowPassword((v) => !v)} />}
-          />
-        </>
-      )}
-
-      {/* DNI fields */}
-      {regMethod === 'dni' && (
-        <>
-          <Input
-            icon={<CreditCard size={16} />}
-            placeholder="Número de DNI"
-            value={dni}
-            onChange={(e) => onDni(e.target.value)}
-            required
-            inputMode="numeric"
-            maxLength={12}
-          />
-          <Input
-            icon={<KeyRound size={16} />}
-            type={showPin ? 'text' : 'password'}
-            placeholder="PIN de acceso (4–6 dígitos)"
-            value={pin}
-            onChange={(e) => onPin(e.target.value)}
-            required
-            inputMode="numeric"
-            maxLength={6}
-            rightElement={<EyeToggle show={showPin} onToggle={() => setShowPin((v) => !v)} />}
-          />
-          <Input
-            icon={<KeyRound size={16} />}
-            type={showPinConf ? 'text' : 'password'}
-            placeholder="Confirmar PIN"
-            value={pinConf}
-            onChange={(e) => onPinConf(e.target.value)}
-            required
-            inputMode="numeric"
-            maxLength={6}
-            rightElement={<EyeToggle show={showPinConf} onToggle={() => setShowPinConf((v) => !v)} />}
-          />
-
-          {/* DNI photo */}
-          <div>
-            <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
-              Foto o escáner del DNI *
-            </p>
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className={`w-full flex flex-col items-center gap-2 border-2 border-dashed rounded-2xl py-4 transition-colors ${
-                photo ? 'border-mishell-400 bg-mishell-50' : 'border-ink-200 bg-white hover:border-ink-300'
-              }`}
-            >
-              {photo ? (
-                <>
-                  <CheckCircle2 size={22} className="text-mishell-600" />
-                  <p className="text-sm font-medium text-mishell-700">Foto cargada</p>
-                  <span className="text-xs text-ink-500 underline">Cambiar foto</span>
-                </>
-              ) : (
-                <>
-                  <Camera size={22} className="text-ink-400" />
-                  <p className="text-sm font-medium text-ink-700">Subir foto o escáner del DNI</p>
-                  <p className="text-xs text-ink-400 text-center px-4">
-                    JPG, PNG o PDF · Ayuda al admin a verificar tu identidad
-                  </p>
-                </>
-              )}
-            </button>
-            {fileError && <p className="mt-1.5 text-xs text-red-500">{fileError}</p>}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(f.type)) {
-                  setFileError('Solo se aceptan imágenes (JPG, PNG, WEBP) o PDF');
-                  onPhoto(null);
-                  return;
-                }
-                if (f.size > 5 * 1024 * 1024) {
-                  setFileError('La foto no puede superar 5 MB');
-                  onPhoto(null);
-                  return;
-                }
-                setFileError('');
-                onPhoto(f);
-              }}
-            />
-          </div>
-
-          {!photo && (
-            <p className="text-xs text-red-400 text-center -mt-1">
-              La foto o escáner del DNI es obligatoria para registrarte
-            </p>
-          )}
-          {photo && role === 'INQUILINO' && (
-            <p className="text-xs text-ink-400 text-center -mt-1">
-              Podrás ver propiedades. Para reservar, el administrador debe verificar tu cuenta.
-            </p>
-          )}
-        </>
-      )}
 
       {error && (
         <motion.p
@@ -216,7 +202,7 @@ export default function RegStep3Access({
       <Button
         loading={loading}
         onClick={onSubmit}
-        disabled={regMethod === 'dni' && !photo}
+        disabled={isInquilino && !photosOk}
         className="mt-1"
       >
         {role === 'SOCIO' ? 'Crear cuenta como Socio' : 'Crear cuenta'}
