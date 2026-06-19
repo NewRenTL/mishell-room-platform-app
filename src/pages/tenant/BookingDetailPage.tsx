@@ -58,6 +58,7 @@ export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
   const { data: booking, isLoading } = useQuery({
     queryKey: ['booking', id],
@@ -68,9 +69,25 @@ export default function BookingDetailPage() {
   async function handleDownloadPdf() {
     if (!id || downloading) return;
     setDownloading(true);
+    setDownloadError('');
+    // Open the tab synchronously so mobile / Capacitor browsers don't block the popup
+    const newTab = window.open('about:blank', '_blank');
     try {
       const { data } = await bookingsService.getContractDownloadUrl(id);
-      window.open(data.url, '_blank');
+      const url = (data as any)?.url ?? (data as any)?.data?.url;
+      if (!url) throw new Error('No se pudo obtener la URL del PDF');
+      if (newTab && !newTab.closed) {
+        newTab.location.href = url;
+      } else {
+        window.location.href = url;
+      }
+    } catch (err: any) {
+      newTab?.close();
+      setDownloadError(
+        err.response?.data?.message ??
+        err.message ??
+        'No se pudo descargar el contrato. Intenta de nuevo.',
+      );
     } finally {
       setDownloading(false);
     }
@@ -209,7 +226,7 @@ export default function BookingDetailPage() {
 
               {/* Download PDF — only when signed */}
               {booking.contract.status === 'SIGNED' && (
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 flex flex-col gap-2">
                   <button
                     onClick={handleDownloadPdf}
                     disabled={downloading}
@@ -220,6 +237,9 @@ export default function BookingDetailPage() {
                       : <><Download size={14} /> Descargar PDF firmado</>
                     }
                   </button>
+                  {downloadError && (
+                    <p className="text-xs text-mishell-600 text-center">{downloadError}</p>
+                  )}
                 </div>
               )}
             </div>

@@ -33,7 +33,7 @@ export default function BookingFlowPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-[430px] mx-auto flex flex-col min-h-dvh bg-white">
+      <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
         <AppHeader title="Reservar" />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
@@ -43,7 +43,7 @@ export default function BookingFlowPage() {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto flex flex-col min-h-dvh bg-white">
+    <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
       <AppHeader title={property?.title ?? 'Reservar'} />
 
       <div className="px-5 pt-4 pb-2">

@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Joyride, type CallBackProps, type Step, type Placement, STATUS } from 'react-joyride';
 import { HelpCircle } from 'lucide-react';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 export interface TutorialStep {
   title: string;
@@ -63,6 +65,19 @@ export function PageTutorial({ id: _id, steps, buttonBottom = 'bottom-24' }: Pro
     setStepIndex(0);
     setRun(true);
   }
+
+  function closeTutorial() {
+    setRun(false);
+    setStepIndex(0);
+  }
+
+  // Capacitor Android back button closes the tutorial instead of exiting the app
+  useEffect(() => {
+    if (!run || !Capacitor.isNativePlatform()) return;
+    let listenerHandle: { remove: () => void } | undefined;
+    CapacitorApp.addListener('backButton', () => closeTutorial()).then((h) => { listenerHandle = h; });
+    return () => { listenerHandle?.remove(); };
+  }, [run]);
 
   return (
     <>

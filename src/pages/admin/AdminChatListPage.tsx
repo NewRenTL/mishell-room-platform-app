@@ -30,7 +30,7 @@ export default function AdminChatListPage() {
   const { conversations, convMeta, connected, loadingConvs, loadMore, refresh } = useAdminChatMobile();
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-dvh bg-white flex flex-col">
+    <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col">
       {/* Header */}
       <div className="px-4 pt-10 pb-4 border-b border-ink-100">
         <div className="flex items-center justify-between">

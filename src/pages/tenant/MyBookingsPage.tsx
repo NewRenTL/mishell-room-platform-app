@@ -57,7 +57,7 @@ export default function MyBookingsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 transition-colors
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors
                 ${filter === f ? 'bg-mishell-600 text-white' : 'bg-white border border-ink-100 text-ink-700'}`}
             >
               {f}
@@ -87,7 +87,7 @@ export default function MyBookingsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <p className="text-sm font-bold text-ink-900 truncate">{booking.property?.title ?? 'Propiedad'}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_COLORS[booking.status] ?? 'bg-ink-100 text-ink-700'}`}>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[booking.status] ?? 'bg-ink-100 text-ink-700'}`}>
                       {STATUS_LABELS[booking.status] ?? booking.status}
                     </span>
                   </div>
@@ -101,7 +101,7 @@ export default function MyBookingsPage() {
                   </div>
                   <p className="text-sm font-semibold text-mishell-600 mt-2">S/ {Number(booking.totalAmount).toFixed(0)}</p>
                 </div>
-                <ChevronRight size={18} className="text-ink-300 flex-shrink-0 mt-1" />
+                <ChevronRight size={18} className="text-ink-300 shrink-0 mt-1" />
               </button>
             ))
         }

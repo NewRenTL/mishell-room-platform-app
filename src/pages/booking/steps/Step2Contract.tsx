@@ -72,16 +72,25 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       if (!contractId) return;
       setDownloading(true);
       setDownloadError('');
+      // Open the tab synchronously so mobile browsers don't classify it as a popup
+      const newTab = window.open('about:blank', '_blank');
       try {
         const res = await contractsService.getDownloadUrl(contractId);
         const url = (res.data as any).data?.url ?? (res.data as any).url;
-        const a = document.createElement('a');
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.click();
-      } catch {
-        setDownloadError('El PDF aún se está generando. Intenta en unos segundos.');
+        if (!url) throw new Error('No se pudo obtener la URL del PDF');
+        if (newTab && !newTab.closed) {
+          newTab.location.href = url;
+        } else {
+          // Popup was blocked — fall back to same-tab navigation
+          window.location.href = url;
+        }
+      } catch (err: any) {
+        newTab?.close();
+        setDownloadError(
+          err.response?.data?.message ??
+          err.message ??
+          'El PDF aún se está generando. Intenta en unos segundos.',
+        );
       } finally {
         setDownloading(false);
       }

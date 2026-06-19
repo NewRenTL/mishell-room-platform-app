@@ -81,7 +81,7 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
       {property && (
         <div className="bg-ink-50 rounded-2xl p-4 flex gap-3 items-center">
           {property.photoUrls?.[0] && (
-            <img src={property.photoUrls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+            <img src={property.photoUrls[0]} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
           )}
           <div>
             <p className="text-sm font-bold text-ink-900 leading-tight">{property.title}</p>

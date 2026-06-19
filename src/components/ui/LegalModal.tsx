@@ -95,7 +95,7 @@ export function LegalModal({ type, onClose }: { type: LegalType; onClose: () => 
             onClick={onClose}
           />
           <motion.div
-            className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white rounded-t-3xl z-50 flex flex-col"
+            className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white rounded-t-3xl z-50 flex flex-col"
             style={{ maxHeight: '82dvh' }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}

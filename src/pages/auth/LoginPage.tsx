@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, CreditCard, KeyRound } from 'lucide-react';
+import { Mail, Lock, CreditCard, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState('');
   const [legalOpen, setLegalOpen] = useState<LegalType>(null);
+  const [showSecret, setShowSecret] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -107,13 +108,23 @@ export default function LoginPage() {
         />
         <Input
           icon={credType === 'dni' ? <KeyRound size={16} /> : <Lock size={16} />}
-          type="password"
+          type={showSecret ? 'text' : 'password'}
           inputMode={credType === 'dni' ? 'numeric' : undefined}
           maxLength={credType === 'dni' ? 6 : undefined}
           placeholder={credType === 'dni' ? 'PIN (4–6 dígitos)' : 'Contraseña'}
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
           autoComplete="current-password"
+          rightElement={
+            <button
+              type="button"
+              onClick={() => setShowSecret((v) => !v)}
+              className="text-ink-400 hover:text-ink-600 transition-colors p-0.5"
+              aria-label={showSecret ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            >
+              {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          }
         />
         {credType === 'dni' && (
           <p className="text-xs text-ink-400 text-center -mt-1">

@@ -169,7 +169,7 @@ export default function AddPropertyPage() {
 
       <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-5 pb-28">
         {/* Basic info */}
-        <section>
+        <section data-tutorial="basic-info">
           <h2 className="text-sm font-bold text-ink-900 mb-3">Información básica</h2>
           <div className="flex flex-col gap-3">
             <Input
@@ -189,7 +189,7 @@ export default function AddPropertyPage() {
         </section>
 
         {/* Location */}
-        <section>
+        <section data-tutorial="location">
           <h2 className="text-sm font-bold text-ink-900 mb-3">Ubicación</h2>
           <div className="flex flex-col gap-3">
             <div>
@@ -278,7 +278,7 @@ export default function AddPropertyPage() {
         </section>
 
         {/* Photos */}
-        <section>
+        <section data-tutorial="photos">
           <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos de la propiedad</h2>
           <p className="text-xs text-ink-500 mb-3">Sube hasta 7 fotos. La primera será la portada.</p>
 
@@ -365,10 +365,9 @@ export default function AddPropertyPage() {
         id="add-property"
         buttonBottom="bottom-20"
         steps={[
-          { title: 'Información básica', content: 'Escribe un título descriptivo y una descripción atractiva. Un buen título ayuda a los inquilinos a encontrar tu propiedad.' },
-          { title: 'Fotos de la propiedad', content: 'Sube hasta 7 fotos. La primera foto será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!' },
-          { title: 'Precio y ubicación', content: 'Indica el precio semanal en soles. Marca la ubicación en el mapa para que los inquilinos vean exactamente dónde está.' },
-          { title: 'Servicios disponibles', content: 'Selecciona los servicios que incluye la habitación: WiFi, agua caliente, cocina, etc. Más servicios = más atractivo.' },
+          { title: 'Información básica', content: 'Escribe un título descriptivo y una descripción atractiva. Un buen título ayuda a los inquilinos a encontrar tu propiedad.', target: '[data-tutorial="basic-info"]' },
+          { title: 'Ubicación exacta', content: 'Elige tu región, escribe la dirección (te saldrán sugerencias) y ajusta el pin en el mapa.', target: '[data-tutorial="location"]' },
+          { title: 'Fotos de la propiedad', content: 'Sube hasta 7 fotos. La primera será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!', target: '[data-tutorial="photos"]' },
           { title: 'Después de publicar', content: 'Importante: recuerda cambiar el estado de tu propiedad a "Disponible" para que los inquilinos puedan encontrarla y reservarla.' },
         ]}
       />

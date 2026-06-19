@@ -33,7 +33,7 @@ export function TabSwitcher({ tabs, active, onChange, dark = false }: TabSwitche
               }
             `}
           >
-            {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
+            {tab.icon && <span className="shrink-0">{tab.icon}</span>}
             {tab.label}
           </button>
         );

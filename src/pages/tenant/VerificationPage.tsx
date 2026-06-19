@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, IdCard, Phone, User, X } from 'lucide-react';
+import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, IdCard, Phone, User, X, Home } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -85,6 +85,14 @@ export default function VerificationPage() {
   const cfg = STATUS_CONFIG[status];
   const Icon = cfg.icon;
   const canSubmit = status === 'UNVERIFIED' || status === 'OBSERVED';
+
+  // Auto-redirect after a short pause when verification is already approved
+  useEffect(() => {
+    if (status === 'APPROVED') {
+      const t = setTimeout(() => navigate('/home', { replace: true }), 1800);
+      return () => clearTimeout(t);
+    }
+  }, [status, navigate]);
 
   return (
     <div className="flex flex-col min-h-dvh bg-ink-50">
@@ -182,24 +190,43 @@ export default function VerificationPage() {
           <Button
             loading={submit.isPending}
             onClick={() => submit.mutate()}
+            data-tutorial="submit-verification"
           >
             {status === 'OBSERVED' ? 'Reenviar solicitud' : 'Enviar solicitud de verificación'}
           </Button>
         )}
 
-        {/* Pending — auto-refreshing hint */}
+        {/* Pending — auto-refreshing hint + escape button */}
         {status === 'PENDING' && (
-          <div className="flex items-center justify-center gap-2 py-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <p className="text-xs text-ink-400">Esperando aprobación del administrador…</p>
-          </div>
+          <>
+            <div className="flex items-center justify-center gap-2 py-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <p className="text-xs text-ink-400">Esperando aprobación del administrador…</p>
+            </div>
+            <button
+              onClick={() => navigate('/home')}
+              className="flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-ink-700 active:text-ink-900 transition-colors"
+            >
+              <Home size={14} />
+              Volver al inicio
+            </button>
+            <p className="text-[11px] text-ink-400 text-center -mt-1 leading-relaxed">
+              Puedes seguir explorando la app mientras revisamos tu solicitud.
+              Te avisaremos cuando esté aprobada.
+            </p>
+          </>
         )}
 
-        {/* Approved — continue button */}
+        {/* Approved — continue button + auto-redirect notice */}
         {status === 'APPROVED' && (
-          <Button onClick={() => navigate('/home')}>
-            Continuar
-          </Button>
+          <>
+            <Button onClick={() => navigate('/home', { replace: true })}>
+              Continuar al inicio
+            </Button>
+            <p className="text-[11px] text-ink-400 text-center">
+              Redirigiendo automáticamente…
+            </p>
+          </>
         )}
 
         {status === 'PENDING' && data?.requestedAt && (
@@ -213,9 +240,9 @@ export default function VerificationPage() {
         id="verification"
         steps={[
           { title: '¿Por qué verificar tu identidad?', content: 'La verificación es un paso único y obligatorio para reservar habitaciones. Protege tanto a los inquilinos como a los propietarios.' },
-          { title: 'Cómo funciona', content: 'Toca "Enviar solicitud de verificación" y el administrador revisará tu información (nombre, DNI y foto). El proceso suele tardar unas horas.' },
+          { title: 'Cómo funciona', content: 'Toca este botón y el administrador revisará tu información (nombre, DNI y fotos). El proceso suele tardar unas horas.', target: '[data-tutorial="submit-verification"]' },
           { title: 'Actualización automática', content: 'Esta página se actualiza automáticamente cada 5 segundos cuando tu solicitud está en revisión. No necesitas recargar la página.' },
-          { title: 'Cuando te aprueben', content: 'Al ser aprobado, aparecerá el botón "Continuar" para acceder a todas las funciones: reservar habitaciones, ver contratos y más.' },
+          { title: 'Cuando te aprueben', content: 'Al ser aprobado, te llevaremos automáticamente al inicio para que reserves habitaciones, veas contratos y más.' },
         ]}
       />
     </div>

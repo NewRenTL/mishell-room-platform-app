@@ -151,43 +151,52 @@ export default function RegStep3Access({
         }
       />
 
-      {/* DNI / Carnet Ext. */}
-      <Input
-        icon={<CreditCard size={16} />}
-        placeholder={`Número de DNI / Carnet Ext.${isInquilino ? ' *' : ' (opcional)'}`}
-        value={dni}
-        onChange={(e) => onDni(e.target.value)}
-        inputMode="numeric"
-        maxLength={12}
-      />
+      {/* DNI + document photos — only INQUILINO needs to verify identity */}
+      {isInquilino ? (
+        <>
+          <Input
+            icon={<CreditCard size={16} />}
+            placeholder="Número de DNI / Carnet Ext. *"
+            value={dni}
+            onChange={(e) => onDni(e.target.value)}
+            inputMode="numeric"
+            maxLength={12}
+          />
 
-      {/* Document photos */}
-      <div>
-        <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-2">
-          Foto del documento{isInquilino ? ' *' : ' (opcional)'}
-        </p>
-        <div className="flex flex-col gap-3">
-          <PhotoUpload
-            label="Subir foto ANVERSO del DNI / Carnet Ext."
-            file={photoFront}
-            onFile={onPhotoFront}
-            error={frontError}
-            onError={setFrontError}
-          />
-          <PhotoUpload
-            label="Subir foto REVERSO del DNI / Carnet Ext."
-            file={photoBack}
-            onFile={onPhotoBack}
-            error={backError}
-            onError={setBackError}
-          />
+          <div>
+            <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-2">
+              Foto del documento *
+            </p>
+            <div className="flex flex-col gap-3">
+              <PhotoUpload
+                label="Subir foto ANVERSO del DNI / Carnet Ext."
+                file={photoFront}
+                onFile={onPhotoFront}
+                error={frontError}
+                onError={setFrontError}
+              />
+              <PhotoUpload
+                label="Subir foto REVERSO del DNI / Carnet Ext."
+                file={photoBack}
+                onFile={onPhotoBack}
+                error={backError}
+                onError={setBackError}
+              />
+            </div>
+            {!photosOk && (
+              <p className="mt-2 text-xs text-red-400 text-center">
+                Las dos fotos del documento son obligatorias para registrarte
+              </p>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="bg-mishell-50 border border-mishell-100 rounded-xl px-3 py-2.5 text-xs text-ink-700 leading-relaxed">
+          Como <strong>Socio</strong>, podrás gestionar tus propiedades sin
+          subir tu DNI ahora. Te lo podremos pedir más adelante si quieres
+          firmar contratos digitales.
         </div>
-        {isInquilino && !photosOk && (
-          <p className="mt-2 text-xs text-red-400 text-center">
-            Las dos fotos del documento son obligatorias para registrarte
-          </p>
-        )}
-      </div>
+      )}
 
       {error && (
         <motion.p

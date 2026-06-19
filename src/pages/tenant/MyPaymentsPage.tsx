@@ -253,6 +253,7 @@ function PaymentRow({ payment, onOpenSheet }: {
           </div>
           {canPay && (
             <button
+              data-tutorial="pay-button"
               onClick={() => onOpenSheet(payment)}
               className="ml-1 px-3 py-1.5 bg-mishell-600 text-white text-xs font-semibold rounded-xl active:scale-95 transition-transform"
             >
@@ -500,7 +501,7 @@ export default function MyPaymentsPage() {
         id="my-payments"
         steps={[
           { title: 'Tus pagos semanales', content: 'Aquí ves todos los pagos de tus reservas activas, organizados por propiedad. Los pagos se generan semana a semana.' },
-          { title: 'Cómo registrar un pago', content: 'Toca el botón "Pagar" en la semana que corresponde. Puedes pagar por Yape, transferencia o efectivo.' },
+          { title: 'Cómo registrar un pago', content: 'Toca el botón "Pagar" en la semana que corresponde. Puedes pagar por Yape, transferencia o efectivo.', target: '[data-tutorial="pay-button"]' },
           { title: 'Adjuntar comprobante', content: 'Si pagas por Yape o transferencia, adjunta una captura de pantalla del comprobante para que el administrador pueda verificarlo.' },
           { title: 'Estados de pago', content: 'Pendiente = aún no pagado. En revisión = pago enviado, esperando aprobación. Aprobado = confirmado por el administrador.' },
           { title: 'Notificar tu salida', content: 'Si planeas dejar la habitación, toca "Notificar fecha de salida" con anticipación. Esto es importante para cerrar tu reserva correctamente.' },

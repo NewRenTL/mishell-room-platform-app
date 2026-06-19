@@ -31,7 +31,7 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const tabs = user?.role === 'SOCIO' ? TABS_SOCIO : TABS_INQUILINO;
 
   return (
-    <div className="h-dvh flex flex-col max-w-[430px] mx-auto bg-ink-50 relative">
+    <div className="h-dvh flex flex-col max-w-107.5 mx-auto bg-ink-50 relative">
       {user?.status === 'INACTIVE' && (
         <div className="sticky top-0 z-40 flex items-center gap-2 px-4 py-2.5 bg-amber-50 border-b border-amber-200">
           <Clock size={14} className="text-amber-600 shrink-0" />
@@ -45,7 +45,7 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
       </main>
 
       {!hideNav && (
-        <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-ink-100 flex h-16 z-50 shadow-sm">
+        <nav className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white border-t border-ink-100 flex h-16 z-50 shadow-sm">
           {tabs.map(({ path, icon: Icon, label }) => {
             const active = pathname === path
               || (path !== '/home' && path !== '/socio' && pathname.startsWith(path));

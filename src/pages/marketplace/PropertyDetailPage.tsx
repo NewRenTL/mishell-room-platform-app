@@ -29,14 +29,26 @@ export default function PropertyDetailPage() {
     enabled: !!id,
   });
 
+  const [reserveError, setReserveError] = useState('');
+
   function handleReserve() {
     if (!isAuthenticated) { setAuthSheetOpen(true); return; }
-    if (user?.status === 'INACTIVE') return;
-    const isDniUser = user?.email?.endsWith('@mishell.room');
-    if (isDniUser && user?.verificationStatus !== 'APPROVED') {
+    if (user?.status === 'INACTIVE') { setReserveError('Tu cuenta está pendiente de verificación. No puedes reservar aún.'); return; }
+    if (user?.role === 'SOCIO') {
+      setReserveError('Los propietarios no pueden reservar habitaciones desde su cuenta.');
+      return;
+    }
+    if (user?.role === 'ADMIN') {
+      setReserveError('La cuenta administrativa no puede reservar.');
+      return;
+    }
+    if (user?.verificationStatus !== 'APPROVED') {
       navigate('/verification');
       return;
     }
+    // Prefetch the booking flow chunk to make navigation feel instant
+    import('../booking/BookingFlowPage').catch(() => {});
+    setReserveError('');
     setProperty(id!);
     navigate(`/booking/${id}`);
   }
@@ -123,7 +135,7 @@ export default function PropertyDetailPage() {
       >
         <div className="flex items-start justify-between gap-2">
           <h1 className="text-xl font-bold text-ink-900">{property.title}</h1>
-          <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+          <div className="flex items-center gap-1 shrink-0 mt-0.5">
             <Star size={14} className="fill-mishell-600 text-mishell-600" />
             <span className="text-sm font-semibold text-ink-900">4.9</span>
             <span className="text-xs text-ink-600">· 124 reseñas</span>
@@ -157,7 +169,7 @@ export default function PropertyDetailPage() {
                 const Icon = AMENITY_ICONS[key] ?? Wifi;
                 return (
                   <div key={key} className="flex items-center gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
-                    <div className="w-9 h-9 rounded-full bg-ink-50 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
                       <Icon size={16} className="text-ink-700" />
                     </div>
                     <span className="text-sm text-ink-900">{AMENITY_LABELS[key] ?? key}</span>
@@ -175,7 +187,7 @@ export default function PropertyDetailPage() {
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
               {(property.restrictions as any[]).map((r: any) => (
                 <div key={r.key} className="flex items-start gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
-                  <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0 mt-0.5">
                     {r.key === 'max_capacity'
                       ? <Users size={16} className="text-mishell-600" />
                       : <XCircle size={16} className="text-mishell-600" />
@@ -225,11 +237,14 @@ export default function PropertyDetailPage() {
 
       {/* FAB Reservar */}
       <motion.div
-        className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50"
+        className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50"
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
+        {reserveError && (
+          <p className="text-xs text-mishell-600 text-center mb-2 px-2">{reserveError}</p>
+        )}
         <motion.button
           onClick={handleReserve}
           className="w-full bg-mishell-600 hover:bg-mishell-500 active:bg-mishell-700 text-white font-semibold rounded-full h-14 text-base transition-colors"

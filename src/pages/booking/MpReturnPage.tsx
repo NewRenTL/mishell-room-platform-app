@@ -62,7 +62,7 @@ export default function MpReturnPage() {
   const cfg = configs[result];
 
   return (
-    <div className="max-w-[430px] mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-8 py-12">
+    <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-8 py-12">
       {result === 'loading' ? (
         <div className="w-10 h-10 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
       ) : (

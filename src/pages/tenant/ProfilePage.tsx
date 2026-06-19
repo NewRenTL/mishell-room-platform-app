@@ -175,7 +175,7 @@ export default function ProfilePage() {
         <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
           {/* Email */}
           <div className="flex items-center gap-3 px-4 py-3.5 border-b border-ink-100">
-            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
               <Mail size={14} className="text-ink-600" />
             </div>
             <div className="flex-1">
@@ -186,7 +186,7 @@ export default function ProfilePage() {
 
           {/* Phone */}
           <div className="flex items-center gap-3 px-4 py-3.5 border-b border-ink-100">
-            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
               <Phone size={14} className="text-ink-600" />
             </div>
             <div className="flex-1">
@@ -216,7 +216,7 @@ export default function ProfilePage() {
 
           {/* DNI */}
           <div className="flex items-center gap-3 px-4 py-3.5">
-            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
               <CreditCard size={14} className="text-ink-600" />
             </div>
             <div className="flex-1">
@@ -267,7 +267,7 @@ export default function ProfilePage() {
               onClick={action}
               className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0 hover:bg-ink-50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
                 <Icon size={14} className="text-ink-600" />
               </div>
               <span className="text-sm font-medium text-ink-900 flex-1 text-left">{label}</span>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-ink-100 rounded-2xl hover:bg-ink-50 transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0">
             <LogOut size={14} className="text-mishell-600" />
           </div>
           <span className="text-sm font-semibold text-mishell-600 flex-1 text-left">Cerrar sesión</span>

@@ -27,12 +27,12 @@ export function PropertyCard({ property, compact = false, onClick }: PropertyCar
   if (compact) {
     return (
       <div
-        className="w-52 bg-white rounded-2xl shadow-sm overflow-hidden flex-shrink-0 cursor-pointer active:scale-95 transition-transform"
+        className="w-52 bg-white rounded-2xl shadow-sm overflow-hidden shrink-0 cursor-pointer active:scale-95 transition-transform"
         onClick={onClick}
       >
         <div className="relative h-36">
           {img
-            ? <img src={img} alt={property.title} className="w-full h-full object-cover" />
+            ? <img src={img} alt={property.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
             : <div className="w-full h-full bg-ink-100 flex items-center justify-center text-ink-400 text-xs">Sin foto</div>
           }
           {isNew && (
@@ -73,7 +73,7 @@ export function PropertyCard({ property, compact = false, onClick }: PropertyCar
     >
       <div className="relative h-52">
         {img
-          ? <img src={img} alt={property.title} className="w-full h-full object-cover" />
+          ? <img src={img} alt={property.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
           : <div className="w-full h-full bg-ink-100 flex items-center justify-center text-ink-400 text-sm">Sin foto</div>
         }
         {isNew && (
@@ -97,7 +97,7 @@ export function PropertyCard({ property, compact = false, onClick }: PropertyCar
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <p className="text-base font-bold text-ink-900">{property.title}</p>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <Star size={13} className="fill-mishell-600 text-mishell-600" />
             <span className="text-sm font-semibold text-ink-900">4.9</span>
           </div>

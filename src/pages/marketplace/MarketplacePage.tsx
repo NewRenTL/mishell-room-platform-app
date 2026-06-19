@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { PropertyCard } from '../../components/ui/PropertyCard';
@@ -51,16 +51,13 @@ export default function MarketplacePage() {
                 <button
                   key={c}
                   onClick={() => { setCity(val); setPage(1); }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 transition-colors
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-colors
                     ${city === val ? 'bg-mishell-600 text-white' : 'bg-white border border-ink-100 text-ink-700'}`}
                 >
                   {c}
                 </button>
               );
             })}
-            <button className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 bg-white border border-ink-100 text-ink-700 flex items-center gap-1">
-              <SlidersHorizontal size={12} /> Filtros
-            </button>
           </div>
         </div>
       </div>

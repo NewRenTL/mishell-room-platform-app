@@ -152,7 +152,7 @@ export default function PropertyManagePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-[430px] mx-auto min-h-dvh bg-white flex flex-col">
+      <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col">
         <AppHeader title="Propiedad" />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
@@ -165,7 +165,7 @@ export default function PropertyManagePage() {
   const photoUrls = property?.photoUrls ?? [];
 
   return (
-    <div className="max-w-[430px] mx-auto flex flex-col min-h-dvh bg-ink-50">
+    <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-ink-50">
       <AppHeader title={property?.title ?? 'Propiedad'} />
 
       {/* Hero photo */}
@@ -463,7 +463,7 @@ export default function PropertyManagePage() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-            className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50"
+            className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50"
           >
             <Button loading={saving} onClick={handleSave}>
               <Save size={16} className="mr-2" />

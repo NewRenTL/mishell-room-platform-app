@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, UserPlus, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { Button } from './Button';
 
 interface Props {
@@ -20,6 +23,14 @@ export function AuthPromptSheet({
   description = 'Crea tu cuenta o inicia sesión para continuar con la reserva.',
 }: Props) {
   const navigate = useNavigate();
+
+  // On Capacitor (Android), the device back button closes the sheet instead of exiting the app
+  useEffect(() => {
+    if (!open || !Capacitor.isNativePlatform()) return;
+    let listenerHandle: { remove: () => void } | undefined;
+    CapacitorApp.addListener('backButton', () => onClose()).then((h) => { listenerHandle = h; });
+    return () => { listenerHandle?.remove(); };
+  }, [open, onClose]);
 
   function go(path: '/login' | '/register') {
     onClose();
