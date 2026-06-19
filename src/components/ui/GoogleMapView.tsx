@@ -1,5 +1,7 @@
 import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
 
+const PLACES_LIBRARIES: ('places')[] = ['places'];
+
 const MISHELL_PIN = (() => {
   const svg = `
     <svg width="44" height="56" viewBox="0 0 44 56" xmlns="http://www.w3.org/2000/svg">
@@ -24,7 +26,9 @@ interface Props {
 
 export function GoogleMapView({ lat, lng, title }: Props) {
   const { isLoaded } = useJsApiLoader({
+    id: 'mishell-google-maps',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+    libraries: PLACES_LIBRARIES,
   });
 
   if (!isLoaded) {

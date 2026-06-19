@@ -3,6 +3,7 @@ import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
 import { MapPin, LocateFixed } from 'lucide-react';
 
 const LIMA = { lat: -12.0464, lng: -77.0428 };
+const PLACES_LIBRARIES: ('places')[] = ['places'];
 
 const MISHELL_PIN = (() => {
   const svg = `
@@ -44,7 +45,9 @@ interface Props {
 
 export function GoogleMapPicker({ value, onChange, onAddressChange }: Props) {
   const { isLoaded } = useJsApiLoader({
+    id: 'mishell-google-maps',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_KEY,
+    libraries: PLACES_LIBRARIES,
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);

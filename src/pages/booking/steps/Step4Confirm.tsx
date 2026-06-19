@@ -273,9 +273,10 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
   const [otp, setOtp]     = useState(IS_SANDBOX ? '123456' : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   async function handlePay() {
-    if (!phone.trim() || !otp.trim()) { setError('Ingresa tu número y el código OTP de Yape'); return; }
+    if (!phone.trim() || !otp.trim()) { setError('Ingresa tu número y el código de aprobación de Yape'); return; }
     setError('');
     setLoading(true);
     try {
@@ -315,12 +316,45 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
         />
       </div>
       <div>
-        <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide mb-1 block">Código OTP (app Yape)</label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide">
+            Código de aprobación de Yape
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowHelp((v) => !v)}
+            className="text-[11px] font-semibold text-mishell-600 underline"
+          >
+            {showHelp ? 'Ocultar' : '¿Cómo lo obtengo?'}
+          </button>
+        </div>
         <input
           type="text" inputMode="numeric" placeholder="Ej: 123456"
           value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} maxLength={6}
           className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-mishell-600"
         />
+        <p className="text-[11px] text-ink-500 mt-1.5 leading-snug">
+          Es el código de <strong>6 dígitos</strong> que aparece en la app Yape para aprobar compras.
+        </p>
+        <AnimatePresence>
+          {showHelp && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5 overflow-hidden"
+            >
+              <p className="text-[11px] font-semibold text-blue-700 mb-1.5">Cómo obtener el código:</p>
+              <ol className="text-[11px] text-blue-700 leading-relaxed list-decimal pl-4 space-y-0.5">
+                <li>Abre la <strong>app de Yape</strong> en tu celular.</li>
+                <li>Toca el ícono de <strong>menú</strong> (☰) arriba a la izquierda.</li>
+                <li>Entra en <strong>"Aprobar compras por internet"</strong>.</li>
+                <li>Verás un <strong>código de 6 dígitos</strong> que dura 30 segundos.</li>
+                <li>Cópialo y pégalo aquí antes de que caduque.</li>
+              </ol>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       {error && (
         <div className="flex items-start gap-2 bg-mishell-50 rounded-xl p-3">

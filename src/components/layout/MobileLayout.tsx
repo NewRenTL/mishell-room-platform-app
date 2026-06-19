@@ -13,7 +13,6 @@ const TABS_INQUILINO = [
 
 const TABS_SOCIO = [
   { path: '/socio',        icon: Building2,     label: 'Mis Prop.' },
-  { path: '/home',         icon: Home,          label: 'Explorar'  },
   { path: '/my-bookings',  icon: Key,           label: 'Reservas'  },
   { path: '/messages',     icon: MessageCircle, label: 'Mensajes'  },
   { path: '/profile',      icon: User,          label: 'Perfil'    },

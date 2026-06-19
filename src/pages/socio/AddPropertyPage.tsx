@@ -6,6 +6,7 @@ import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
+import { AddressAutocomplete } from '../../components/ui/AddressAutocomplete';
 import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
@@ -53,7 +54,7 @@ export default function AddPropertyPage() {
       if (f.size > 5 * 1024 * 1024) { setPhotoError('Cada foto no puede superar 5 MB'); return false; }
       return true;
     });
-    setPhotos((prev) => [...prev, ...incoming].slice(0, 5));
+    setPhotos((prev) => [...prev, ...incoming].slice(0, 7));
   }
 
   function removePhoto(idx: number) {
@@ -191,25 +192,33 @@ export default function AddPropertyPage() {
         <section>
           <h2 className="text-sm font-bold text-ink-900 mb-3">Ubicación</h2>
           <div className="flex flex-col gap-3">
-            <Input
-              icon={<MapPin size={16} />}
-              placeholder="Dirección *"
-              value={form.address}
-              onChange={(e) => set('address', e.target.value)}
-            />
-            <div className="flex gap-2 flex-wrap">
-              {CITIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => set('city', c)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                    ${form.city === c ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}
-                >
-                  {c}
-                </button>
-              ))}
+            <div>
+              <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
+                Región / ciudad
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {CITIES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => set('city', c)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
+                      ${form.city === c ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
+            <AddressAutocomplete
+              value={form.address}
+              city={form.city}
+              placeholder="Dirección — escribe y elige una sugerencia *"
+              onChange={(addr, coordsResult) => {
+                set('address', addr);
+                if (coordsResult) setCoords(coordsResult);
+              }}
+            />
 
             {/* Map picker */}
             <div>
@@ -249,10 +258,11 @@ export default function AddPropertyPage() {
                 <label className="text-xs text-ink-500 block mb-1">Habitaciones</label>
                 <Input
                   icon={<Home size={16} />}
-                  value={form.rooms}
-                  onChange={(e) => set('rooms', e.target.value)}
-                  inputMode="numeric"
+                  value="1"
+                  readOnly
+                  disabled
                 />
+                <p className="text-[10px] text-ink-400 mt-1">1 habitación por propiedad</p>
               </div>
               <div className="flex-1">
                 <label className="text-xs text-ink-500 block mb-1">Cap. máx. personas</label>
@@ -270,7 +280,7 @@ export default function AddPropertyPage() {
         {/* Photos */}
         <section>
           <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos de la propiedad</h2>
-          <p className="text-xs text-ink-500 mb-3">Sube hasta 5 fotos. La primera será la portada.</p>
+          <p className="text-xs text-ink-500 mb-3">Sube hasta 7 fotos. La primera será la portada.</p>
 
           <div className="flex gap-3 flex-wrap">
             {photos.map((file, idx) => (
@@ -295,7 +305,7 @@ export default function AddPropertyPage() {
               </div>
             ))}
 
-            {photos.length < 5 && (
+            {photos.length < 7 && (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -356,7 +366,7 @@ export default function AddPropertyPage() {
         buttonBottom="bottom-20"
         steps={[
           { title: 'Información básica', content: 'Escribe un título descriptivo y una descripción atractiva. Un buen título ayuda a los inquilinos a encontrar tu propiedad.' },
-          { title: 'Fotos de la propiedad', content: 'Sube hasta 5 fotos. La primera foto será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!' },
+          { title: 'Fotos de la propiedad', content: 'Sube hasta 7 fotos. La primera foto será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!' },
           { title: 'Precio y ubicación', content: 'Indica el precio semanal en soles. Marca la ubicación en el mapa para que los inquilinos vean exactamente dónde está.' },
           { title: 'Servicios disponibles', content: 'Selecciona los servicios que incluye la habitación: WiFi, agua caliente, cocina, etc. Más servicios = más atractivo.' },
           { title: 'Después de publicar', content: 'Importante: recuerda cambiar el estado de tu propiedad a "Disponible" para que los inquilinos puedan encontrarla y reservarla.' },
