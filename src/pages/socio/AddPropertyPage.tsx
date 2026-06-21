@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, Users, FileText, Camera, X, ImagePlus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Home, MapPin, Users, FileText, X, ImagePlus, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
@@ -11,6 +11,7 @@ import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
 import { PageTutorial } from '../../components/ui/PageTutorial';
+import { getProvinces, getDistricts } from '../../utils/peruLocations';
 
 const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
 
@@ -24,9 +25,9 @@ export default function AddPropertyPage() {
     description: '',
     address: '',
     city: 'Lima',
-    provincia: '',
-    distrito: '',
-    numeroDpto: '',
+    province: '',
+    district: '',
+    unitNumber: '',
     rooms: '1',
     maxCapacity: '2',
     pricePerWeek: '',
@@ -89,9 +90,10 @@ export default function AddPropertyPage() {
         description: form.description || undefined,
         address: form.address,
         city: form.city,
-        provincia: form.provincia || undefined,
-        distrito: form.distrito || undefined,
-        numeroDpto: form.numeroDpto || undefined,
+        province: form.province || undefined,
+        district: form.district || undefined,
+        unitNumber: form.unitNumber || undefined,
+        country: 'Peru',
         rooms: Number(form.rooms),
         maxCapacity: Number(form.maxCapacity),
         pricePerWeek: Number(form.pricePerWeek),
@@ -207,7 +209,9 @@ export default function AddPropertyPage() {
                   <button
                     key={c}
                     type="button"
-                    onClick={() => set('city', c)}
+                    onClick={() => {
+                      setForm((f) => ({ ...f, city: c, province: '', district: '' }));
+                    }}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
                       ${form.city === c ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}
                   >
@@ -226,21 +230,36 @@ export default function AddPropertyPage() {
               }}
             />
             <div className="flex gap-2">
-              <Input
-                placeholder="Provincia"
-                value={form.provincia}
-                onChange={(e) => set('provincia', e.target.value)}
-              />
-              <Input
-                placeholder="Distrito"
-                value={form.distrito}
-                onChange={(e) => set('distrito', e.target.value)}
-              />
+              <div className="flex-1">
+                <select
+                  value={form.province}
+                  onChange={(e) => setForm((f) => ({ ...f, province: e.target.value, district: '' }))}
+                  className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none"
+                >
+                  <option value="">Provincia</option>
+                  {getProvinces(form.city).map((p) => (
+                    <option key={p.name} value={p.name}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <select
+                  value={form.district}
+                  onChange={(e) => set('district', e.target.value)}
+                  disabled={!form.province}
+                  className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none disabled:opacity-40"
+                >
+                  <option value="">Distrito</option>
+                  {getDistricts(form.city, form.province).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <Input
               placeholder="N° departamento / habitación (ej: Dpto 301)"
-              value={form.numeroDpto}
-              onChange={(e) => set('numeroDpto', e.target.value)}
+              value={form.unitNumber}
+              onChange={(e) => set('unitNumber', e.target.value)}
             />
 
             {/* Map picker */}
