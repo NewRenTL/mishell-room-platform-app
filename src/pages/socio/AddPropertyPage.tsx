@@ -24,6 +24,9 @@ export default function AddPropertyPage() {
     description: '',
     address: '',
     city: 'Lima',
+    provincia: '',
+    distrito: '',
+    numeroDpto: '',
     rooms: '1',
     maxCapacity: '2',
     pricePerWeek: '',
@@ -86,6 +89,9 @@ export default function AddPropertyPage() {
         description: form.description || undefined,
         address: form.address,
         city: form.city,
+        provincia: form.provincia || undefined,
+        distrito: form.distrito || undefined,
+        numeroDpto: form.numeroDpto || undefined,
         rooms: Number(form.rooms),
         maxCapacity: Number(form.maxCapacity),
         pricePerWeek: Number(form.pricePerWeek),
@@ -218,6 +224,23 @@ export default function AddPropertyPage() {
                 set('address', addr);
                 if (coordsResult) setCoords(coordsResult);
               }}
+            />
+            <div className="flex gap-2">
+              <Input
+                placeholder="Provincia"
+                value={form.provincia}
+                onChange={(e) => set('provincia', e.target.value)}
+              />
+              <Input
+                placeholder="Distrito"
+                value={form.distrito}
+                onChange={(e) => set('distrito', e.target.value)}
+              />
+            </div>
+            <Input
+              placeholder="N° departamento / habitación (ej: Dpto 301)"
+              value={form.numeroDpto}
+              onChange={(e) => set('numeroDpto', e.target.value)}
             />
 
             {/* Map picker */}

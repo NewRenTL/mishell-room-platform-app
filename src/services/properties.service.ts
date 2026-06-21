@@ -20,6 +20,9 @@ export interface UpdatePropertyData {
   description?: string;
   address?: string;
   city?: string;
+  provincia?: string;
+  distrito?: string;
+  numeroDpto?: string;
   pricePerWeek?: number;
   rooms?: number;
   maxCapacity?: number;
