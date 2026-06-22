@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import { AddressAutocomplete } from '../../components/ui/AddressAutocomplete';
 import api from '../../services/api';
@@ -198,21 +199,12 @@ export default function AddPropertyPage() {
         <section data-tutorial="location">
           <h2 className="text-sm font-bold text-ink-900 mb-3">Ubicación</h2>
           <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
-                Departamento *
-              </p>
-              <select
-                value={form.city}
-                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, province: '', district: '' }))}
-                className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none"
-              >
-                <option value="">Selecciona un departamento</option>
-                {PERU_DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-            </div>
+            <Select
+              placeholder="Departamento *"
+              value={form.city}
+              onChange={(val) => setForm((f) => ({ ...f, city: val, province: '', district: '' }))}
+              options={PERU_DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+            />
             <AddressAutocomplete
               value={form.address}
               city={form.city}
@@ -224,29 +216,22 @@ export default function AddPropertyPage() {
             />
             <div className="flex gap-2">
               <div className="flex-1">
-                <select
+                <Select
+                  placeholder="Provincia"
                   value={form.province}
-                  onChange={(e) => setForm((f) => ({ ...f, province: e.target.value, district: '' }))}
-                  className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none"
-                >
-                  <option value="">Provincia</option>
-                  {getProvinces(form.city).map((p) => (
-                    <option key={p.name} value={p.name}>{p.name}</option>
-                  ))}
-                </select>
+                  onChange={(val) => setForm((f) => ({ ...f, province: val, district: '' }))}
+                  disabled={!form.city}
+                  options={getProvinces(form.city).map((p) => ({ value: p.name, label: p.name }))}
+                />
               </div>
               <div className="flex-1">
-                <select
+                <Select
+                  placeholder="Distrito"
                   value={form.district}
-                  onChange={(e) => set('district', e.target.value)}
+                  onChange={(val) => set('district', val)}
                   disabled={!form.province}
-                  className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none disabled:opacity-40"
-                >
-                  <option value="">Distrito</option>
-                  {getDistricts(form.city, form.province).map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
+                  options={getDistricts(form.city, form.province).map((d) => ({ value: d, label: d }))}
+                />
               </div>
             </div>
             <Input
