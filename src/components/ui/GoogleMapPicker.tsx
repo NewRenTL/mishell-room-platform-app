@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
-import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
-import { MapPin, LocateFixed } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Autocomplete, GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api';
+import { MapPin, LocateFixed, Search } from 'lucide-react';
 
 const LIMA = { lat: -12.0464, lng: -77.0428 };
 const PLACES_LIBRARIES: ('places')[] = ['places'];
@@ -51,9 +51,21 @@ export function GoogleMapPicker({ value, onChange, onAddressChange }: Props) {
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const acRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(value ?? null);
   const [isDragging, setIsDragging] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync marker when parent updates coords (e.g. from AddressAutocomplete)
+  useEffect(() => {
+    if (!value) return;
+    setMarker(value);
+    if (mapRef.current) {
+      mapRef.current.panTo(value);
+      mapRef.current.setZoom(17);
+    }
+  }, [value?.lat, value?.lng]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -95,6 +107,28 @@ export function GoogleMapPicker({ value, onChange, onAddressChange }: Props) {
   function centerOnMarker() {
     if (marker && mapRef.current) {
       mapRef.current.panTo(marker);
+      mapRef.current.setZoom(17);
+    }
+  }
+
+  function handleSearchPlaceChanged() {
+    const ac = acRef.current;
+    if (!ac) return;
+    const place = ac.getPlace();
+    if (!place.geometry?.location) return;
+    const coords = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+    const formatted = (place.formatted_address ?? place.name ?? '')
+      .replace(/,\s*Per[uú]$/i, '')
+      .trim();
+    setMarker(coords);
+    onChange(coords);
+    setSearchQuery(formatted);
+    if (onAddressChange) onAddressChange(formatted);
+    if (mapRef.current) {
+      mapRef.current.panTo(coords);
       mapRef.current.setZoom(17);
     }
   }
@@ -144,16 +178,41 @@ export function GoogleMapPicker({ value, onChange, onAddressChange }: Props) {
         )}
       </GoogleMap>
 
-      {/* Instruction hint */}
-      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-full px-3.5 py-1.5 flex items-center gap-1.5 shadow-sm pointer-events-none">
-        {geocoding
-          ? <div className="w-3 h-3 border border-mishell-600 border-t-transparent rounded-full animate-spin shrink-0" />
-          : <MapPin size={12} className="text-mishell-600 shrink-0" />
-        }
-        <span className="text-[11px] font-medium text-ink-700 whitespace-nowrap">
-          {geocoding ? 'Obteniendo dirección…' : marker ? 'Arrastra el pin para ajustar' : 'Toca el mapa para marcar la ubicación'}
-        </span>
+      {/* Search box inside map */}
+      <div className="absolute top-2.5 left-2.5 right-14 z-10">
+        <Autocomplete
+          onLoad={(ac) => { acRef.current = ac; }}
+          onPlaceChanged={handleSearchPlaceChanged}
+          options={{
+            componentRestrictions: { country: 'pe' },
+            fields: ['formatted_address', 'geometry', 'name'],
+          }}
+        >
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar en el mapa…"
+              className="w-full bg-white/95 backdrop-blur-sm shadow-md border border-ink-100 rounded-full pl-8 pr-3 py-2 text-xs text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-mishell-600"
+            />
+          </div>
+        </Autocomplete>
       </div>
+
+      {/* Hint when no search used */}
+      {!searchQuery && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-full px-3.5 py-1.5 flex items-center gap-1.5 shadow-sm pointer-events-none">
+          {geocoding
+            ? <div className="w-3 h-3 border border-mishell-600 border-t-transparent rounded-full animate-spin shrink-0" />
+            : <MapPin size={12} className="text-mishell-600 shrink-0" />
+          }
+          <span className="text-[11px] font-medium text-ink-700 whitespace-nowrap">
+            {geocoding ? 'Obteniendo dirección…' : marker ? 'Arrastra el pin para ajustar' : 'Busca o toca el mapa para marcar'}
+          </span>
+        </div>
+      )}
 
       {/* Re-center button */}
       {marker && (

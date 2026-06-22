@@ -11,9 +11,7 @@ import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
 import { PageTutorial } from '../../components/ui/PageTutorial';
-import { getProvinces, getDistricts } from '../../utils/peruLocations';
-
-const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
+import { PERU_DEPARTMENTS, getProvinces, getDistricts } from '../../utils/peruLocations';
 
 export default function AddPropertyPage() {
   const navigate = useNavigate();
@@ -24,7 +22,7 @@ export default function AddPropertyPage() {
     title: '',
     description: '',
     address: '',
-    city: 'Lima',
+    city: '',
     province: '',
     district: '',
     unitNumber: '',
@@ -66,8 +64,8 @@ export default function AddPropertyPage() {
   }
 
   async function handleSubmit() {
-    if (!form.title.trim() || !form.address.trim() || !form.pricePerWeek) {
-      setError('Título, dirección y precio son obligatorios');
+    if (!form.title.trim() || !form.city || !form.address.trim() || !form.pricePerWeek) {
+      setError('Título, departamento, dirección y precio son obligatorios');
       return;
     }
     if (Number(form.pricePerWeek) <= 0) {
@@ -202,23 +200,18 @@ export default function AddPropertyPage() {
           <div className="flex flex-col gap-3">
             <div>
               <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">
-                Región / ciudad
+                Departamento *
               </p>
-              <div className="flex gap-2 flex-wrap">
-                {CITIES.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => {
-                      setForm((f) => ({ ...f, city: c, province: '', district: '' }));
-                    }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                      ${form.city === c ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}
-                  >
-                    {c}
-                  </button>
+              <select
+                value={form.city}
+                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, province: '', district: '' }))}
+                className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 bg-white focus:outline-none focus:border-mishell-600 appearance-none"
+              >
+                <option value="">Selecciona un departamento</option>
+                {PERU_DEPARTMENTS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
                 ))}
-              </div>
+              </select>
             </div>
             <AddressAutocomplete
               value={form.address}
