@@ -1,36 +1,5 @@
 import api from './api';
-import type { Property, PaginatedResponse, PropertyPhoto } from '../types';
-
-export interface PropertyFilters {
-  search?: string;
-  city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  rooms?: number;
-  page?: number;
-  limit?: number;
-  status?: string;
-  sortBy?: string;
-  order?: 'asc' | 'desc';
-  createdAfter?: string;
-}
-
-export interface UpdatePropertyData {
-  title?: string;
-  description?: string;
-  address?: string;
-  city?: string;
-  province?: string;
-  district?: string;
-  unitNumber?: string;
-  country?: string;
-  pricePerWeek?: number;
-  rooms?: number;
-  maxCapacity?: number;
-  amenities?: string[];
-  latitude?: number;
-  longitude?: number;
-}
+import type { Property, PaginatedResponse, PropertyPhoto, PropertyFilters, UpdatePropertyData } from '../types';
 
 export const propertiesService = {
   getAll: (filters?: PropertyFilters) =>

@@ -1,14 +1,5 @@
 import api from './api';
-import type { Booking, PaymentMethod, PaginatedResponse } from '../types';
-
-export interface BookingContract {
-  id: string;
-  content: string;
-  title: string;
-  status: string;
-  issuedAt?: string;
-  createdAt?: string;
-}
+import type { Booking, Contract, PaymentMethod, PaginatedResponse } from '../types';
 
 export const bookingsService = {
   create: (data: { propertyId: string; checkIn: string; checkOut?: string; notes?: string; guestName?: string; guestDni?: string }) =>
@@ -33,7 +24,7 @@ export const bookingsService = {
     api.get<PaginatedResponse<Booking>>(`/bookings/property/${propertyId}`, { params }),
 
   getContract: (bookingId: string) =>
-    api.get<BookingContract>(`/bookings/${bookingId}/contract`),
+    api.get<Contract>(`/bookings/${bookingId}/contract`),
 
   signContract: (bookingId: string, signatureId: string) =>
     api.patch<Booking>(`/bookings/${bookingId}/sign-contract`, { signatureId }),

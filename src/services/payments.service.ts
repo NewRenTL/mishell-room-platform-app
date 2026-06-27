@@ -1,4 +1,5 @@
 import api from './api';
+import type { CardPaymentPayload } from '../types';
 
 interface MpCheckoutResponse {
   preferenceId: string;
@@ -16,16 +17,6 @@ interface YapePaymentResponse {
   status: string;
   statusDetail: string;
   paymentId: number;
-}
-
-export interface CardPaymentPayload {
-  token: string;
-  paymentMethodId: string;
-  issuerId?: string;
-  installments: number;
-  cardholderEmail: string;
-  identificationType?: string;
-  identificationNumber?: string;
 }
 
 export const paymentsService = {

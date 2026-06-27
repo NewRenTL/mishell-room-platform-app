@@ -1,10 +1,5 @@
 import api from './api';
-import type { User } from '../types';
-
-export interface AuthResponse {
-  accessToken: string;
-  user: User;
-}
+import type { User, AuthResponse } from '../types';
 
 export const authService = {
   login: (email: string, password: string) =>

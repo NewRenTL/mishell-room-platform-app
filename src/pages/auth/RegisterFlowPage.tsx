@@ -6,10 +6,9 @@ import { Stepper } from '../../components/ui/Stepper';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/authStore';
 import { getApiErrorMessage } from '../../utils/error';
+import type { RegRole } from '../../types/auth';
 import RegStep1Role from './steps/RegStep1Role';
 import RegStep2Data from './steps/RegStep2Data';
-
-export type RegRole = 'INQUILINO' | 'SOCIO';
 
 const STEPS = [
   { label: 'Tipo' },

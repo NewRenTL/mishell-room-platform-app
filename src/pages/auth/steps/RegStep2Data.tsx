@@ -5,7 +5,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { LegalModal } from '../../../components/ui/LegalModal';
 import type { LegalType } from '../../../components/ui/LegalModal';
-import type { RegRole } from '../RegisterFlowPage';
+import type { RegRole } from '../../../types/auth';
 
 const PHONE_RE = /^9\d{8}$/;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];

@@ -1,6 +1,6 @@
 import { Search, Building2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import type { RegRole } from '../RegisterFlowPage';
+import type { RegRole } from '../../../types/auth';
 
 interface Props {
   selected: RegRole | null;
