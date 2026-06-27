@@ -3,6 +3,7 @@ import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Buil
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
+import { getApiErrorMessage } from '../../../utils/error';
 import { useBookingStore } from '../../../stores/bookingStore';
 import type { Property } from '../../../types';
 
@@ -153,11 +154,11 @@ function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
         identificationType: docType,
         identificationNumber: docNumber,
       });
-      const result = (res.data as any).data ?? res.data;
+      const result = res.data.data;
       if (result.status === 'approved') onSuccess();
       else setError(`Pago no aprobado: ${result.statusDetail ?? result.status}`);
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? err.message ?? 'Error al procesar el pago');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al procesar el pago'));
     } finally {
       setLoading(false);
     }
@@ -281,11 +282,11 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
     setLoading(true);
     try {
       const res = await paymentsService.processYape(bookingId, otp.trim(), phone.trim());
-      const { status } = res.data.data ?? (res.data as any);
+      const { status } = res.data.data;
       if (status === 'approved') onSuccess();
       else setError('El pago fue rechazado. Verifica tu saldo o intenta de nuevo.');
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? err.message ?? 'Error al procesar el pago');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al procesar el pago'));
     } finally {
       setLoading(false);
     }
@@ -397,13 +398,13 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       setLoading(true);
       try {
         const res = await paymentsService.createMpCheckout(bookingId);
-        const data = (res.data as any).data ?? res.data;
+        const checkout = res.data.data;
         const isSandbox = import.meta.env.VITE_IS_SANDBOX !== 'false';
-        const url = isSandbox ? data.sandboxInitPoint : data.initPoint;
+        const url = isSandbox ? checkout.sandboxInitPoint : checkout.initPoint;
         reset();
         window.location.href = url;
-      } catch (err: any) {
-        setError(err.response?.data?.message ?? 'Error al iniciar el pago con MercadoPago');
+      } catch (err: unknown) {
+        setError(getApiErrorMessage(err, 'Error al iniciar el pago con MercadoPago'));
         setLoading(false);
       }
     }

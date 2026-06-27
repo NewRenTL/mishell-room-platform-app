@@ -7,6 +7,7 @@ import { AppHeader } from '../../components/layout/AppHeader';
 import { Button } from '../../components/ui/Button';
 import { DniDocViewer } from '../../components/ui/DniDocViewer';
 import { verificationService } from '../../services/verification.service';
+import { getApiErrorMessage } from '../../utils/error';
 import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const STATUS_CONFIG = {
@@ -51,10 +52,7 @@ export default function VerificationPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['verification-status'],
-    queryFn: () => verificationService.getMyStatus().then((r) => {
-      const d = (r.data as any).data ?? r.data;
-      return d as import('../../services/verification.service').VerificationStatus;
-    }),
+    queryFn: () => verificationService.getMyStatus().then((r) => r.data),
     refetchInterval: (query) =>
       query.state.data?.verificationStatus === 'PENDING' ? 5000 : false,
   });
@@ -65,8 +63,8 @@ export default function VerificationPage() {
       setSubmitError('');
       queryClient.invalidateQueries({ queryKey: ['verification-status'] });
     },
-    onError: (err: any) => {
-      setSubmitError(err.response?.data?.message ?? 'Error al enviar la solicitud. Intenta de nuevo.');
+    onError: (err: unknown) => {
+      setSubmitError(getApiErrorMessage(err, 'Error al enviar la solicitud. Intenta de nuevo.'));
     },
   });
 

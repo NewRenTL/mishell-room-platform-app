@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, MapPin, Calendar, ArrowRight, Clock, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { toPng } from 'html-to-image';
 import { Button } from '../../components/ui/Button';
 import { bookingsService } from '../../services/bookings.service';
+
+const WHATSAPP_NUMBER = '51910881880';
 
 function fmt(dateStr: string | null | undefined) {
   if (!dateStr) return '—';
@@ -20,8 +20,6 @@ function fmtTime(dateStr: string | null | undefined) {
 export default function BookingSuccessPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [sharing, setSharing] = useState(false);
 
   const { data: booking, isError } = useQuery({
     queryKey: ['booking', id],
@@ -34,43 +32,15 @@ export default function BookingSuccessPage() {
     : '—';
   const bookingTime = fmtTime(booking?.createdAt);
 
-  async function handleShare() {
-    if (!cardRef.current || !booking) return;
-    setSharing(true);
-    try {
-      const summary =
-        `🏠 ¡Reserva confirmada en Mishell Room!\n` +
-        `📍 ${booking.property?.title ?? ''}\n` +
-        `📅 ${dateRange}  ·  🕒 ${bookingTime}\n` +
-        `💳 Total: S/ ${Number(booking.totalAmount).toFixed(0)}\n` +
-        (booking.referenceId ? `🔖 ID: ${booking.referenceId}` : '');
-
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, backgroundColor: '#ffffff' });
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `reserva-${booking.referenceId ?? booking.id}.png`, { type: 'image/png' });
-
-      const canShareFiles =
-        typeof navigator !== 'undefined' &&
-        typeof navigator.canShare === 'function' &&
-        navigator.canShare({ files: [file] });
-
-      if (canShareFiles && navigator.share) {
-        await navigator.share({ files: [file], text: summary, title: 'Mi reserva' });
-      } else {
-        window.open(`https://wa.me/?text=${encodeURIComponent(summary)}`, '_blank');
-      }
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') {
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(
-            `Mi reserva en Mishell Room - ID ${booking.referenceId ?? booking.id}`,
-          )}`,
-          '_blank',
-        );
-      }
-    } finally {
-      setSharing(false);
-    }
+  function handleShare() {
+    if (!booking) return;
+    const summary =
+      `🏠 ¡Reserva confirmada en Mishell Room!\n` +
+      `📍 ${booking.property?.title ?? ''}\n` +
+      `📅 ${dateRange}  ·  🕒 ${bookingTime}\n` +
+      `💳 Total: S/ ${Number(booking.totalAmount).toFixed(0)}\n` +
+      (booking.referenceId ? `🔖 ID: ${booking.referenceId}` : '');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(summary)}`, '_blank');
   }
 
   if (isError) {
@@ -117,7 +87,6 @@ export default function BookingSuccessPage() {
 
       {/* Booking summary card */}
       <motion.div
-        ref={cardRef}
         className="w-full bg-white border border-ink-100 rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -177,7 +146,7 @@ export default function BookingSuccessPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.65, duration: 0.4 }}
       >
-        <Button onClick={handleShare} loading={sharing}>
+        <Button onClick={handleShare}>
           <Share2 size={16} className="mr-2" />
           Compartir por WhatsApp
         </Button>
@@ -187,12 +156,6 @@ export default function BookingSuccessPage() {
         >
           Ir a mi perfil
           <ArrowRight size={15} />
-        </button>
-        <button
-          onClick={() => navigate('/home')}
-          className="text-xs text-ink-400 hover:text-ink-600 transition-colors"
-        >
-          Volver al inicio
         </button>
       </motion.div>
     </div>

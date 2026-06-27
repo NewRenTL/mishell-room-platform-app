@@ -25,7 +25,7 @@ export default function BookingFlowPage() {
   const bookingId = useBookingStore((s) => s.bookingId);
   const contractId = useBookingStore((s) => s.contractId);
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading, isError } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: () => propertiesService.getOne(propertyId!).then((r) => r.data),
     enabled: !!propertyId,
@@ -37,6 +37,20 @@ export default function BookingFlowPage() {
         <AppHeader title="Reservar" />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
+        <AppHeader title="Reservar" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 px-8 text-center">
+          <p className="text-sm text-ink-500">No se pudo cargar la propiedad.</p>
+          <button onClick={() => navigate(-1)} className="text-sm font-semibold text-mishell-600">
+            Volver
+          </button>
         </div>
       </div>
     );

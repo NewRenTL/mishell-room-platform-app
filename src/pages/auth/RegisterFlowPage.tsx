@@ -5,16 +5,15 @@ import { AppHeader } from '../../components/layout/AppHeader';
 import { Stepper } from '../../components/ui/Stepper';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/authStore';
+import { getApiErrorMessage } from '../../utils/error';
 import RegStep1Role from './steps/RegStep1Role';
 import RegStep2Data from './steps/RegStep2Data';
-import RegStep3Access from './steps/RegStep3Access';
 
 export type RegRole = 'INQUILINO' | 'SOCIO';
 
 const STEPS = [
   { label: 'Tipo' },
   { label: 'Datos' },
-  { label: 'Acceso' },
 ];
 
 export default function RegisterFlowPage() {
@@ -90,8 +89,8 @@ export default function RegisterFlowPage() {
       const { accessToken, user } = res.data;
       setAuth(accessToken, user);
       navigate(fromPath ?? (user.role === 'SOCIO' ? '/socio' : '/home'), { replace: true });
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al crear la cuenta');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al crear la cuenta'));
     } finally {
       setLoading(false);
     }
@@ -128,36 +127,15 @@ export default function RegisterFlowPage() {
               transition={{ duration: 0.25 }}
             >
               <RegStep2Data
-                firstName={firstName}
-                lastName={lastName}
-                phone={phone}
-                onFirstName={setFirstName}
-                onLastName={setLastName}
-                onPhone={setPhone}
-                onNext={() => setStep(3)}
-              />
-            </motion.div>
-          )}
-          {step === 3 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.25 }}
-            >
-              <RegStep3Access
                 role={role!}
-                email={email}
-                onEmail={setEmail}
-                password={password}
-                onPassword={setPassword}
-                dni={dni}
-                onDni={setDni}
-                photoFront={photoFront}
-                onPhotoFront={setPhotoFront}
-                photoBack={photoBack}
-                onPhotoBack={setPhotoBack}
+                firstName={firstName}   onFirstName={setFirstName}
+                lastName={lastName}     onLastName={setLastName}
+                phone={phone}           onPhone={setPhone}
+                email={email}           onEmail={setEmail}
+                password={password}     onPassword={setPassword}
+                dni={dni}               onDni={setDni}
+                photoFront={photoFront} onPhotoFront={setPhotoFront}
+                photoBack={photoBack}   onPhotoBack={setPhotoBack}
                 loading={loading}
                 error={error}
                 onSubmit={handleSubmit}

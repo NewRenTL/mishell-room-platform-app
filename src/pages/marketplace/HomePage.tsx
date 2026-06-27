@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Search, Home as HomeIcon, Zap, Smile, MapPin, Building2 } from 'lucide-react';
+import { Search, Home as HomeIcon, Zap, Smile, MapPin, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PropertyCard } from '../../components/ui/PropertyCard';
 import { TabSwitcher } from '../../components/ui/TabSwitcher';
 import { HorizontalCarousel } from '../../components/ui/HorizontalCarousel';
-import { PageTutorial } from '../../components/ui/PageTutorial';
 import { propertiesService } from '../../services/properties.service';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -18,6 +17,7 @@ export default function HomePage() {
   const { data, isLoading } = useQuery({
     queryKey: ['properties', 'home'],
     queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
   });
 
   const { data: recentData, isLoading: recentLoading } = useQuery({
@@ -26,6 +26,7 @@ export default function HomePage() {
       propertiesService
         .getAll({ limit: 20, status: 'AVAILABLE', sortBy: 'createdAt', order: 'desc' })
         .then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
   });
 
   const properties = data?.data ?? [];
@@ -46,6 +47,11 @@ export default function HomePage() {
               <div className="flex items-center gap-1.5 text-ink-500 text-xs mb-1">
                 <MapPin size={11} />
                 <span>Lima, Perú</span>
+                {user?.role === 'INQUILINO' && (
+                  <span className="text-[10px] font-semibold text-mishell-600 bg-mishell-50 border border-mishell-100 px-1.5 py-0.5 rounded-full">
+                    Arrendatario/a
+                  </span>
+                )}
               </div>
               <h1 className="text-xl font-bold text-ink-900 leading-tight">
                 {user ? (
@@ -60,10 +66,16 @@ export default function HomePage() {
               <p className="text-xs text-ink-500 mt-0.5">Encuentra tu próximo hogar</p>
             </div>
             <button
-              onClick={() => navigate('/home')}
-              className="w-9 h-9 rounded-full bg-ink-50 border border-ink-100 flex items-center justify-center relative"
+              onClick={() => navigate('/profile')}
+              className="w-9 h-9 rounded-full bg-ink-50 border border-ink-100 flex items-center justify-center overflow-hidden"
             >
-              <Bell size={17} className="text-ink-600" />
+              {user ? (
+                <span className="text-xs font-bold text-mishell-600">
+                  {user.firstName?.[0]?.toUpperCase() ?? 'U'}
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-ink-600">?</span>
+              )}
             </button>
           </div>
 
@@ -199,16 +211,6 @@ export default function HomePage() {
         </motion.section>
       </div>
 
-      <PageTutorial
-        id="home"
-        steps={[
-          { title: 'Bienvenido a Mishell Room', content: 'Aquí encontrarás habitaciones disponibles para alquilar. Explora las opciones y reserva la que más te guste.' },
-          { title: 'Disponibles ahora', content: 'Esta sección muestra habitaciones listas para reservar hoy. Desliza horizontalmente para ver más opciones.' },
-          { title: 'Recién publicadas', content: 'Habitaciones añadidas en los últimos 3 días. ¡Sé de los primeros en verlas y reservar!' },
-          { title: 'Guardar favoritos', content: 'Toca el corazón ❤️ en cualquier habitación para guardarla. Puedes revisar tus favoritos cuando quieras.' },
-          { title: 'Buscar y filtrar', content: 'Toca la barra de búsqueda para filtrar por ciudad, precio o número de habitaciones. Encuentra exactamente lo que necesitas.' },
-        ]}
-      />
     </div>
   );
 }

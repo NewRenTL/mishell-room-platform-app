@@ -8,6 +8,7 @@ import { LegalModal } from '../../components/ui/LegalModal';
 import type { LegalType } from '../../components/ui/LegalModal';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/authStore';
+import { getApiErrorMessage } from '../../utils/error';
 
 function detectCredentialType(value: string): 'email' | 'dni' | null {
   if (!value.trim()) return null;
@@ -64,8 +65,8 @@ export default function LoginPage() {
       setAuth(accessToken, user);
       const defaultPath = user.role === 'ADMIN' ? '/admin-chat' : user.role === 'SOCIO' ? '/socio' : '/home';
       navigate(fromPath ?? defaultPath, { replace: true });
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Credenciales incorrectas');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Credenciales incorrectas'));
     } finally {
       setLoading(false);
     }

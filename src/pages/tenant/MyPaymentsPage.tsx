@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { weeklyPaymentsService } from '../../services/weekly-payments.service';
 import type { BookingWithPayments, WeeklyPayment } from '../../types';
+import { getApiErrorMessage } from '../../utils/error';
 import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const STATUS_CONFIG = {
@@ -395,8 +396,8 @@ export default function MyPaymentsPage() {
       setMutationError('');
       queryClient.invalidateQueries({ queryKey: ['my-payments'] });
     },
-    onError: (err: any) => {
-      setMutationError(err.response?.data?.message ?? 'Error al registrar el pago. Intenta de nuevo.');
+    onError: (err: unknown) => {
+      setMutationError(getApiErrorMessage(err, 'Error al registrar el pago. Intenta de nuevo.'));
     },
   });
 
@@ -407,8 +408,8 @@ export default function MyPaymentsPage() {
       setMutationError('');
       queryClient.invalidateQueries({ queryKey: ['my-payments'] });
     },
-    onError: (err: any) => {
-      setMutationError(err.response?.data?.message ?? 'Error al notificar la fecha de salida. Intenta de nuevo.');
+    onError: (err: unknown) => {
+      setMutationError(getApiErrorMessage(err, 'Error al notificar la fecha de salida. Intenta de nuevo.'));
     },
   });
 

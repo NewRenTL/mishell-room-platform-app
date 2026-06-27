@@ -1,15 +1,18 @@
 import { useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Users, TrendingUp, Calendar, Trash2, Save, ImagePlus, CheckCircle2 } from 'lucide-react';
+import { MapPin, Users, TrendingUp, Calendar, Trash2, Save, ImagePlus, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
 import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import { propertiesService } from '../../services/properties.service';
+import { getApiErrorMessage } from '../../utils/error';
 import { bookingsService } from '../../services/bookings.service';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
+import { PERU_DEPARTMENTS, getProvinces, getDistricts } from '../../utils/peruLocations';
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: 'bg-ink-100 text-ink-700',
@@ -33,24 +36,25 @@ const PROP_STATUSES = [
   { key: 'MAINTENANCE', label: 'Mantenimiento',  color: 'bg-amber-600' },
 ];
 
-const CITIES = ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura', 'Chiclayo'];
 
 type Tab = 'reservas' | 'editar';
 
 export default function PropertyManagePage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [tab, setTab] = useState<Tab>('reservas');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
   const [changingStatus, setChangingStatus] = useState(false);
   const [statusSuccess, setStatusSuccess] = useState(false);
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading, isError } = useQuery({
     queryKey: ['property', id],
     queryFn: () => propertiesService.getOne(id!).then((r) => r.data),
     enabled: !!id,
@@ -66,7 +70,8 @@ export default function PropertyManagePage() {
   const revenue = bookings.filter((b) => b.status !== 'CANCELLED').reduce((s, b) => s + Number(b.totalAmount), 0);
 
   const [form, setForm] = useState<{
-    title: string; description: string; address: string; city: string;
+    title: string; description: string; address: string;
+    city: string; province: string; district: string; unitNumber: string;
     pricePerWeek: string; rooms: string; maxCapacity: string; amenities: string[];
   } | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -77,6 +82,9 @@ export default function PropertyManagePage() {
       description: property.description ?? '',
       address: property.address,
       city: property.city,
+      province: property.province ?? '',
+      district: property.district ?? '',
+      unitNumber: property.unitNumber ?? '',
       pricePerWeek: String(property.pricePerWeek),
       rooms: String(property.rooms),
       maxCapacity: String(property.maxCapacity),
@@ -104,6 +112,9 @@ export default function PropertyManagePage() {
       await propertiesService.update(id, {
         title: form.title, description: form.description || undefined,
         address: form.address, city: form.city,
+        province:   form.province   || undefined,
+        district:   form.district   || undefined,
+        unitNumber: form.unitNumber || undefined,
         pricePerWeek: Number(form.pricePerWeek),
         rooms: Number(form.rooms), maxCapacity: Number(form.maxCapacity),
         amenities: form.amenities,
@@ -111,8 +122,10 @@ export default function PropertyManagePage() {
         longitude: coords?.lng,
       });
       qc.invalidateQueries({ queryKey: ['property', id] });
-    } catch (err: any) {
-      setSaveError(err.response?.data?.message ?? 'Error al guardar');
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err: unknown) {
+      setSaveError(getApiErrorMessage(err, 'Error al guardar'));
     } finally { setSaving(false); }
   }
 
@@ -131,6 +144,7 @@ export default function PropertyManagePage() {
 
   async function handleDeletePhoto(photoId: string) {
     if (!id) return;
+    if (!window.confirm('¿Eliminar esta foto?')) return;
     setDeletingPhotoId(photoId);
     try {
       await propertiesService.deletePhoto(id, photoId);
@@ -161,6 +175,20 @@ export default function PropertyManagePage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col">
+        <AppHeader title="Propiedad" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 px-8 text-center">
+          <p className="text-sm text-ink-500">No se pudo cargar la propiedad.</p>
+          <button onClick={() => navigate(-1)} className="text-sm font-semibold text-mishell-600">
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const photos = property?.photos ?? [];
   const photoUrls = property?.photoUrls ?? [];
 
@@ -179,7 +207,7 @@ export default function PropertyManagePage() {
           ? <img src={photoUrls[0]} alt="" className="w-full h-full object-cover" />
           : <div className="w-full h-full flex items-center justify-center text-ink-400 text-sm">Sin foto</div>
         }
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4">
           <p className="text-white text-base font-bold leading-tight truncate">{property?.title}</p>
           <p className="text-white/70 text-xs flex items-center gap-1 mt-0.5"><MapPin size={10} />{property?.address}, {property?.city}</p>
@@ -270,7 +298,29 @@ export default function PropertyManagePage() {
                   );
                 })}
               </div>
+
+              {/* Tip cuando la propiedad aún no tiene estado activo */}
+              {property?.status === 'PENDING_APPROVAL' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3"
+                >
+                  <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    Hazle clic en <strong>Disponible</strong>, <strong>Ocupada</strong> o <strong>Mantenimiento</strong> para que los inquilinos puedan encontrar tu propiedad.
+                  </p>
+                </motion.div>
+              )}
             </section>
+
+            {/* ir a mi perfil */}
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-ink-600 hover:text-ink-900 transition-colors"
+            >
+              ir a mi perfil <ArrowRight size={15} />
+            </button>
 
             {/* Booking history */}
             <section>
@@ -389,19 +439,41 @@ export default function PropertyManagePage() {
                 <section>
                   <h2 className="text-sm font-bold text-ink-900 mb-3">Ubicación</h2>
                   <div className="flex flex-col gap-3">
+                    <Select
+                      placeholder="Departamento *"
+                      value={form.city}
+                      onChange={(val) => setForm((f) => f ? { ...f, city: val, province: '', district: '' } : f)}
+                      options={PERU_DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+                    />
                     <Input icon={<MapPin size={16} />} placeholder="Dirección *" value={form.address} onChange={(e) => setField('address', e.target.value)} />
-                    <div className="flex gap-2 flex-wrap">
-                      {CITIES.map((c) => (
-                        <button key={c} type="button" onClick={() => setField('city', c)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                            ${form.city === c ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}>
-                          {c}
-                        </button>
-                      ))}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Select
+                          placeholder="Provincia"
+                          value={form.province}
+                          onChange={(val) => setForm((f) => f ? { ...f, province: val, district: '' } : f)}
+                          disabled={!form.city}
+                          options={getProvinces(form.city).map((p) => ({ value: p.name, label: p.name }))}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Select
+                          placeholder="Distrito"
+                          value={form.district}
+                          onChange={(val) => setField('district', val)}
+                          disabled={!form.province}
+                          options={getDistricts(form.city, form.province).map((d) => ({ value: d, label: d }))}
+                        />
+                      </div>
                     </div>
+                    <Input
+                      placeholder="N° departamento / habitación (ej: Dpto 301)"
+                      value={form.unitNumber}
+                      onChange={(e) => setField('unitNumber', e.target.value)}
+                    />
                     <p className="text-xs font-medium text-ink-700 flex items-center gap-1">
                       <MapPin size={12} className="text-mishell-600" />
-                      Ubicación exacta en el mapa
+                      Marcar Ubicación aproximada en el mapa
                     </p>
                     <div className="h-52 rounded-2xl overflow-hidden border border-ink-100">
                       <GoogleMapPicker
@@ -425,11 +497,11 @@ export default function PropertyManagePage() {
                     <div className="flex gap-3">
                       <div className="flex-1">
                         <label className="text-xs text-ink-500 block mb-1">Habitaciones</label>
-                        <Input value={form.rooms} onChange={(e) => setField('rooms', e.target.value)} inputMode="numeric" />
+                        <Input value={form.rooms} readOnly disabled inputMode="numeric" />
                       </div>
                       <div className="flex-1">
-                        <label className="text-xs text-ink-500 block mb-1">Cap. máx.</label>
-                        <Input value={form.maxCapacity} onChange={(e) => setField('maxCapacity', e.target.value)} inputMode="numeric" />
+                        <label className="text-xs text-ink-500 block mb-1">Personas</label>
+                        <Input value={form.maxCapacity} readOnly disabled inputMode="numeric" />
                       </div>
                     </div>
                   </div>
@@ -465,6 +537,18 @@ export default function PropertyManagePage() {
             transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
             className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white border-t border-ink-100 px-5 py-3 z-50"
           >
+            <AnimatePresence>
+              {saveSuccess && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold mb-2"
+                >
+                  <CheckCircle2 size={13} /> Cambios guardados
+                </motion.p>
+              )}
+            </AnimatePresence>
             <Button loading={saving} onClick={handleSave}>
               <Save size={16} className="mr-2" />
               Guardar cambios

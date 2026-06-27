@@ -22,6 +22,7 @@ const SocioDashboardPage  = lazy(() => import('./pages/socio/SocioDashboardPage'
 const PropertyManagePage  = lazy(() => import('./pages/socio/PropertyManagePage'));
 const AddPropertyPage     = lazy(() => import('./pages/socio/AddPropertyPage'));
 const BookingDetailPage   = lazy(() => import('./pages/tenant/BookingDetailPage'));
+const ContractViewPage    = lazy(() => import('./pages/booking/ContractViewPage'));
 const VerificationPage    = lazy(() => import('./pages/tenant/VerificationPage'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -102,6 +103,9 @@ export default function App() {
           } />
           <Route path="/my-bookings/:id" element={
             <ProtectedRoute><MobileLayout hideNav><BookingDetailPage /></MobileLayout></ProtectedRoute>
+          } />
+          <Route path="/booking/:bookingId/contract" element={
+            <ProtectedRoute><MobileLayout hideNav><ContractViewPage /></MobileLayout></ProtectedRoute>
           } />
           <Route path="/my-payments" element={
             <ProtectedRoute><MobileLayout><MyPaymentsPage /></MobileLayout></ProtectedRoute>

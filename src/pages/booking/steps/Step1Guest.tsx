@@ -4,6 +4,7 @@ import { Input } from '../../../components/ui/Input';
 import { DateInput } from '../../../components/ui/DateInput';
 import { Button } from '../../../components/ui/Button';
 import { bookingsService } from '../../../services/bookings.service';
+import { getApiErrorMessage } from '../../../utils/error';
 import { useBookingStore } from '../../../stores/bookingStore';
 import { useAuthStore } from '../../../stores/authStore';
 import type { Property } from '../../../types';
@@ -69,8 +70,8 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
       const booking = res.data;
       setBookingIds(booking.id, booking.contract?.id ?? null);
       onNext();
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al crear la reserva');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al crear la reserva'));
     } finally {
       setLoading(false);
     }

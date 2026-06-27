@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/authStore';
+import { getApiErrorMessage } from '../../utils/error';
 
 type RegisterMethod = 'email' | 'dni';
 
@@ -89,8 +90,8 @@ export default function RegisterPage() {
         setAuth(accessToken, user);
         navigate('/home');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al crear la cuenta');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al crear la cuenta'));
     } finally {
       setLoading(false);
     }

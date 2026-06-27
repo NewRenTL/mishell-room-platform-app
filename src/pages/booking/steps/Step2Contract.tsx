@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { SignatureCanvas } from '../../../components/ui/SignatureCanvas';
 import { bookingsService } from '../../../services/bookings.service';
+import { getApiErrorMessage } from '../../../utils/error';
 import { signaturesService } from '../../../services/signatures.service';
 import { contractsService } from '../../../services/contracts.service';
 import { useBookingStore } from '../../../stores/bookingStore';
@@ -60,8 +61,8 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       await bookingsService.signContract(bookingId, signatureId);
       setSignature(signatureDataUrl, signatureId);
       setSigned(true);
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al firmar el contrato');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al firmar el contrato'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       const newTab = window.open('about:blank', '_blank');
       try {
         const res = await contractsService.getDownloadUrl(contractId);
-        const url = (res.data as any).data?.url ?? (res.data as any).url;
+        const url = res.data.data?.url;
         if (!url) throw new Error('No se pudo obtener la URL del PDF');
         if (newTab && !newTab.closed) {
           newTab.location.href = url;
@@ -84,13 +85,9 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
           // Popup was blocked — fall back to same-tab navigation
           window.location.href = url;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         newTab?.close();
-        setDownloadError(
-          err.response?.data?.message ??
-          err.message ??
-          'El PDF aún se está generando. Intenta en unos segundos.',
-        );
+        setDownloadError(getApiErrorMessage(err, 'El PDF aún se está generando. Intenta en unos segundos.'));
       } finally {
         setDownloading(false);
       }

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle } from 'lucide-react';
+import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle, X, Expand } from 'lucide-react';
 import { motion } from 'motion/react';
 import { GoogleMapView } from '../../components/ui/GoogleMapView';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -22,8 +22,11 @@ export default function PropertyDetailPage() {
   const isFav = useFavoritesStore((s) => s.has(id ?? ''));
   const [photoIdx, setPhotoIdx] = useState(0);
   const [authSheetOpen, setAuthSheetOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const lbTouchX = useRef<number | null>(null);
 
-  const { data: property, isLoading } = useQuery({
+  const { data: property, isLoading, isError } = useQuery({
     queryKey: ['property', id],
     queryFn: () => propertiesService.getOne(id!).then((r) => r.data),
     enabled: !!id,
@@ -66,11 +69,14 @@ export default function PropertyDetailPage() {
     );
   }
 
-  if (!property) {
+  if (isError || !property) {
     return (
-      <div className="flex flex-col bg-white min-h-full items-center justify-center text-ink-400">
+      <div className="flex flex-col bg-white min-h-full items-center justify-center text-ink-400 gap-2">
         <AppHeader />
-        <p>Propiedad no encontrada</p>
+        <p className="text-sm">{isError ? 'Error al cargar la propiedad.' : 'Propiedad no encontrada.'}</p>
+        <button onClick={() => navigate(-1)} className="text-sm font-semibold text-mishell-600">
+          Volver
+        </button>
       </div>
     );
   }
@@ -100,31 +106,118 @@ export default function PropertyDetailPage() {
         }
       />
 
-      {/* Gallery */}
-      <div className="relative h-64 bg-ink-100 overflow-hidden">
+      {/* ── Gallery (compact preview) ── */}
+      <div
+        className="relative h-64 bg-ink-100 overflow-hidden cursor-pointer group"
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current === null) return;
+          const delta = e.changedTouches[0].clientX - touchStartX.current;
+          if (Math.abs(delta) > 40) {
+            if (delta < 0) setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
+            else setPhotoIdx((i) => Math.max(i - 1, 0));
+          } else {
+            setLightboxOpen(true);
+          }
+          touchStartX.current = null;
+        }}
+        onClick={() => photos.length > 0 && setLightboxOpen(true)}
+      >
         {photos.length > 0 ? (
           <>
-            <img
-              src={photos[photoIdx]}
-              alt={property.title}
-              className="w-full h-full object-cover"
-            />
+            <img src={photos[photoIdx]} alt={property.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+            {/* Expand hint */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <Expand size={13} className="text-white" />
+                <span className="text-white text-xs font-medium">Ver foto</span>
+              </div>
+            </div>
             {photos.length > 1 && (
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {photos.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPhotoIdx(i)}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === photoIdx ? 'bg-white' : 'bg-white/50'}`}
+                  <button key={i} onClick={(e) => { e.stopPropagation(); setPhotoIdx(i); }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${i === photoIdx ? 'bg-white scale-125' : 'bg-white/50'}`}
                   />
                 ))}
               </div>
             )}
+            <div className="absolute top-3 right-3 bg-black/40 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+              {photoIdx + 1}/{photos.length}
+            </div>
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-ink-400 text-sm">Sin fotos</div>
         )}
       </div>
+
+      {/* ── Lightbox ── */}
+      {lightboxOpen && photos.length > 0 && (
+        <motion.div
+          className="fixed inset-0 z-9999 bg-black flex flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-safe pb-3 pt-4 shrink-0">
+            <span className="text-white/70 text-sm font-medium">{photoIdx + 1} / {photos.length}</span>
+            <button onClick={() => setLightboxOpen(false)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20">
+              <X size={20} className="text-white" />
+            </button>
+          </div>
+
+          {/* Image */}
+          <div
+            className="flex-1 flex items-center justify-center overflow-hidden px-2"
+            onTouchStart={(e) => { lbTouchX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              if (lbTouchX.current === null) return;
+              const delta = e.changedTouches[0].clientX - lbTouchX.current;
+              if (Math.abs(delta) > 40) {
+                if (delta < 0) setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
+                else setPhotoIdx((i) => Math.max(i - 1, 0));
+              }
+              lbTouchX.current = null;
+            }}
+          >
+            <motion.img
+              key={photoIdx}
+              src={photos[photoIdx]}
+              alt={property.title}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.18 }}
+            />
+          </div>
+
+          {/* Dot navigation */}
+          {photos.length > 1 && (
+            <div className="shrink-0 flex items-center justify-center gap-2 py-4">
+              {photos.map((_, i) => (
+                <button key={i} onClick={() => setPhotoIdx(i)}
+                  className={`rounded-full transition-all ${i === photoIdx ? 'w-4 h-2 bg-white' : 'w-2 h-2 bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Arrow buttons */}
+          {photoIdx > 0 && (
+            <button onClick={() => setPhotoIdx((i) => i - 1)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center text-2xl leading-none active:bg-white/20"
+            >‹</button>
+          )}
+          {photoIdx < photos.length - 1 && (
+            <button onClick={() => setPhotoIdx((i) => i + 1)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center text-2xl leading-none active:bg-white/20"
+            >›</button>
+          )}
+        </motion.div>
+      )}
 
       {/* Main info */}
       <motion.div
@@ -181,11 +274,11 @@ export default function PropertyDetailPage() {
         )}
 
         {/* Restrictions */}
-        {(property.restrictions as any[]).length > 0 && (
+        {property.restrictions.length > 0 && (
           <section>
             <h2 className="text-base font-bold text-ink-900 mb-1">Restricciones</h2>
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-              {(property.restrictions as any[]).map((r: any) => (
+              {property.restrictions.map((r) => (
                 <div key={r.key} className="flex items-start gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
                   <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0 mt-0.5">
                     {r.key === 'max_capacity'

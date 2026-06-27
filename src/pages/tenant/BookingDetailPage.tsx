@@ -5,6 +5,7 @@ import {
   MapPin, FileText, ChevronRight,
   BedDouble, Users, Navigation, Download, Loader2,
 } from 'lucide-react';
+import { getApiErrorMessage } from '../../utils/error';
 import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { bookingsService } from '../../services/bookings.service';
@@ -74,20 +75,16 @@ export default function BookingDetailPage() {
     const newTab = window.open('about:blank', '_blank');
     try {
       const { data } = await bookingsService.getContractDownloadUrl(id);
-      const url = (data as any)?.url ?? (data as any)?.data?.url;
+      const url = data.url;
       if (!url) throw new Error('No se pudo obtener la URL del PDF');
       if (newTab && !newTab.closed) {
         newTab.location.href = url;
       } else {
         window.location.href = url;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       newTab?.close();
-      setDownloadError(
-        err.response?.data?.message ??
-        err.message ??
-        'No se pudo descargar el contrato. Intenta de nuevo.',
-      );
+      setDownloadError(getApiErrorMessage(err, 'No se pudo descargar el contrato. Intenta de nuevo.'));
     } finally {
       setDownloading(false);
     }
@@ -154,12 +151,10 @@ export default function BookingDetailPage() {
                   {property.rooms} hab.
                 </span>
               )}
-              {property?.maxCapacity != null && (
-                <span className="flex items-center gap-1 text-xs text-ink-700 bg-ink-50 px-2.5 py-1 rounded-full border border-ink-100">
-                  <Users size={11} className="text-ink-500" />
-                  {property.maxCapacity} pers. máx.
-                </span>
-              )}
+              <span className="flex items-center gap-1 text-xs text-ink-700 bg-ink-50 px-2.5 py-1 rounded-full border border-ink-100">
+                <Users size={11} className="text-ink-500" />
+                {(property?.maxCapacity ?? 1) > 1 ? `${property?.maxCapacity} personas` : '1 persona'}
+              </span>
             </div>
 
             {/* Amenities */}

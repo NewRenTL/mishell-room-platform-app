@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Phone, CreditCard, LogOut, ChevronRight, FileText, Edit2, Check, X, Heart, Camera, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, CreditCard, LogOut, ChevronRight, FileText, Edit2, Check, X, Heart, Camera, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { useAuthStore } from '../../stores/authStore';
 import { authService } from '../../services/auth.service';
+import { getApiErrorMessage } from '../../utils/error';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ export default function ProfilePage() {
   const [dni, setDni] = useState(user?.dni ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatarUrl ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
@@ -41,8 +43,10 @@ export default function ProfilePage() {
       const res = await authService.updateProfile({ phone: phone || undefined, dni: dni || undefined });
       setAuth(accessToken!, { ...user!, phone: res.data.phone, dni: res.data.dni });
       setEditing(false);
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al guardar');
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al guardar'));
     } finally {
       setSaving(false);
     }
@@ -62,7 +66,7 @@ export default function ProfilePage() {
     try {
       const res = await authService.uploadAvatar(file);
       setAvatarUrl(res.data.avatarUrl);
-      setAuth(accessToken!, { ...user!, avatarKey: res.data.avatarKey });
+      setAuth(accessToken!, { ...user!, avatarKey: res.data.avatarKey, avatarUrl: res.data.avatarUrl });
     } catch {
       // silently ignore upload errors
     } finally {
@@ -249,6 +253,16 @@ export default function ProfilePage() {
         {error && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-mishell-600 mt-2 text-center">
             {error}
+          </motion.p>
+        )}
+        {saveSuccess && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold mt-2"
+          >
+            <CheckCircle2 size={13} /> Datos guardados correctamente
           </motion.p>
         )}
       </motion.div>

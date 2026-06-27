@@ -54,6 +54,7 @@ export interface User {
   phone?: string;
   dni?: string;
   avatarKey?: string;
+  avatarUrl?: string;
   role: Role;
   status: 'ACTIVE' | 'INACTIVE';
   mustChangePassword: boolean;
@@ -72,6 +73,9 @@ export interface Property {
   description?: string;
   address: string;
   city: string;
+  province?: string;
+  district?: string;
+  unitNumber?: string;
   country: string;
   latitude?: number;
   longitude?: number;

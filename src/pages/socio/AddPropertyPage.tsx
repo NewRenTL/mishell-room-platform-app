@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, Users, FileText, X, ImagePlus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Home, MapPin, Users, FileText, X, ImagePlus, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
 import { Input } from '../../components/ui/Input';
@@ -10,6 +10,7 @@ import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import { AddressAutocomplete } from '../../components/ui/AddressAutocomplete';
 import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
+import { getApiErrorMessage } from '../../utils/error';
 import { AMENITY_OPTIONS } from '../../utils/amenities';
 import { PageTutorial } from '../../components/ui/PageTutorial';
 import { PERU_DEPARTMENTS, getProvinces, getDistricts } from '../../utils/peruLocations';
@@ -105,8 +106,8 @@ export default function AddPropertyPage() {
         await propertiesService.addPhoto(created.id, photo);
       }
       setCreatedId(created.id);
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al publicar la propiedad');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al publicar la propiedad'));
     } finally {
       setLoading(false);
     }
@@ -140,31 +141,11 @@ export default function AddPropertyPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="w-full flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3.5 text-left"
-        >
-          <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800">
-            Recuerda indicar el estado de tu propiedad:{' '}
-            <span className="font-semibold">Disponible, Ocupada u otro</span>,
-            para que los inquilinos la encuentren correctamente.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
           className="flex flex-col gap-3 w-full"
         >
           <Button onClick={() => navigate(`/socio/properties/${createdId}`)}>
             Gestionar propiedad
           </Button>
-          <button
-            onClick={() => navigate('/socio', { replace: true })}
-            className="text-sm text-ink-500 font-medium py-2"
-          >
-            Ir al inicio
-          </button>
         </motion.div>
       </div>
     );
@@ -244,7 +225,7 @@ export default function AddPropertyPage() {
             <div>
               <p className="text-xs font-medium text-ink-700 mb-2 flex items-center gap-1">
                 <MapPin size={12} className="text-mishell-600" />
-                Marca la ubicación exacta en el mapa
+                Marcar Ubicación aproximada en el mapa
               </p>
               <div className="h-56 rounded-2xl overflow-hidden border border-ink-100">
                 <GoogleMapPicker
@@ -285,13 +266,14 @@ export default function AddPropertyPage() {
                 <p className="text-[10px] text-ink-400 mt-1">1 habitación por propiedad</p>
               </div>
               <div className="flex-1">
-                <label className="text-xs text-ink-500 block mb-1">Cap. máx. personas</label>
+                <label className="text-xs text-ink-500 block mb-1">Personas</label>
                 <Input
                   icon={<Users size={16} />}
-                  value={form.maxCapacity}
-                  onChange={(e) => set('maxCapacity', e.target.value)}
-                  inputMode="numeric"
+                  value="1"
+                  readOnly
+                  disabled
                 />
+                <p className="text-[10px] text-ink-400 mt-1">1 persona por propiedad</p>
               </div>
             </div>
           </div>

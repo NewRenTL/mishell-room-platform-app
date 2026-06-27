@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, MapPin, Bell, Search } from 'lucide-react';
+import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, MapPin, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import { propertiesService } from '../../services/properties.service';
 import { bookingsService } from '../../services/bookings.service';
@@ -30,6 +30,7 @@ export default function SocioDashboardPage() {
   const { data: propsData, isLoading: loadingProps } = useQuery({
     queryKey: ['properties', 'mine', propsPage],
     queryFn: () => propertiesService.getMine({ page: propsPage, limit: PROPS_LIMIT }).then((r) => r.data),
+    staleTime: 1000 * 60 * 2,
   });
 
   const properties = propsData?.data ?? [];
@@ -38,6 +39,7 @@ export default function SocioDashboardPage() {
   const { data: stats } = useQuery({
     queryKey: ['socio-stats'],
     queryFn: () => bookingsService.getSocioStats().then((r) => r.data),
+    staleTime: 1000 * 60 * 2,
   });
 
   return (
@@ -52,23 +54,23 @@ export default function SocioDashboardPage() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-ink-500 mb-0.5">Panel de propietario</p>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <p className="text-xs text-ink-500">Panel de propietario</p>
+              <span className="text-[10px] font-semibold text-ink-600 bg-ink-100 border border-ink-200 px-1.5 py-0.5 rounded-full">
+                Socio
+              </span>
+            </div>
             <h1 className="text-xl font-bold text-ink-900">
               Hola, {user?.firstName} 👋
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-full bg-ink-50 border border-ink-100 flex items-center justify-center">
-              <Bell size={17} className="text-ink-600" />
-            </button>
-            <motion.button
-              onClick={() => navigate('/socio/add-property')}
-              className="w-9 h-9 rounded-full bg-mishell-600 flex items-center justify-center shadow-md shadow-mishell-600/30"
-              whileTap={{ scale: 0.9 }}
-            >
-              <Plus size={18} className="text-white" />
-            </motion.button>
-          </div>
+          <motion.button
+            onClick={() => navigate('/socio/add-property')}
+            className="w-9 h-9 rounded-full bg-mishell-600 flex items-center justify-center shadow-md shadow-mishell-600/30"
+            whileTap={{ scale: 0.9 }}
+          >
+            <Plus size={18} className="text-white" />
+          </motion.button>
         </div>
       </motion.div>
 
@@ -157,10 +159,11 @@ export default function SocioDashboardPage() {
             <h2 className="text-base font-bold text-ink-900">Mis propiedades</h2>
             <motion.button
               onClick={() => navigate('/socio/add-property')}
-              className="flex items-center gap-1 text-xs font-semibold text-mishell-600"
-              whileTap={{ scale: 0.9 }}
+              className="flex items-center gap-1.5 bg-mishell-600 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm shadow-mishell-600/30 active:bg-mishell-700"
+              whileTap={{ scale: 0.96 }}
             >
-              <Plus size={13} /> Nueva
+              <Plus size={13} />
+              Nueva propiedad
             </motion.button>
           </div>
 

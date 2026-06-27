@@ -3,6 +3,7 @@ import { CreditCard, Info, Banknote, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { bookingsService } from '../../../services/bookings.service';
+import { getApiErrorMessage } from '../../../utils/error';
 import { useBookingStore } from '../../../stores/bookingStore';
 import type { PaymentMethod } from '../../../types';
 
@@ -82,8 +83,8 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
       await bookingsService.updatePayment(bookingId, selected);
       setPaymentMethod(selected);
       onNext();
-    } catch (err: any) {
-      setError(err.response?.data?.message ?? 'Error al guardar método de pago');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al guardar método de pago'));
     } finally {
       setLoading(false);
     }
