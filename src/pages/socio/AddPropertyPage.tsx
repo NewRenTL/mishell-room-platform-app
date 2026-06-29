@@ -187,6 +187,7 @@ export default function AddPropertyPage() {
               value={form.city}
               onChange={(val) => setForm((f) => ({ ...f, city: val, province: '', district: '' }))}
               options={PERU_DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+              searchable
             />
             <AddressAutocomplete
               value={form.address}
@@ -205,6 +206,7 @@ export default function AddPropertyPage() {
                   onChange={(val) => setForm((f) => ({ ...f, province: val, district: '' }))}
                   disabled={!form.city}
                   options={getProvinces(form.city).map((p) => ({ value: p.name, label: p.name }))}
+                  searchable
                 />
               </div>
               <div className="flex-1">
@@ -214,6 +216,7 @@ export default function AddPropertyPage() {
                   onChange={(val) => set('district', val)}
                   disabled={!form.province}
                   options={getDistricts(form.city, form.province).map((d) => ({ value: d, label: d }))}
+                  searchable
                 />
               </div>
             </div>

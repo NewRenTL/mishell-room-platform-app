@@ -450,6 +450,7 @@ export default function PropertyManagePage() {
                       value={form.city}
                       onChange={(val) => setForm((f) => f ? { ...f, city: val, province: '', district: '' } : f)}
                       options={PERU_DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+                      searchable
                     />
                     <Input icon={<MapPin size={16} />} placeholder="Dirección *" value={form.address} onChange={(e) => setField('address', e.target.value)} />
                     <div className="flex gap-2">
@@ -460,6 +461,7 @@ export default function PropertyManagePage() {
                           onChange={(val) => setForm((f) => f ? { ...f, province: val, district: '' } : f)}
                           disabled={!form.city}
                           options={getProvinces(form.city).map((p) => ({ value: p.name, label: p.name }))}
+                          searchable
                         />
                       </div>
                       <div className="flex-1">
@@ -469,6 +471,7 @@ export default function PropertyManagePage() {
                           onChange={(val) => setField('district', val)}
                           disabled={!form.province}
                           options={getDistricts(form.city, form.province).map((d) => ({ value: d, label: d }))}
+                          searchable
                         />
                       </div>
                     </div>
