@@ -30,6 +30,7 @@ export default function PropertyDetailPage() {
     queryKey: ['property', id],
     queryFn: () => propertiesService.getOne(id!).then((r) => r.data),
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
   });
 
   const [reserveError, setReserveError] = useState('');
@@ -89,10 +90,11 @@ export default function PropertyDetailPage() {
       <AppHeader
         right={
           <div className="flex items-center gap-1">
-            <button className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-ink-50">
+            <button aria-label="Compartir" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-ink-50">
               <Share2 size={18} className="text-ink-900" />
             </button>
             <motion.button
+              aria-label={isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
               className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-ink-50"
               onClick={() => toggle(id!)}
               whileTap={{ scale: 0.75 }}
@@ -270,11 +272,11 @@ export default function PropertyDetailPage() {
         )}
 
         {/* Amenities */}
-        {(property.amenities as string[]).length > 0 && (
+        {((property.amenities as string[] | null) ?? []).length > 0 && (
           <section>
             <h2 className="text-base font-bold text-ink-900 mb-1">Lo que este lugar ofrece</h2>
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-              {(property.amenities as string[]).map((key) => {
+              {((property.amenities as string[] | null) ?? []).map((key) => {
                 const Icon = AMENITY_ICONS[key] ?? Wifi;
                 return (
                   <div key={key} className="flex items-center gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
@@ -290,11 +292,11 @@ export default function PropertyDetailPage() {
         )}
 
         {/* Restrictions */}
-        {property.restrictions.length > 0 && (
+        {((property.restrictions as unknown[] | null) ?? []).length > 0 && (
           <section>
             <h2 className="text-base font-bold text-ink-900 mb-1">Restricciones</h2>
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-              {property.restrictions.map((r) => (
+              {((property.restrictions as unknown[] | null) ?? []).map((r: { key: string; label: string; description: string }) => (
                 <div key={r.key} className="flex items-start gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
                   <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0 mt-0.5">
                     {r.key === 'max_capacity'

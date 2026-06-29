@@ -13,13 +13,13 @@ export default function HomePage() {
   const user = useAuthStore((s) => s.user);
   const [section, setSection] = useState('alquileres');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['properties', 'home'],
     queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: recentData, isLoading: recentLoading } = useQuery({
+  const { data: recentData, isLoading: recentLoading, isError: recentError } = useQuery({
     queryKey: ['properties', 'recent'],
     queryFn: () =>
       propertiesService
@@ -140,6 +140,11 @@ export default function HomePage() {
                 <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm shrink-0 animate-pulse" />
               ))}
             </HorizontalCarousel>
+          ) : isError ? (
+            <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
+              <Building2 size={28} className="text-ink-200" />
+              <p className="text-sm text-ink-400">No se pudieron cargar las habitaciones</p>
+            </div>
           ) : properties.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
               <Building2 size={28} className="text-ink-200" />
@@ -196,6 +201,11 @@ export default function HomePage() {
                 <div key={i} className="w-52 h-48 bg-white rounded-2xl shadow-sm shrink-0 animate-pulse" />
               ))}
             </HorizontalCarousel>
+          ) : recentError ? (
+            <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
+              <Building2 size={28} className="text-ink-200" />
+              <p className="text-sm text-ink-400">No se pudieron cargar las publicaciones recientes</p>
+            </div>
           ) : recentProperties.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 bg-white rounded-2xl border border-ink-100">
               <Building2 size={28} className="text-ink-200" />

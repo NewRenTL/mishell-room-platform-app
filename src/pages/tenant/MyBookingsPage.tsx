@@ -35,9 +35,10 @@ export default function MyBookingsPage() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('Todas');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['bookings', 'mine'],
     queryFn: () => bookingsService.getMine({ limit: 50 }).then((r) => r.data),
+    staleTime: 1000 * 60 * 2,
   });
 
   const all = data?.data ?? [];
@@ -71,6 +72,13 @@ export default function MyBookingsPage() {
           ? Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-28 bg-white rounded-2xl animate-pulse" />
             ))
+          : isError
+            ? (
+              <div className="flex flex-col items-center justify-center py-16 text-ink-400 gap-3">
+                <Calendar size={40} />
+                <p className="text-sm">No se pudieron cargar tus reservas</p>
+              </div>
+            )
           : filtered.length === 0
             ? (
               <div className="flex flex-col items-center justify-center py-16 text-ink-400 gap-3">

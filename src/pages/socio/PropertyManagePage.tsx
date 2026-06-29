@@ -58,12 +58,14 @@ export default function PropertyManagePage() {
     queryKey: ['property', id],
     queryFn: () => propertiesService.getOne(id!).then((r) => r.data),
     enabled: !!id,
+    staleTime: 1000 * 60 * 2,
   });
 
-  const { data: bookingsData } = useQuery({
+  const { data: bookingsData, isError: bookingsError } = useQuery({
     queryKey: ['bookings', 'property', id],
     queryFn: () => bookingsService.getByProperty(id!, { limit: 50 }).then((r) => r.data),
     enabled: !!id,
+    staleTime: 1000 * 60 * 2,
   });
 
   const bookings = bookingsData?.data ?? [];
@@ -327,7 +329,11 @@ export default function PropertyManagePage() {
               <p className="text-xs font-semibold text-ink-700 uppercase tracking-wide mb-3">
                 Historial de reservas ({bookings.length})
               </p>
-              {bookings.length === 0 ? (
+              {bookingsError ? (
+                <div className="bg-white border border-ink-100 rounded-2xl p-8 text-center">
+                  <p className="text-sm text-ink-400">No se pudieron cargar las reservas</p>
+                </div>
+              ) : bookings.length === 0 ? (
                 <div className="bg-white border border-ink-100 rounded-2xl p-8 text-center">
                   <Calendar size={32} className="text-ink-300 mx-auto mb-2" />
                   <p className="text-sm text-ink-500">Sin reservas aún</p>

@@ -42,7 +42,7 @@ export default function AdminChatListPage() {
                 : <><WifiOff size={11} className="text-ink-400" /><p className="text-xs text-ink-400">Sin conexión</p></>}
             </div>
           </div>
-          <button onClick={refresh} className="p-2 rounded-xl text-ink-400 hover:text-ink-700 hover:bg-ink-100 transition-colors">
+          <button onClick={refresh} aria-label="Actualizar" className="p-2 rounded-xl text-ink-400 hover:text-ink-700 hover:bg-ink-100 transition-colors">
             <RefreshCw size={16} className={loadingConvs ? 'animate-spin' : ''} />
           </button>
         </div>

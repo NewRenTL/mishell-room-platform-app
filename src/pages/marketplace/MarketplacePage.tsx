@@ -15,11 +15,12 @@ export default function MarketplacePage() {
   const [city, setCity] = useState('');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['properties', { search, city, page }],
     queryFn: () =>
       propertiesService.getAll({ search: search || undefined, city: city || undefined, page, limit: 10, status: 'AVAILABLE' })
         .then((r) => r.data),
+    staleTime: 1000 * 60 * 5,
   });
 
   const properties = data?.data ?? [];
@@ -68,6 +69,13 @@ export default function MarketplacePage() {
           ? Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="w-full h-52 bg-white rounded-2xl animate-pulse" />
             ))
+          : isError
+            ? (
+              <div className="flex flex-col items-center justify-center py-16 text-ink-400">
+                <Search size={40} className="mb-3" />
+                <p className="text-sm">No se pudieron cargar las habitaciones</p>
+              </div>
+            )
           : properties.length === 0
             ? (
               <div className="flex flex-col items-center justify-center py-16 text-ink-400">

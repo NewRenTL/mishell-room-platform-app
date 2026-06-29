@@ -50,7 +50,7 @@ export default function VerificationPage() {
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState('');
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['verification-status'],
     queryFn: () => verificationService.getMyStatus().then((r) => r.data),
     refetchInterval: (query) =>
@@ -74,6 +74,20 @@ export default function VerificationPage() {
         <AppHeader title="Verificación de identidad" />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col min-h-dvh bg-ink-50">
+        <AppHeader title="Verificación de identidad" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 px-8 text-center">
+          <p className="text-sm text-ink-400">No se pudo cargar el estado de verificación.</p>
+          <button onClick={() => navigate('/home')} className="text-sm font-semibold text-mishell-600">
+            Volver al inicio
+          </button>
         </div>
       </div>
     );

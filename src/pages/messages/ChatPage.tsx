@@ -64,6 +64,7 @@ export default function ChatPage() {
       <div className="px-4 pt-5 pb-3 border-b border-ink-100 flex items-center gap-3">
         <button
           onClick={() => navigate('/admin-chat')}
+          aria-label="Volver"
           className="p-1.5 rounded-lg text-ink-600 hover:bg-ink-100 transition-colors"
         >
           <ArrowLeft size={18} />

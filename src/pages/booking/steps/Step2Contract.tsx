@@ -77,7 +77,7 @@ export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }
       const newTab = window.open('about:blank', '_blank');
       try {
         const res = await contractsService.getDownloadUrl(contractId);
-        const url = res.data.data?.url;
+        const url = res.data.url;
         if (!url) throw new Error('No se pudo obtener la URL del PDF');
         if (newTab && !newTab.closed) {
           newTab.location.href = url;

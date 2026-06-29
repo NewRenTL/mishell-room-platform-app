@@ -152,7 +152,7 @@ function PaymentSheet({
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <button onClick={() => setStep('method')} className="text-ink-500 hover:text-ink-700">
+              <button aria-label="Volver" onClick={() => setStep('method')} className="text-ink-500 hover:text-ink-700">
                 <X size={18} />
               </button>
               <div>
@@ -176,6 +176,7 @@ function PaymentSheet({
               <div className="relative">
                 <img src={previewUrl} alt="Comprobante" className="w-full max-h-52 object-contain rounded-xl border border-ink-100" />
                 <button
+                  aria-label="Eliminar comprobante"
                   onClick={() => { setPreviewUrl(null); setVoucherFile(null); }}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 border border-ink-100 flex items-center justify-center"
                 >
@@ -380,9 +381,10 @@ export default function MyPaymentsPage() {
   const [page, setPage] = useState(1);
   const [sheetPayment, setSheetPayment] = useState<WeeklyPayment | null>(null);
   const [mutationError, setMutationError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const LIMIT = 10;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['my-payments', page],
     queryFn: () => weeklyPaymentsService.getMyPayments({ page, limit: LIMIT }).then((r) => r.data),
     refetchOnWindowFocus: true,
@@ -394,6 +396,8 @@ export default function MyPaymentsPage() {
     onSuccess: () => {
       setSheetPayment(null);
       setMutationError('');
+      setSuccessMessage('Pago registrado. El administrador lo revisará pronto.');
+      setTimeout(() => setSuccessMessage(''), 4000);
       queryClient.invalidateQueries({ queryKey: ['my-payments'] });
     },
     onError: (err: unknown) => {
@@ -406,6 +410,8 @@ export default function MyPaymentsPage() {
       weeklyPaymentsService.setDepartureNotice(bookingId, date),
     onSuccess: () => {
       setMutationError('');
+      setSuccessMessage('Fecha de salida notificada correctamente.');
+      setTimeout(() => setSuccessMessage(''), 4000);
       queryClient.invalidateQueries({ queryKey: ['my-payments'] });
     },
     onError: (err: unknown) => {
@@ -420,11 +426,21 @@ export default function MyPaymentsPage() {
     <div className="flex flex-col min-h-full bg-ink-50">
       <AppHeader title="Mis Pagos" />
 
+      {successMessage && (
+        <div className="mx-5 mt-3 flex items-start gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2.5">
+          <CheckCircle2 size={14} className="text-green-600 mt-0.5 shrink-0" />
+          <p className="text-xs text-green-700 flex-1">{successMessage}</p>
+          <button aria-label="Cerrar" onClick={() => setSuccessMessage('')} className="text-green-400 hover:text-green-600 ml-1">
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       {mutationError && (
         <div className="mx-5 mt-3 flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
           <AlertCircle size={14} className="text-red-600 mt-0.5 shrink-0" />
           <p className="text-xs text-red-700 flex-1">{mutationError}</p>
-          <button onClick={() => setMutationError('')} className="text-red-400 hover:text-red-600 ml-1">
+          <button aria-label="Cerrar" onClick={() => setMutationError('')} className="text-red-400 hover:text-red-600 ml-1">
             <X size={13} />
           </button>
         </div>
@@ -435,6 +451,11 @@ export default function MyPaymentsPage() {
           Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="h-48 bg-white rounded-2xl animate-pulse" />
           ))
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 text-ink-400 gap-3">
+            <Banknote size={40} />
+            <p className="text-sm text-center">No se pudieron cargar tus pagos. Intenta más tarde.</p>
+          </div>
         ) : bookings.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-ink-400 gap-3">
             <Banknote size={40} />

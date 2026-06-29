@@ -21,11 +21,11 @@ interface YapePaymentResponse {
 
 export const paymentsService = {
   createMpCheckout: (bookingId: string) =>
-    api.post<{ data: MpCheckoutResponse }>('/payments/mp-checkout', { bookingId }),
+    api.post<MpCheckoutResponse>('/payments/mp-checkout', { bookingId }),
 
   processCard: (bookingId: string, payload: CardPaymentPayload) =>
-    api.post<{ data: CardPaymentResponse }>('/payments/card', { bookingId, ...payload }),
+    api.post<CardPaymentResponse>('/payments/card', { bookingId, ...payload }),
 
   processYape: (bookingId: string, otp: string, phoneNumber: string) =>
-    api.post<{ data: YapePaymentResponse }>('/payments/yape', { bookingId, otp, phoneNumber }),
+    api.post<YapePaymentResponse>('/payments/yape', { bookingId, otp, phoneNumber }),
 };

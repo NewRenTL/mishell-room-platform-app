@@ -61,10 +61,11 @@ export default function BookingDetailPage() {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
-  const { data: booking, isLoading } = useQuery({
+  const { data: booking, isLoading, isError } = useQuery({
     queryKey: ['booking', id],
     queryFn: () => bookingsService.getOne(id!).then((r) => r.data),
     enabled: !!id,
+    staleTime: 1000 * 60 * 2,
   });
 
   async function handleDownloadPdf() {
@@ -106,6 +107,13 @@ export default function BookingDetailPage() {
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : isError ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 px-8 text-center">
+          <p className="text-sm text-ink-400">No se pudo cargar la reserva.</p>
+          <button onClick={() => navigate('/my-bookings')} className="text-sm font-semibold text-mishell-600">
+            Volver a mis reservas
+          </button>
         </div>
       ) : !booking ? (
         <div className="flex-1 flex items-center justify-center text-ink-400 text-sm">

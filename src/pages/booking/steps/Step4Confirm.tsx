@@ -154,7 +154,7 @@ function CardForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
         identificationType: docType,
         identificationNumber: docNumber,
       });
-      const result = res.data.data;
+      const result = res.data;
       if (result.status === 'approved') onSuccess();
       else setError(`Pago no aprobado: ${result.statusDetail ?? result.status}`);
     } catch (err: unknown) {
@@ -282,7 +282,7 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
     setLoading(true);
     try {
       const res = await paymentsService.processYape(bookingId, otp.trim(), phone.trim());
-      const { status } = res.data.data;
+      const { status } = res.data;
       if (status === 'approved') onSuccess();
       else setError('El pago fue rechazado. Verifica tu saldo o intenta de nuevo.');
     } catch (err: unknown) {
@@ -398,7 +398,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       setLoading(true);
       try {
         const res = await paymentsService.createMpCheckout(bookingId);
-        const checkout = res.data.data;
+        const checkout = res.data;
         const isSandbox = import.meta.env.VITE_IS_SANDBOX !== 'false';
         const url = isSandbox ? checkout.sandboxInitPoint : checkout.initPoint;
         reset();

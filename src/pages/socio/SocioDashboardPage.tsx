@@ -27,7 +27,7 @@ export default function SocioDashboardPage() {
   const [propsPage, setPropsPage] = useState(1);
   const PROPS_LIMIT = 10;
 
-  const { data: propsData, isLoading: loadingProps } = useQuery({
+  const { data: propsData, isLoading: loadingProps, isError: propsError } = useQuery({
     queryKey: ['properties', 'mine', propsPage],
     queryFn: () => propertiesService.getMine({ page: propsPage, limit: PROPS_LIMIT }).then((r) => r.data),
     staleTime: 1000 * 60 * 2,
@@ -36,7 +36,7 @@ export default function SocioDashboardPage() {
   const properties = propsData?.data ?? [];
   const propsMeta = propsData?.meta;
 
-  const { data: stats } = useQuery({
+  const { data: stats, isError: statsError } = useQuery({
     queryKey: ['socio-stats'],
     queryFn: () => bookingsService.getSocioStats().then((r) => r.data),
     staleTime: 1000 * 60 * 2,
@@ -172,6 +172,10 @@ export default function SocioDashboardPage() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="h-24 bg-white rounded-2xl animate-pulse" />
               ))}
+            </div>
+          ) : propsError ? (
+            <div className="bg-white border border-ink-100 rounded-2xl p-6 text-center">
+              <p className="text-sm text-ink-400">No se pudieron cargar tus propiedades</p>
             </div>
           ) : properties.length === 0 ? (
             <motion.div
