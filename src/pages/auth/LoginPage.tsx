@@ -167,6 +167,17 @@ export default function LoginPage() {
         </button>
       </div>
 
+      {/* Back to home */}
+      <div className="flex items-center justify-center mt-3">
+        <button
+          type="button"
+          onClick={() => navigate(fromPath ?? '/home')}
+          className="text-sm font-medium text-mishell-600 hover:text-mishell-500 underline underline-offset-2 transition-colors"
+        >
+          Prefiero explorar primero
+        </button>
+      </div>
+
       {/* Legal */}
       <p className="mt-auto pt-8 text-xs text-ink-400 text-center">
         Al continuar, aceptas nuestros{' '}
