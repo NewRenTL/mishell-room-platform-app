@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle, X, Expand } from 'lucide-react';
+import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle, X, Expand, Building2, DoorOpen } from 'lucide-react';
 import { motion } from 'motion/react';
 import { GoogleMapView } from '../../components/ui/GoogleMapView';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -235,8 +235,24 @@ export default function PropertyDetailPage() {
           </div>
         </div>
         <p className="text-sm text-ink-600 flex items-center gap-1 mt-1">
-          <MapPin size={13} /> {property.address}, {property.city}
+          <MapPin size={13} /> {property.address}{property.district ? `, ${property.district}` : ''}{property.province ? `, ${property.province}` : ''}{property.city ? `, ${property.city}` : ''}
         </p>
+        {(property.apartmentName || property.roomNumber) && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {property.apartmentName && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1">
+                <Building2 size={12} className="text-ink-500" />
+                {property.apartmentName}
+              </span>
+            )}
+            {property.roomNumber && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1">
+                <DoorOpen size={12} className="text-ink-500" />
+                {property.roomNumber}
+              </span>
+            )}
+          </div>
+        )}
       </motion.div>
 
       <motion.div
@@ -300,7 +316,8 @@ export default function PropertyDetailPage() {
         <section>
           <h2 className="text-base font-bold text-ink-900 mb-1">Ubicación</h2>
           <p className="text-sm text-ink-600 mb-3 flex items-center gap-1">
-            <MapPin size={13} /> {property.address}, {property.city}
+            <MapPin size={13} />
+            {[property.address, property.district, property.province, property.city].filter(Boolean).join(', ')}
           </p>
           {hasMap ? (
             <div className="h-52 rounded-2xl overflow-hidden border border-ink-100">
