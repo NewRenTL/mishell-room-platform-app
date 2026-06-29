@@ -1,7 +1,9 @@
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, MapPin, Calendar, ArrowRight, Clock, Share2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Calendar, ArrowRight, Clock, Share2, Download, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { toPng } from 'html-to-image';
 import { Button } from '../../components/ui/Button';
 import { bookingsService } from '../../services/bookings.service';
 
@@ -20,6 +22,8 @@ function fmtTime(dateStr: string | null | undefined) {
 export default function BookingSuccessPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [savingImage, setSavingImage] = useState(false);
 
   const { data: booking, isError } = useQuery({
     queryKey: ['booking', id],
@@ -32,15 +36,44 @@ export default function BookingSuccessPage() {
     : '—';
   const bookingTime = fmtTime(booking?.createdAt);
 
+  async function handleSaveImage() {
+    if (!cardRef.current || !booking) return;
+    setSavingImage(true);
+    try {
+      const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 2, backgroundColor: '#ffffff' });
+      // Web Share API con archivo (funciona en móvil)
+      if (navigator.canShare) {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], `comprobante-${booking.referenceId ?? id}.png`, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Comprobante de reserva - Mishell Room' });
+          return;
+        }
+      }
+      // Fallback: descarga directa
+      const link = document.createElement('a');
+      link.download = `comprobante-${booking.referenceId ?? id}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch {
+      // silencioso — el usuario puede tomar captura manual
+    } finally {
+      setSavingImage(false);
+    }
+  }
+
   function handleShare() {
     if (!booking) return;
-    const summary =
-      `🏠 ¡Reserva confirmada en Mishell Room!\n` +
-      `📍 ${booking.property?.title ?? ''}\n` +
-      `📅 ${dateRange}  ·  🕒 ${bookingTime}\n` +
-      `💳 Total: S/ ${Number(booking.totalAmount).toFixed(0)}\n` +
-      (booking.referenceId ? `🔖 ID: ${booking.referenceId}` : '');
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(summary)}`, '_blank');
+    const lines = [
+      'Reserva confirmada - Mishell Room',
+      '',
+      `Propiedad: ${booking.property?.title ?? ''}`,
+      `Ubicacion: ${booking.property?.city ?? ''}, Lima ${booking.property?.country ?? ''}`,
+      `Fechas: ${dateRange}   Hora: ${bookingTime}`,
+      `Total pagado: S/ ${Number(booking.totalAmount).toFixed(0)}`,
+    ];
+    if (booking.referenceId) lines.push(`ID de reserva: ${booking.referenceId}`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
   }
 
   if (isError) {
@@ -87,6 +120,7 @@ export default function BookingSuccessPage() {
 
       {/* Booking summary card */}
       <motion.div
+        ref={cardRef}
         className="w-full bg-white border border-ink-100 rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -150,6 +184,22 @@ export default function BookingSuccessPage() {
           <Share2 size={16} className="mr-2" />
           Compartir por WhatsApp
         </Button>
+
+        <button
+          onClick={handleSaveImage}
+          disabled={savingImage || !booking}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-ink-200 bg-white text-ink-700 text-sm font-semibold disabled:opacity-50 active:scale-95 transition-all"
+        >
+          {savingImage
+            ? <><Loader2 size={15} className="animate-spin" /> Generando imagen...</>
+            : <><Download size={15} /> Guardar comprobante</>
+          }
+        </button>
+
+        <p className="text-xs text-ink-500 text-center leading-relaxed px-2">
+          Tambien puedes enviar la foto de tu comprobante de pago (Yape, transferencia, etc.) a este mismo numero de WhatsApp.
+        </p>
+
         <button
           onClick={() => navigate('/profile')}
           className="flex items-center justify-center gap-1.5 text-sm font-semibold text-ink-700 py-2 hover:text-ink-900 transition-colors"
