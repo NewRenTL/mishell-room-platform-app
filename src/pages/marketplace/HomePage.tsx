@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Home as HomeIcon, Zap, MapPin, Building2 } from 'lucide-react';
+import { Search, Home as HomeIcon, Zap, Lock, MapPin, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PropertyCard } from '../../components/ui/PropertyCard';
-import { TabSwitcher } from '../../components/ui/TabSwitcher';
 import { HorizontalCarousel } from '../../components/ui/HorizontalCarousel';
 import { propertiesService } from '../../services/properties.service';
 import { useAuthStore } from '../../stores/authStore';
@@ -91,14 +90,27 @@ export default function HomePage() {
 
         {/* Section tabs */}
         <div className="px-5 pb-4">
-          <TabSwitcher
-            tabs={[
-              { key: 'alquileres', label: 'Alquileres', icon: <HomeIcon size={14} /> },
-              { key: 'servicios',  label: 'Servicios',  icon: <Zap size={14} /> },
-            ]}
-            active={section}
-            onChange={setSection}
-          />
+          <div className="flex bg-ink-50 rounded-full p-1 gap-1">
+            <button
+              onClick={() => setSection('alquileres')}
+              className={`flex-1 py-2 rounded-full text-sm font-medium flex items-center justify-center gap-1.5 transition-all ${
+                section === 'alquileres'
+                  ? 'bg-white text-ink-900 font-semibold shadow-sm'
+                  : 'text-ink-600 hover:text-ink-900'
+              }`}
+            >
+              <HomeIcon size={14} />
+              Alquileres
+            </button>
+            <div className="flex-1 py-2 rounded-full flex items-center justify-center gap-1.5 text-ink-300 cursor-not-allowed relative">
+              <Lock size={11} className="shrink-0" />
+              <Zap size={14} className="shrink-0" />
+              <span className="text-sm font-medium">Servicios</span>
+              <span className="absolute -top-1 -right-1 text-[9px] font-bold bg-mishell-600 text-white px-1.5 py-0.5 rounded-full leading-none">
+                Pronto
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
