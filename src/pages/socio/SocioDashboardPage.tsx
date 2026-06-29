@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, Search } from 'lucide-react';
+import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, Search, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 import { propertiesService } from '../../services/properties.service';
 import { bookingsService } from '../../services/bookings.service';
