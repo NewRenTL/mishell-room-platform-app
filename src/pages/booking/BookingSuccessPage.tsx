@@ -90,42 +90,44 @@ export default function BookingSuccessPage() {
   return (
     <div className="max-w-107.5 mx-auto min-h-dvh bg-white flex flex-col items-center justify-center px-6 text-center gap-6">
 
-      {/* Checkmark */}
-      <motion.div
-        className="relative flex items-center justify-center"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
-      >
-        {/* Glow */}
-        <div className="absolute w-28 h-28 rounded-full bg-green-100 blur-xl opacity-60" />
-        <div className="relative w-24 h-24 rounded-full border-4 border-green-500 bg-white flex items-center justify-center">
-          <CheckCircle2 size={48} className="text-green-500" strokeWidth={1.8} />
-        </div>
-      </motion.div>
+      {/* ── ZONA DE CAPTURA (checkmark + título + tarjeta) ── */}
+      <div ref={cardRef} className="w-full flex flex-col items-center gap-6 bg-white py-8">
 
-      {/* Title */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35, duration: 0.4 }}
-      >
-        <h1 className="text-2xl font-extrabold text-ink-900 leading-tight">
-          ¡Tu reserva se<br />realizó con éxito!
-        </h1>
-        <p className="text-sm text-ink-500 mt-2 leading-relaxed">
-          Hemos enviado los detalles a tu correo electrónico.
-        </p>
-      </motion.div>
+        {/* Checkmark */}
+        <motion.div
+          className="relative flex items-center justify-center"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
+        >
+          {/* Glow */}
+          <div className="absolute w-28 h-28 rounded-full bg-green-100 blur-xl opacity-60" />
+          <div className="relative w-24 h-24 rounded-full border-4 border-green-500 bg-white flex items-center justify-center">
+            <CheckCircle2 size={48} className="text-green-500" strokeWidth={1.8} />
+          </div>
+        </motion.div>
 
-      {/* Booking summary card */}
-      <motion.div
-        ref={cardRef}
-        className="w-full bg-white border border-ink-100 rounded-2xl overflow-hidden"
-        initial={{ opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5, duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-      >
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+        >
+          <h1 className="text-2xl font-extrabold text-ink-900 leading-tight">
+            ¡Tu reserva se<br />realizó con éxito!
+          </h1>
+          <p className="text-sm text-ink-500 mt-2 leading-relaxed">
+            Hemos enviado los detalles a tu correo electrónico.
+          </p>
+        </motion.div>
+
+        {/* Booking summary card */}
+        <motion.div
+          className="w-full bg-white border border-ink-100 rounded-2xl overflow-hidden"
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+        >
         {/* Card header */}
         <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
           <span className="text-[10px] font-bold tracking-widest text-ink-500 uppercase">Resumen de la reserva</span>
@@ -172,6 +174,8 @@ export default function BookingSuccessPage() {
           </span>
         </div>
       </motion.div>
+
+      </div>{/* ── FIN ZONA DE CAPTURA ── */}
 
       {/* Actions */}
       <motion.div
