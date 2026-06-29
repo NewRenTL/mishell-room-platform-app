@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Home as HomeIcon, Zap, Smile, MapPin, Building2 } from 'lucide-react';
+import { Search, Home as HomeIcon, Zap, MapPin, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { PropertyCard } from '../../components/ui/PropertyCard';
 import { TabSwitcher } from '../../components/ui/TabSwitcher';
@@ -41,29 +41,17 @@ export default function HomePage() {
       {/* Sticky header */}
       <div className="bg-white/90 backdrop-blur-md sticky top-0 z-20 border-b border-ink-100/60">
         <div className="px-5 pt-12 pb-4">
-          {/* Greeting row */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-1.5 text-ink-500 text-xs mb-1">
-                <MapPin size={11} />
-                <span>Lima, Perú</span>
-                {user?.role === 'INQUILINO' && (
-                  <span className="text-[10px] font-semibold text-mishell-600 bg-mishell-50 border border-mishell-100 px-1.5 py-0.5 rounded-full">
-                    Arrendatario/a
-                  </span>
-                )}
-              </div>
-              <h1 className="text-xl font-bold text-ink-900 leading-tight">
-                {user ? (
-                  <span className="flex items-center gap-2">
-                    <Smile size={18} className="text-mishell-600 shrink-0" />
-                    Hola, {user.firstName}
-                  </span>
-                ) : (
-                  'Mishell Room'
-                )}
-              </h1>
-              <p className="text-xs text-ink-500 mt-0.5">Encuentra tu próximo hogar</p>
+          {/* Brand + role row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <img
+                src="/images/LogoMishell.png"
+                alt="Mishell"
+                className="w-9 h-9 rounded-full object-cover border border-ink-100"
+              />
+              <span className="text-base font-bold text-ink-900">
+                {user?.role === 'INQUILINO' ? 'Arrendataria' : 'Mishell Room'}
+              </span>
             </div>
             <button
               onClick={() => navigate('/profile')}
@@ -77,6 +65,17 @@ export default function HomePage() {
                 <span className="text-xs font-bold text-ink-600">?</span>
               )}
             </button>
+          </div>
+
+          {/* Greeting row */}
+          <div className="mb-4">
+            <div className="flex items-center gap-1.5 text-ink-500 text-xs mb-0.5">
+              <MapPin size={11} />
+              <span>Lima, Perú</span>
+            </div>
+            <p className="text-sm text-ink-600">
+              Hola, <span className="font-semibold text-ink-900">{user?.firstName}</span> — Encuentra tu próximo hogar
+            </p>
           </div>
 
           {/* Search shortcut */}

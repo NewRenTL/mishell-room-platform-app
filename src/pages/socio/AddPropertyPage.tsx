@@ -27,7 +27,8 @@ export default function AddPropertyPage() {
     city: '',
     province: '',
     district: '',
-    unitNumber: '',
+    apartmentName: '',
+    roomNumber: '',
     rooms: '1',
     maxCapacity: '2',
     pricePerWeek: '',
@@ -92,7 +93,8 @@ export default function AddPropertyPage() {
         city: form.city,
         province: form.province || undefined,
         district: form.district || undefined,
-        unitNumber: form.unitNumber || undefined,
+        apartmentName: form.apartmentName || undefined,
+        roomNumber: form.roomNumber || undefined,
         country: 'Peru',
         rooms: Number(form.rooms),
         maxCapacity: Number(form.maxCapacity),
@@ -216,9 +218,14 @@ export default function AddPropertyPage() {
               </div>
             </div>
             <Input
-              placeholder="N° departamento / habitación (ej: Dpto 301)"
-              value={form.unitNumber}
-              onChange={(e) => set('unitNumber', e.target.value)}
+              placeholder="Nombre del departamento (ej: Departamento A 301)"
+              value={form.apartmentName}
+              onChange={(e) => set('apartmentName', e.target.value)}
+            />
+            <Input
+              placeholder="Número de habitación (ej: Habitación 2)"
+              value={form.roomNumber}
+              onChange={(e) => set('roomNumber', e.target.value)}
             />
 
             {/* Map picker */}

@@ -71,7 +71,7 @@ export default function PropertyManagePage() {
 
   const [form, setForm] = useState<{
     title: string; description: string; address: string;
-    city: string; province: string; district: string; unitNumber: string;
+    city: string; province: string; district: string; apartmentName: string;
     pricePerWeek: string; rooms: string; maxCapacity: string; amenities: string[];
   } | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -84,7 +84,7 @@ export default function PropertyManagePage() {
       city: property.city,
       province: property.province ?? '',
       district: property.district ?? '',
-      unitNumber: property.unitNumber ?? '',
+      apartmentName: property.apartmentName ?? '',
       pricePerWeek: String(property.pricePerWeek),
       rooms: String(property.rooms),
       maxCapacity: String(property.maxCapacity),
@@ -114,7 +114,7 @@ export default function PropertyManagePage() {
         address: form.address, city: form.city,
         province:   form.province   || undefined,
         district:   form.district   || undefined,
-        unitNumber: form.unitNumber || undefined,
+        apartmentName: form.apartmentName || undefined,
         pricePerWeek: Number(form.pricePerWeek),
         rooms: Number(form.rooms), maxCapacity: Number(form.maxCapacity),
         amenities: form.amenities,
@@ -468,8 +468,8 @@ export default function PropertyManagePage() {
                     </div>
                     <Input
                       placeholder="N° departamento / habitación (ej: Dpto 301)"
-                      value={form.unitNumber}
-                      onChange={(e) => setField('unitNumber', e.target.value)}
+                      value={form.apartmentName}
+                      onChange={(e) => setField('apartmentName', e.target.value)}
                     />
                     <p className="text-xs font-medium text-ink-700 flex items-center gap-1">
                       <MapPin size={12} className="text-mishell-600" />

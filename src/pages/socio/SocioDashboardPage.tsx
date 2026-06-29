@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, MapPin, Search } from 'lucide-react';
+import { Plus, Home, TrendingUp, Calendar, ChevronRight, ArrowRight, Search } from 'lucide-react';
 import { motion } from 'motion/react';
 import { propertiesService } from '../../services/properties.service';
 import { bookingsService } from '../../services/bookings.service';
@@ -53,16 +53,16 @@ export default function SocioDashboardPage() {
         transition={{ duration: 0.4 }}
       >
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <p className="text-xs text-ink-500">Panel de propietario</p>
-              <span className="text-[10px] font-semibold text-ink-600 bg-ink-100 border border-ink-200 px-1.5 py-0.5 rounded-full">
-                Socio
-              </span>
+          <div className="flex items-center gap-2">
+            <img
+              src="/images/LogoMishell.png"
+              alt="Mishell"
+              className="w-9 h-9 rounded-full object-cover border border-ink-100"
+            />
+            <div>
+              <p className="text-base font-bold text-ink-900 leading-tight">Socio</p>
+              <p className="text-xs text-ink-500">Hola, {user?.firstName}</p>
             </div>
-            <h1 className="text-xl font-bold text-ink-900">
-              Hola, {user?.firstName} 👋
-            </h1>
           </div>
           <motion.button
             onClick={() => navigate('/socio/add-property')}

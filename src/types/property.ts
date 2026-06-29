@@ -29,7 +29,8 @@ export interface UpdatePropertyData {
   city?: string;
   province?: string;
   district?: string;
-  unitNumber?: string;
+  apartmentName?: string;
+  roomNumber?: string;
   country?: string;
   pricePerWeek?: number;
   rooms?: number;
@@ -47,7 +48,8 @@ export interface Property {
   city: string;
   province?: string;
   district?: string;
-  unitNumber?: string;
+  apartmentName?: string;
+  roomNumber?: string;
   country: string;
   latitude?: number;
   longitude?: number;
