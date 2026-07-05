@@ -33,11 +33,12 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const tabs = user?.role === 'SOCIO' ? TABS_SOCIO : TABS_INQUILINO;
 
   const isOnMessages = pathname === '/messages';
+  const canChat = user?.role === 'INQUILINO' || user?.role === 'SOCIO';
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['chat-unread'],
     queryFn: () => chatService.getMyUnread().then((r) => r.data),
     refetchInterval: 30_000,
-    enabled: !!user && !isOnMessages,
+    enabled: canChat && !isOnMessages,
     staleTime: 15_000,
   });
 
