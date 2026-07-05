@@ -1,7 +1,9 @@
 import { Home, MessageCircle, Key, User, Banknote, Clock, Building2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../stores/authStore';
+import { chatService } from '../../services/chat.service';
 
 const TABS_INQUILINO = [
   { path: '/home',         icon: Home,          label: 'Inicio'   },
@@ -29,6 +31,15 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const user = useAuthStore((s) => s.user);
 
   const tabs = user?.role === 'SOCIO' ? TABS_SOCIO : TABS_INQUILINO;
+
+  const isOnMessages = pathname === '/messages';
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['chat-unread'],
+    queryFn: () => chatService.getMyUnread().then((r) => r.data),
+    refetchInterval: 30_000,
+    enabled: !!user && !isOnMessages,
+    staleTime: 15_000,
+  });
 
   return (
     <div className="h-dvh flex flex-col max-w-107.5 mx-auto bg-ink-50 relative">
@@ -62,16 +73,23 @@ export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
-                <motion.div
-                  animate={{ y: active ? 3 : 0 }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                >
-                  <Icon
-                    size={20}
-                    className={active ? 'text-mishell-600' : 'text-ink-400'}
-                    strokeWidth={active ? 2.5 : 1.8}
-                  />
-                </motion.div>
+                <div className="relative">
+                  <motion.div
+                    animate={{ y: active ? 3 : 0 }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  >
+                    <Icon
+                      size={20}
+                      className={active ? 'text-mishell-600' : 'text-ink-400'}
+                      strokeWidth={active ? 2.5 : 1.8}
+                    />
+                  </motion.div>
+                  {path === '/messages' && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1.5 min-w-3.75 h-3.75 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[10px] font-semibold leading-none ${active ? 'text-mishell-600' : 'text-ink-400'}`}>
                   {label}
                 </span>

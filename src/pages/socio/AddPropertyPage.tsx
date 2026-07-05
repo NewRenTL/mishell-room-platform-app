@@ -11,7 +11,7 @@ import { AddressAutocomplete } from '../../components/ui/AddressAutocomplete';
 import api from '../../services/api';
 import { propertiesService } from '../../services/properties.service';
 import { getApiErrorMessage } from '../../utils/error';
-import { AMENITY_OPTIONS } from '../../utils/amenities';
+import { AMENITY_OPTIONS, RESTRICTION_OPTIONS } from '../../utils/amenities';
 import { PageTutorial } from '../../components/ui/PageTutorial';
 import { PERU_DEPARTMENTS, getProvinces, getDistricts } from '../../utils/peruLocations';
 
@@ -30,11 +30,12 @@ export default function AddPropertyPage() {
     apartmentName: '',
     roomNumber: '',
     rooms: '1',
-    maxCapacity: '2',
+    maxCapacity: '1',
     pricePerWeek: '',
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState('');
   const [createdId, setCreatedId] = useState<string | null>(null);
@@ -50,6 +51,12 @@ export default function AddPropertyPage() {
     );
   }
 
+  function toggleRestriction(key: string) {
+    setSelectedRestrictions((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  }
+
   function handlePhotoFiles(files: FileList | null) {
     if (!files) return;
     setPhotoError('');
@@ -59,7 +66,7 @@ export default function AddPropertyPage() {
       if (f.size > 5 * 1024 * 1024) { setPhotoError('Cada foto no puede superar 5 MB'); return false; }
       return true;
     });
-    setPhotos((prev) => [...prev, ...incoming].slice(0, 7));
+    setPhotos((prev) => [...prev, ...incoming].slice(0, 10));
   }
 
   function removePhoto(idx: number) {
@@ -75,14 +82,6 @@ export default function AddPropertyPage() {
       setError('El precio debe ser mayor a 0');
       return;
     }
-    if (Number(form.rooms) < 1) {
-      setError('El número de habitaciones debe ser al menos 1');
-      return;
-    }
-    if (Number(form.maxCapacity) < 1) {
-      setError('La capacidad máxima debe ser al menos 1');
-      return;
-    }
     setError('');
     setLoading(true);
     try {
@@ -96,11 +95,11 @@ export default function AddPropertyPage() {
         apartmentName: form.apartmentName || undefined,
         roomNumber: form.roomNumber || undefined,
         country: 'Peru',
-        rooms: Number(form.rooms),
-        maxCapacity: Number(form.maxCapacity),
+        rooms: 1,
+        maxCapacity: 1,
         pricePerWeek: Number(form.pricePerWeek),
         amenities: selectedAmenities,
-        restrictions: [],
+        restrictions: selectedRestrictions,
         latitude:  coords?.lat,
         longitude: coords?.lng,
       });
@@ -136,6 +135,9 @@ export default function AddPropertyPage() {
           <h2 className="text-xl font-bold text-ink-900">¡Propiedad publicada!</h2>
           <p className="text-sm text-ink-600 leading-relaxed">
             Tu propiedad está en revisión.
+          </p>
+          <p className="text-sm text-ink-500 leading-relaxed">
+            Se te enviará un mensaje a tu perfil cuando ya esté activo tu publicación.
           </p>
         </motion.div>
 
@@ -292,7 +294,7 @@ export default function AddPropertyPage() {
         {/* Photos */}
         <section data-tutorial="photos">
           <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos de la propiedad</h2>
-          <p className="text-xs text-ink-500 mb-3">Sube hasta 7 fotos. La primera será la portada.</p>
+          <p className="text-xs text-ink-500 mb-3">Sube hasta 10 fotos. La primera será la portada.</p>
 
           <div className="flex gap-3 flex-wrap">
             {photos.map((file, idx) => (
@@ -317,7 +319,7 @@ export default function AddPropertyPage() {
               </div>
             ))}
 
-            {photos.length < 7 && (
+            {photos.length < 10 && (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -336,7 +338,6 @@ export default function AddPropertyPage() {
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
-            capture="environment"
             className="hidden"
             onChange={(e) => handlePhotoFiles(e.target.files)}
           />
@@ -362,6 +363,32 @@ export default function AddPropertyPage() {
           </div>
         </section>
 
+        {/* Restrictions */}
+        <section>
+          <h2 className="text-sm font-bold text-ink-900 mb-3">Restricciones</h2>
+          <div className="flex flex-col gap-2">
+            {RESTRICTION_OPTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleRestriction(key)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium text-left transition-colors
+                  ${selectedRestrictions.includes(key)
+                    ? 'bg-mishell-50 border-mishell-400 text-mishell-700'
+                    : 'bg-white border-ink-100 text-ink-700'}`}
+              >
+                <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
+                  ${selectedRestrictions.includes(key) ? 'border-mishell-600 bg-mishell-600' : 'border-ink-300'}`}>
+                  {selectedRestrictions.includes(key) && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
+                </div>
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {error && <p className="text-sm text-mishell-600 text-center">{error}</p>}
       </div>
 
@@ -379,7 +406,7 @@ export default function AddPropertyPage() {
         steps={[
           { title: 'Información básica', content: 'Escribe un título descriptivo y una descripción atractiva. Un buen título ayuda a los inquilinos a encontrar tu propiedad.', target: '[data-tutorial="basic-info"]' },
           { title: 'Ubicación exacta', content: 'Elige tu región, escribe la dirección (te saldrán sugerencias) y ajusta el pin en el mapa.', target: '[data-tutorial="location"]' },
-          { title: 'Fotos de la propiedad', content: 'Sube hasta 7 fotos. La primera será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!', target: '[data-tutorial="photos"]' },
+          { title: 'Fotos de la propiedad', content: 'Sube hasta 10 fotos. La primera será la portada que ven los inquilinos. ¡Las fotos de calidad atraen más reservas!', target: '[data-tutorial="photos"]' },
           { title: 'Después de publicar', content: 'Importante: recuerda cambiar el estado de tu propiedad a "Disponible" para que los inquilinos puedan encontrarla y reservarla.' },
         ]}
       />

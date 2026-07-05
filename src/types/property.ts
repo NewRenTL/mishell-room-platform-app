@@ -36,6 +36,7 @@ export interface UpdatePropertyData {
   rooms?: number;
   maxCapacity?: number;
   amenities?: string[];
+  restrictions?: string[];
   latitude?: number;
   longitude?: number;
 }

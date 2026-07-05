@@ -11,7 +11,7 @@ import { GoogleMapPicker } from '../../components/ui/GoogleMapPicker';
 import { propertiesService } from '../../services/properties.service';
 import { getApiErrorMessage } from '../../utils/error';
 import { bookingsService } from '../../services/bookings.service';
-import { AMENITY_OPTIONS } from '../../utils/amenities';
+import { AMENITY_OPTIONS, RESTRICTION_OPTIONS } from '../../utils/amenities';
 import { PERU_DEPARTMENTS, getProvinces, getDistricts } from '../../utils/peruLocations';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -74,7 +74,8 @@ export default function PropertyManagePage() {
   const [form, setForm] = useState<{
     title: string; description: string; address: string;
     city: string; province: string; district: string; apartmentName: string;
-    pricePerWeek: string; rooms: string; maxCapacity: string; amenities: string[];
+    pricePerWeek: string; rooms: string; maxCapacity: string;
+    amenities: string[]; restrictions: string[];
   } | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -91,6 +92,7 @@ export default function PropertyManagePage() {
       rooms: String(property.rooms),
       maxCapacity: String(property.maxCapacity),
       amenities: (property.amenities as string[]) ?? [],
+      restrictions: (property.restrictions as unknown as string[]) ?? [],
     });
     if (property.latitude != null && property.longitude != null) {
       setCoords({ lat: property.latitude, lng: property.longitude });
@@ -107,6 +109,13 @@ export default function PropertyManagePage() {
       : [...form.amenities, key]);
   }
 
+  function toggleRestriction(key: string) {
+    if (!form) return;
+    setField('restrictions', form.restrictions.includes(key)
+      ? form.restrictions.filter((k) => k !== key)
+      : [...form.restrictions, key]);
+  }
+
   async function handleSave() {
     if (!form || !id) return;
     setSaving(true); setSaveError('');
@@ -120,6 +129,7 @@ export default function PropertyManagePage() {
         pricePerWeek: Number(form.pricePerWeek),
         rooms: Number(form.rooms), maxCapacity: Number(form.maxCapacity),
         amenities: form.amenities,
+        restrictions: form.restrictions,
         latitude:  coords?.lat,
         longitude: coords?.lng,
       });
@@ -523,6 +533,31 @@ export default function PropertyManagePage() {
                       <button key={key} type="button" onClick={() => toggleAmenity(key)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
                           ${form.amenities.includes(key) ? 'bg-mishell-600 text-white border-mishell-600' : 'bg-white text-ink-700 border-ink-100'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <h2 className="text-sm font-bold text-ink-900 mb-3">Restricciones</h2>
+                  <div className="flex flex-col gap-2">
+                    {RESTRICTION_OPTIONS.map(({ key, label }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleRestriction(key)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium text-left transition-colors
+                          ${form.restrictions.includes(key)
+                            ? 'bg-mishell-50 border-mishell-400 text-mishell-700'
+                            : 'bg-white border-ink-100 text-ink-700'}`}
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center
+                          ${form.restrictions.includes(key) ? 'border-mishell-600 bg-mishell-600' : 'border-ink-300'}`}>
+                          {form.restrictions.includes(key) && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                          )}
+                        </div>
                         {label}
                       </button>
                     ))}
