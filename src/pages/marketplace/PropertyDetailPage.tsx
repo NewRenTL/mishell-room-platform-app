@@ -367,6 +367,11 @@ export default function PropertyDetailPage() {
       <VerificationSheet
         open={verificationSheetOpen}
         onClose={() => setVerificationSheetOpen(false)}
+        onApproved={() => {
+          import('../booking/BookingFlowPage').catch(() => {});
+          setProperty(id!);
+          navigate(`/booking/${id}`);
+        }}
       />
 
       <AuthPromptSheet

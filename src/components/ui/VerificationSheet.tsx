@@ -49,9 +49,10 @@ function StatusIcon({ status, className }: { status: string; className?: string 
 interface Props {
   open: boolean;
   onClose: () => void;
+  onApproved?: () => void;
 }
 
-export function VerificationSheet({ open, onClose }: Props) {
+export function VerificationSheet({ open, onClose, onApproved }: Props) {
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState('');
 
@@ -84,6 +85,13 @@ export function VerificationSheet({ open, onClose }: Props) {
   const status = data?.verificationStatus ?? 'UNVERIFIED';
   const cfg = STATUS_STYLES[status] ?? STATUS_STYLES.UNVERIFIED;
   const canSubmit = status === 'UNVERIFIED' || status === 'OBSERVED';
+
+  useEffect(() => {
+    if (open && status === 'APPROVED' && onApproved) {
+      const t = setTimeout(() => { onClose(); onApproved(); }, 800);
+      return () => clearTimeout(t);
+    }
+  }, [open, status, onApproved, onClose]);
 
   return (
     <AnimatePresence>
