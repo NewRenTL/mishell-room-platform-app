@@ -9,7 +9,7 @@ import { propertiesService } from '../../services/properties.service';
 import { useAuthStore } from '../../stores/authStore';
 import { useBookingStore } from '../../stores/bookingStore';
 import { useFavoritesStore } from '../../stores/favoritesStore';
-import { AMENITY_ICONS, AMENITY_LABELS } from '../../utils/amenities';
+import { AMENITY_ICONS, AMENITY_LABELS, RESTRICTION_LABELS } from '../../utils/amenities';
 import { AuthPromptSheet } from '../../components/ui/AuthPromptSheet';
 
 export default function PropertyDetailPage() {
@@ -296,18 +296,15 @@ export default function PropertyDetailPage() {
           <section>
             <h2 className="text-base font-bold text-ink-900 mb-1">Restricciones</h2>
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-              {((property.restrictions as { key: string; label: string; description: string }[] | null) ?? []).map((r) => (
-                <div key={r.key} className="flex items-start gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
-                  <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0 mt-0.5">
-                    {r.key === 'max_capacity'
+              {((property.restrictions as string[] | null) ?? []).map((key) => (
+                <div key={key} className="flex items-center gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
+                  <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0">
+                    {key === 'max_1_persona'
                       ? <Users size={16} className="text-mishell-600" />
                       : <XCircle size={16} className="text-mishell-600" />
                     }
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink-900">{r.label}</p>
-                    <p className="text-xs text-ink-600">{r.description}</p>
-                  </div>
+                  <p className="text-sm font-semibold text-ink-900">{RESTRICTION_LABELS[key] ?? key}</p>
                 </div>
               ))}
             </div>

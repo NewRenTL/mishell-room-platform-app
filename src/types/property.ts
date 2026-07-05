@@ -58,7 +58,7 @@ export interface Property {
   rooms: number;
   maxCapacity: number;
   amenities: string[];
-  restrictions: { key: string; label: string; description: string }[];
+  restrictions: string[];
   status: PropertyStatus;
   owner: Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>;
   photos: PropertyPhoto[];
