@@ -9,9 +9,8 @@ import { DniDocViewer } from '../../components/ui/DniDocViewer';
 import { verificationService } from '../../services/verification.service';
 import { getApiErrorMessage } from '../../utils/error';
 
-const STATUS_CONFIG = {
+const STATUS_STYLES: Record<string, { color: string; bg: string; border: string; title: string; desc: string }> = {
   UNVERIFIED: {
-    icon: ShieldCheck,
     color: 'text-ink-400',
     bg: 'bg-ink-50',
     border: 'border-ink-200',
@@ -19,7 +18,6 @@ const STATUS_CONFIG = {
     desc: 'Para poder realizar reservas necesitas verificar tu identidad. El proceso es rápido y nuestro equipo revisará tu información.',
   },
   PENDING: {
-    icon: Clock,
     color: 'text-amber-600',
     bg: 'bg-amber-50',
     border: 'border-amber-200',
@@ -27,7 +25,6 @@ const STATUS_CONFIG = {
     desc: 'Tu solicitud está siendo revisada por nuestro equipo. Te notificaremos pronto.',
   },
   APPROVED: {
-    icon: CheckCircle2,
     color: 'text-green-600',
     bg: 'bg-green-50',
     border: 'border-green-200',
@@ -35,7 +32,6 @@ const STATUS_CONFIG = {
     desc: 'Tu identidad ha sido verificada. Ya puedes realizar reservas en la plataforma.',
   },
   OBSERVED: {
-    icon: XCircle,
     color: 'text-red-600',
     bg: 'bg-red-50',
     border: 'border-red-200',
@@ -43,6 +39,14 @@ const STATUS_CONFIG = {
     desc: 'El administrador revisó tu solicitud y tiene una observación. Lee el comentario y vuelve a enviarla.',
   },
 };
+
+function StatusIcon({ status, className }: { status: string; className?: string }) {
+  const size = 28;
+  if (status === 'PENDING')  return <Clock size={size} className={className} />;
+  if (status === 'APPROVED') return <CheckCircle2 size={size} className={className} />;
+  if (status === 'OBSERVED') return <XCircle size={size} className={className} />;
+  return <ShieldCheck size={size} className={className} />;
+}
 
 export default function VerificationPage() {
   const queryClient = useQueryClient();
@@ -66,6 +70,17 @@ export default function VerificationPage() {
       setSubmitError(getApiErrorMessage(err, 'Error al enviar la solicitud. Intenta de nuevo.'));
     },
   });
+
+  const status = data?.verificationStatus ?? 'UNVERIFIED';
+  const cfg = STATUS_STYLES[status] ?? STATUS_STYLES.UNVERIFIED;
+  const canSubmit = status === 'UNVERIFIED' || status === 'OBSERVED';
+
+  useEffect(() => {
+    if (status === 'APPROVED') {
+      const t = setTimeout(() => navigate('/home', { replace: true }), 1800);
+      return () => clearTimeout(t);
+    }
+  }, [status, navigate]);
 
   if (isLoading) {
     return (
@@ -92,33 +107,20 @@ export default function VerificationPage() {
     );
   }
 
-  const status = data?.verificationStatus ?? 'UNVERIFIED';
-  const cfg = STATUS_CONFIG[status];
-  const Icon = cfg.icon;
-  const canSubmit = status === 'UNVERIFIED' || status === 'OBSERVED';
-
-  // Auto-redirect after a short pause when verification is already approved
-  useEffect(() => {
-    if (status === 'APPROVED') {
-      const t = setTimeout(() => navigate('/home', { replace: true }), 1800);
-      return () => clearTimeout(t);
-    }
-  }, [status, navigate]);
-
   return (
     <div className="flex flex-col min-h-dvh bg-ink-50">
       <AppHeader title="Verificación de identidad" />
 
       <div className="px-5 py-6 flex flex-col gap-4">
 
-        {/* Status card */}
+        {/* Status card — uses inline conditional icons to avoid dynamic component identity issue */}
         <motion.div
           className={`rounded-2xl border p-5 flex flex-col items-center text-center gap-3 ${cfg.bg} ${cfg.border}`}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className={`w-14 h-14 rounded-full flex items-center justify-center ${cfg.bg} border-2 ${cfg.border}`}>
-            <Icon size={28} className={cfg.color} />
+            <StatusIcon status={status} className={cfg.color} />
           </div>
           <div>
             <p className="text-base font-bold text-ink-900">{cfg.title}</p>
@@ -196,18 +198,12 @@ export default function VerificationPage() {
           </div>
         )}
 
-        {/* Submit button */}
         {canSubmit && (
-          <Button
-            loading={submit.isPending}
-            onClick={() => submit.mutate()}
-            data-tutorial="submit-verification"
-          >
+          <Button loading={submit.isPending} onClick={() => submit.mutate()}>
             {status === 'OBSERVED' ? 'Reenviar solicitud' : 'Enviar solicitud de verificación'}
           </Button>
         )}
 
-        {/* Pending — auto-refreshing hint + escape button */}
         {status === 'PENDING' && (
           <>
             <div className="flex items-center justify-center gap-2 py-1">
@@ -223,12 +219,10 @@ export default function VerificationPage() {
             </button>
             <p className="text-[11px] text-ink-400 text-center -mt-1 leading-relaxed">
               Puedes seguir explorando la app mientras revisamos tu solicitud.
-              Te avisaremos cuando esté aprobada.
             </p>
           </>
         )}
 
-        {/* Approved — continue button + auto-redirect notice */}
         {status === 'APPROVED' && (
           <>
             <Button onClick={() => navigate('/home', { replace: true })}>
@@ -246,7 +240,6 @@ export default function VerificationPage() {
           </p>
         )}
       </div>
-
     </div>
   );
 }

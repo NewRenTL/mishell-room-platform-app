@@ -11,6 +11,7 @@ import { useBookingStore } from '../../stores/bookingStore';
 import { useFavoritesStore } from '../../stores/favoritesStore';
 import { AMENITY_ICONS, AMENITY_LABELS, RESTRICTION_LABELS } from '../../utils/amenities';
 import { AuthPromptSheet } from '../../components/ui/AuthPromptSheet';
+import { VerificationSheet } from '../../components/ui/VerificationSheet';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,10 +35,9 @@ export default function PropertyDetailPage() {
   });
 
   const [reserveError, setReserveError] = useState('');
-  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationSheetOpen, setVerificationSheetOpen] = useState(false);
 
   function handleReserve() {
-    setNeedsVerification(false);
     setReserveError('');
     if (!isAuthenticated) { setAuthSheetOpen(true); return; }
     if (user?.status === 'INACTIVE') { setReserveError('Tu cuenta está pendiente de verificación. No puedes reservar aún.'); return; }
@@ -50,10 +50,9 @@ export default function PropertyDetailPage() {
       return;
     }
     if (user?.verificationStatus !== 'APPROVED') {
-      setNeedsVerification(true);
+      setVerificationSheetOpen(true);
       return;
     }
-    // Prefetch the booking flow chunk to make navigation feel instant
     import('../booking/BookingFlowPage').catch(() => {});
     setProperty(id!);
     navigate(`/booking/${id}`);
@@ -353,17 +352,6 @@ export default function PropertyDetailPage() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
-        {needsVerification && (
-          <div className="mb-2 flex flex-col items-center gap-1">
-            <p className="text-xs text-ink-700 text-center leading-snug">Para reservar necesitas verificar tu identidad. El administrador revisará tu solicitud.</p>
-            <button
-              onClick={() => navigate('/verification')}
-              className="text-xs font-bold text-mishell-600 underline underline-offset-2"
-            >
-              Ir a verificación →
-            </button>
-          </div>
-        )}
         {reserveError && (
           <p className="text-xs text-mishell-600 text-center mb-2 px-2">{reserveError}</p>
         )}
@@ -375,6 +363,11 @@ export default function PropertyDetailPage() {
           Reservar ahora
         </motion.button>
       </motion.div>
+
+      <VerificationSheet
+        open={verificationSheetOpen}
+        onClose={() => setVerificationSheetOpen(false)}
+      />
 
       <AuthPromptSheet
         open={authSheetOpen}
