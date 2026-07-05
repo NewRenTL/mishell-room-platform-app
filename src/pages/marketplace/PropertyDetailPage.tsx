@@ -292,11 +292,11 @@ export default function PropertyDetailPage() {
         )}
 
         {/* Restrictions */}
-        {((property.restrictions as unknown[] | null) ?? []).length > 0 && (
+        {(property.restrictions?.length ?? 0) > 0 && (
           <section>
             <h2 className="text-base font-bold text-ink-900 mb-1">Restricciones</h2>
             <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-              {((property.restrictions as unknown[] | null) ?? []).map((r: { key: string; label: string; description: string }) => (
+              {((property.restrictions as { key: string; label: string; description: string }[] | null) ?? []).map((r) => (
                 <div key={r.key} className="flex items-start gap-3 px-4 py-3.5 border-b border-ink-100 last:border-0">
                   <div className="w-9 h-9 rounded-full bg-mishell-50 flex items-center justify-center shrink-0 mt-0.5">
                     {r.key === 'max_capacity'

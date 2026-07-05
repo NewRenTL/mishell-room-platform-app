@@ -49,7 +49,7 @@ export function AuthPromptSheet({
             onClick={onClose}
           />
           <motion.div
-            className="relative bg-white rounded-t-3xl px-5 pt-4 pb-8 flex flex-col gap-5"
+            className="relative bg-white rounded-t-3xl px-5 pt-4 pb-8 flex flex-col gap-5 max-w-107.5 mx-auto w-full"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}

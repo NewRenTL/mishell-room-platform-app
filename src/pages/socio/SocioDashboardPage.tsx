@@ -36,7 +36,7 @@ export default function SocioDashboardPage() {
   const properties = propsData?.data ?? [];
   const propsMeta = propsData?.meta;
 
-  const { data: stats, isError: statsError } = useQuery({
+  const { data: stats } = useQuery({
     queryKey: ['socio-stats'],
     queryFn: () => bookingsService.getSocioStats().then((r) => r.data),
     staleTime: 1000 * 60 * 2,
@@ -64,13 +64,6 @@ export default function SocioDashboardPage() {
               <p className="text-xs text-ink-500">Hola, {user?.firstName}</p>
             </div>
           </div>
-          <motion.button
-            onClick={() => navigate('/socio/add-property')}
-            className="w-9 h-9 rounded-full bg-mishell-600 flex items-center justify-center shadow-md shadow-mishell-600/30"
-            whileTap={{ scale: 0.9 }}
-          >
-            <Plus size={18} className="text-white" />
-          </motion.button>
         </div>
       </motion.div>
 

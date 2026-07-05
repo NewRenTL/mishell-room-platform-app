@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Joyride, type CallBackProps, type Step, type Placement, STATUS } from 'react-joyride';
+import { Joyride, type Placement, STATUS } from 'react-joyride';
 import { HelpCircle } from 'lucide-react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -37,7 +37,8 @@ export function PageTutorial({ id: _id, steps, buttonBottom = 'bottom-24' }: Pro
 
   const filteredSteps = useMemo(() => (run ? filterExistingTargets(steps) : steps), [run, steps]);
 
-  const joyrideSteps: Step[] = filteredSteps.map((s) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const joyrideSteps: any[] = filteredSteps.map((s) => {
     const hasTarget = !!s.target && s.target !== 'body';
     return {
       target: s.target ?? 'body',
@@ -50,12 +51,14 @@ export function PageTutorial({ id: _id, steps, buttonBottom = 'bottom-24' }: Pro
     };
   });
 
-  function handleCallback({ status, index, type, action }: CallBackProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleCallback({ status, index, type, action }: any) {
     if ((status as string) === STATUS.FINISHED || (status as string) === STATUS.SKIPPED) {
       setRun(false);
       setStepIndex(0);
       return;
     }
+    if (action === 'close') { closeTutorial(); return; }
     // Track step index so closing/reopening continues correctly
     if (type === 'step:after' && action === 'next') setStepIndex(index + 1);
     if (type === 'step:after' && action === 'prev') setStepIndex(Math.max(0, index - 1));
@@ -79,18 +82,20 @@ export function PageTutorial({ id: _id, steps, buttonBottom = 'bottom-24' }: Pro
     return () => { listenerHandle?.remove(); };
   }, [run]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const JoyrideAny = Joyride as any;
+
   return (
     <>
-      <Joyride
+      <JoyrideAny
         steps={joyrideSteps}
         run={run}
         stepIndex={stepIndex}
         continuous
-        showProgress
         showSkipButton
         scrollToFirstStep
         scrollOffset={120}
-        disableOverlayClose
+        disableOverlayClose={false}
         spotlightClicks={false}
         callback={handleCallback}
         styles={{

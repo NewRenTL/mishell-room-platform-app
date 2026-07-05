@@ -95,7 +95,6 @@ export default function RegStep2Data({
   const [legalOpen, setLegalOpen] = useState<LegalType>(null);
 
   const isInquilino = role === 'INQUILINO';
-  const phoneValid = !phone.trim() || PHONE_RE.test(phone.replace(/\s/g, ''));
   const photosOk = !isInquilino || (!!photoFront && !!photoBack);
 
   function handlePhone(v: string) {

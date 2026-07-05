@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   reset = () => {
     this.setState({ error: null });
-    window.location.reload();
+    window.location.href = '/';
   };
 
   render() {
@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div>
           <h1 className="text-lg font-bold text-ink-900">Algo salió mal</h1>
           <p className="text-sm text-ink-500 mt-1 max-w-xs">
-            La app encontró un error inesperado. Recarga la pantalla para volver a intentarlo.
+            La app encontró un error inesperado. Vuelve al inicio para continuar.
           </p>
         </div>
         <button
@@ -45,13 +45,11 @@ export class ErrorBoundary extends Component<Props, State> {
           className="flex items-center gap-2 px-5 py-3 bg-mishell-600 text-white font-semibold rounded-2xl text-sm active:scale-95 transition-transform"
         >
           <RefreshCw size={15} />
-          Recargar
+          Volver al inicio
         </button>
-        {import.meta.env.DEV && (
-          <pre className="text-[10px] text-ink-400 max-w-full overflow-auto bg-ink-50 rounded-xl p-3 text-left">
-            {this.state.error.message}
-          </pre>
-        )}
+        <pre className="text-[10px] text-ink-400 max-w-full overflow-auto bg-ink-50 rounded-xl p-3 text-left">
+          {this.state.error.message}
+        </pre>
       </div>
     );
   }

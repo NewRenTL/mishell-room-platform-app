@@ -85,7 +85,7 @@ export default function BookingDetailPage() {
       }
     } catch (err: unknown) {
       newTab?.close();
-      setDownloadError(getApiErrorMessage(err, 'No se pudo descargar el contrato. Intenta de nuevo.'));
+      setDownloadError(getApiErrorMessage(err, 'No se pudo generar el PDF. Intenta de nuevo.'));
     } finally {
       setDownloading(false);
     }

@@ -52,18 +52,6 @@ export default function HomePage() {
                 {user?.role === 'INQUILINO' ? 'Arrendataria' : 'Mishell Room'}
               </span>
             </div>
-            <button
-              onClick={() => navigate('/profile')}
-              className="w-9 h-9 rounded-full bg-ink-50 border border-ink-100 flex items-center justify-center overflow-hidden"
-            >
-              {user ? (
-                <span className="text-xs font-bold text-mishell-600">
-                  {user.firstName?.[0]?.toUpperCase() ?? 'U'}
-                </span>
-              ) : (
-                <span className="text-xs font-bold text-ink-600">?</span>
-              )}
-            </button>
           </div>
 
           {/* Greeting row */}
