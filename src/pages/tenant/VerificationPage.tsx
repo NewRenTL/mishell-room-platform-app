@@ -8,7 +8,6 @@ import { Button } from '../../components/ui/Button';
 import { DniDocViewer } from '../../components/ui/DniDocViewer';
 import { verificationService } from '../../services/verification.service';
 import { getApiErrorMessage } from '../../utils/error';
-import { PageTutorial } from '../../components/ui/PageTutorial';
 
 const STATUS_CONFIG = {
   UNVERIFIED: {
@@ -248,15 +247,6 @@ export default function VerificationPage() {
         )}
       </div>
 
-      <PageTutorial
-        id="verification"
-        steps={[
-          { title: '¿Por qué verificar tu identidad?', content: 'La verificación es un paso único y obligatorio para reservar habitaciones. Protege tanto a los inquilinos como a los propietarios.' },
-          { title: 'Cómo funciona', content: 'Toca este botón y el administrador revisará tu información (nombre, DNI y fotos). El proceso suele tardar unas horas.', target: '[data-tutorial="submit-verification"]' },
-          { title: 'Actualización automática', content: 'Esta página se actualiza automáticamente cada 5 segundos cuando tu solicitud está en revisión. No necesitas recargar la página.' },
-          { title: 'Cuando te aprueben', content: 'Al ser aprobado, te llevaremos automáticamente al inicio para que reserves habitaciones, veas contratos y más.' },
-        ]}
-      />
     </div>
   );
 }
