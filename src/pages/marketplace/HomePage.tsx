@@ -16,7 +16,7 @@ export default function HomePage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['properties', 'home'],
     queryFn: () => propertiesService.getAll({ limit: 10, status: 'AVAILABLE' }).then((r) => r.data),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   const { data: recentData, isLoading: recentLoading, isError: recentError } = useQuery({
@@ -25,7 +25,7 @@ export default function HomePage() {
       propertiesService
         .getAll({ limit: 20, status: 'AVAILABLE', sortBy: 'createdAt', order: 'desc' })
         .then((r) => r.data),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   const properties = data?.data ?? [];

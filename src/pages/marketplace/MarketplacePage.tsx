@@ -20,7 +20,7 @@ export default function MarketplacePage() {
     queryFn: () =>
       propertiesService.getAll({ search: search || undefined, city: city || undefined, page, limit: 10, status: 'AVAILABLE' })
         .then((r) => r.data),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   const properties = data?.data ?? [];
