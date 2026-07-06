@@ -108,6 +108,7 @@ export default function BookingFlowPage() {
               <Step3Payment
                 bookingId={bookingId!}
                 onNext={() => setStep(4)}
+                onBack={() => setStep(2)}
               />
             </motion.div>
           )}

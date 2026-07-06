@@ -10,6 +10,7 @@ import type { PaymentMethod } from '../../../types';
 interface Props {
   bookingId: string;
   onNext: () => void;
+  onBack: () => void;
 }
 
 type Method = {
@@ -69,7 +70,7 @@ function MethodCard({ methodKey, label, description, logo, Icon, selected, index
   );
 }
 
-export default function Step3Payment({ bookingId, onNext }: Props) {
+export default function Step3Payment({ bookingId, onNext, onBack }: Props) {
   const setPaymentMethod = useBookingStore((s) => s.setPaymentMethod);
   const [selected, setSelected] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
@@ -138,6 +139,14 @@ export default function Step3Payment({ bookingId, onNext }: Props) {
       <Button loading={loading} onClick={handleNext} disabled={!selected}>
         Continuar
       </Button>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="text-sm font-semibold text-ink-500 py-2 text-center hover:text-ink-700 transition-colors"
+      >
+        Volver al contrato
+      </button>
     </div>
   );
 }

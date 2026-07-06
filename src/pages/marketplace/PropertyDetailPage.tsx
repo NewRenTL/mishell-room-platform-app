@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle, X, Expand, Building2, DoorOpen } from 'lucide-react';
+import { Share2, Heart, Star, MapPin, Wifi, Users, XCircle, X, Expand, Building2, DoorOpen, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { GoogleMapView } from '../../components/ui/GoogleMapView';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -237,7 +237,7 @@ export default function PropertyDetailPage() {
             <span className="text-xs text-ink-600">· 124 reseñas</span>
           </div>
         </div>
-        <p className="text-sm text-ink-600 flex items-center gap-1 mt-1">
+        <p className={`text-sm text-ink-600 flex items-center gap-1 mt-1 transition-all ${!isAuthenticated ? 'blur-sm select-none pointer-events-none' : ''}`}>
           <MapPin size={13} /> {property.address}{property.district ? `, ${property.district}` : ''}{property.province ? `, ${property.province}` : ''}{property.city ? `, ${property.city}` : ''}
         </p>
         {(property.apartmentName || property.roomNumber) && (
@@ -315,24 +315,37 @@ export default function PropertyDetailPage() {
         {/* Location map */}
         <section>
           <h2 className="text-base font-bold text-ink-900 mb-1">Ubicación</h2>
-          <p className="text-sm text-ink-600 mb-3 flex items-center gap-1">
+          <p className={`text-sm text-ink-600 mb-3 flex items-center gap-1 transition-all ${!isAuthenticated ? 'blur-sm select-none pointer-events-none' : ''}`}>
             <MapPin size={13} />
             {[property.address, property.district, property.province, property.city].filter(Boolean).join(', ')}
           </p>
-          {hasMap ? (
-            <div className="h-52 rounded-2xl overflow-hidden border border-ink-100">
-              <GoogleMapView
-                lat={property.latitude!}
-                lng={property.longitude!}
-                title={property.title}
-              />
-            </div>
-          ) : (
-            <div className="h-24 rounded-2xl border border-ink-100 bg-ink-50 flex flex-col items-center justify-center text-ink-400 gap-1">
-              <MapPin size={20} />
-              <p className="text-xs">{property.address}, {property.city}</p>
-            </div>
-          )}
+          <div className="relative">
+            {hasMap ? (
+              <div className={`h-52 rounded-2xl overflow-hidden border border-ink-100 transition-all ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
+                <GoogleMapView
+                  lat={property.latitude!}
+                  lng={property.longitude!}
+                  title={property.title}
+                />
+              </div>
+            ) : (
+              <div className={`h-24 rounded-2xl border border-ink-100 bg-ink-50 flex flex-col items-center justify-center text-ink-400 gap-1 transition-all ${!isAuthenticated ? 'blur-sm pointer-events-none' : ''}`}>
+                <MapPin size={20} />
+                <p className="text-xs">{property.address}, {property.city}</p>
+              </div>
+            )}
+            {!isAuthenticated && (
+              <button
+                onClick={() => setAuthSheetOpen(true)}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl"
+              >
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 flex flex-col items-center gap-1.5 shadow-sm border border-ink-100">
+                  <Lock size={16} className="text-ink-500" />
+                  <p className="text-xs font-semibold text-ink-700">Inicia sesión para ver la ubicación</p>
+                </div>
+              </button>
+            )}
+          </div>
         </section>
 
         {/* Price */}
