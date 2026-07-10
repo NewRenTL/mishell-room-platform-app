@@ -83,15 +83,27 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const photos = property.photoUrls ?? [];
+  const allPhotos = property.photoUrls ?? [];
+  const photos = isAuthenticated ? allPhotos : allPhotos.slice(0, 1);
   const hasMap = !!property.latitude && !!property.longitude;
+
+  function handleShare() {
+    const url = `https://mishellroom.com/properties/${id}`;
+    const title = property?.title ?? 'Habitación en Mishell Room';
+    const text = `${title} — Mira esta habitación en Mishell Room`;
+    if (navigator.share) {
+      navigator.share({ title, text, url }).catch(() => {});
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
+    }
+  }
 
   return (
     <div className="flex flex-col bg-white min-h-full pb-28">
       <AppHeader
         right={
           <div className="flex items-center gap-1">
-            <button aria-label="Compartir" className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-ink-50">
+            <button aria-label="Compartir" onClick={handleShare} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-ink-50 active:scale-90 transition-transform">
               <Share2 size={18} className="text-ink-900" />
             </button>
             <motion.button
@@ -112,8 +124,8 @@ export default function PropertyDetailPage() {
       {/* ── Gallery (compact preview) ── */}
       <div
         className="relative h-64 bg-ink-100 overflow-hidden cursor-pointer group"
-        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-        onTouchEnd={(e) => {
+        onTouchStart={isAuthenticated ? (e) => { touchStartX.current = e.touches[0].clientX; } : undefined}
+        onTouchEnd={isAuthenticated ? (e) => {
           if (touchStartX.current === null) return;
           const delta = e.changedTouches[0].clientX - touchStartX.current;
           if (Math.abs(delta) > 40) {
@@ -123,8 +135,8 @@ export default function PropertyDetailPage() {
             setLightboxOpen(true);
           }
           touchStartX.current = null;
-        }}
-        onClick={() => photos.length > 0 && setLightboxOpen(true)}
+        } : undefined}
+        onClick={() => isAuthenticated && photos.length > 0 && setLightboxOpen(true)}
       >
         {photos.length > 0 ? (
           <>
@@ -137,7 +149,7 @@ export default function PropertyDetailPage() {
                 <span className="text-white text-xs font-medium">Ver foto</span>
               </div>
             </div>
-            {photos.length > 1 && (
+            {isAuthenticated && photos.length > 1 && (
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {photos.map((_, i) => (
                   <button key={i} onClick={(e) => { e.stopPropagation(); setPhotoIdx(i); }}
@@ -146,9 +158,16 @@ export default function PropertyDetailPage() {
                 ))}
               </div>
             )}
-            <div className="absolute top-3 right-3 bg-black/40 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
-              {photoIdx + 1}/{photos.length}
-            </div>
+            {isAuthenticated && (
+              <div className="absolute top-3 right-3 bg-black/40 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                {photoIdx + 1}/{allPhotos.length}
+              </div>
+            )}
+            {!isAuthenticated && allPhotos.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold px-3 py-1 rounded-full">
+                +{allPhotos.length - 1} fotos — inicia sesión para verlas
+              </div>
+            )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-ink-400 text-sm">Sin fotos</div>

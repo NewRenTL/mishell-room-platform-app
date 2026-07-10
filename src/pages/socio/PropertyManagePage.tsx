@@ -51,6 +51,7 @@ export default function PropertyManagePage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+  const [settingCoverId, setSettingCoverId] = useState<string | null>(null);
   const [changingStatus, setChangingStatus] = useState(false);
   const [statusSuccess, setStatusSuccess] = useState(false);
 
@@ -162,6 +163,15 @@ export default function PropertyManagePage() {
       await propertiesService.deletePhoto(id, photoId);
       qc.invalidateQueries({ queryKey: ['property', id] });
     } finally { setDeletingPhotoId(null); }
+  }
+
+  async function handleSetCover(photoId: string) {
+    if (!id || settingCoverId) return;
+    setSettingCoverId(photoId);
+    try {
+      await propertiesService.setCoverPhoto(id, photoId);
+      qc.invalidateQueries({ queryKey: ['property', id] });
+    } finally { setSettingCoverId(null); }
   }
 
   async function handleStatusChange(status: string) {
@@ -399,29 +409,51 @@ export default function PropertyManagePage() {
           >
             {/* Photos */}
             <section>
-              <h2 className="text-sm font-bold text-ink-900 mb-3">Fotos ({photos.length})</h2>
+              <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos ({photos.length})</h2>
+              <p className="text-xs text-ink-500 mb-3">Toca una foto para establecerla como portada.</p>
               <div className="grid grid-cols-3 gap-2">
-                {photos.map((photo, i) => (
-                  <motion.div
-                    key={photo.id}
-                    className="relative aspect-square rounded-xl overflow-hidden bg-ink-100"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <img src={photoUrls[i]} alt="" className="w-full h-full object-cover" />
-                    <button
-                      onClick={() => handleDeletePhoto(photo.id)}
-                      disabled={deletingPhotoId === photo.id}
-                      className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
+                {photos.map((photo, i) => {
+                  const isCover = i === 0;
+                  const isSettingThis = settingCoverId === photo.id;
+                  return (
+                    <motion.div
+                      key={photo.id}
+                      className={`relative aspect-square rounded-xl overflow-hidden bg-ink-100 cursor-pointer border-2 transition-all
+                        ${isCover ? 'border-mishell-600' : 'border-transparent'}`}
+                      onClick={() => !isCover && handleSetCover(photo.id)}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.05 }}
                     >
-                      {deletingPhotoId === photo.id
-                        ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                        : <Trash2 size={11} className="text-white" />
-                      }
-                    </button>
-                  </motion.div>
-                ))}
+                      <img src={photoUrls[i]} alt="" className="w-full h-full object-cover" />
+                      {isCover && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-mishell-600/90 text-white text-[9px] font-bold text-center py-0.5 tracking-wide">
+                          PORTADA
+                        </div>
+                      )}
+                      {isSettingThis && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                      {!isCover && !isSettingThis && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[8px] font-semibold text-center py-0.5 opacity-0 hover:opacity-100 transition-opacity">
+                          Hacer portada
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photo.id); }}
+                        disabled={deletingPhotoId === photo.id}
+                        className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
+                      >
+                        {deletingPhotoId === photo.id
+                          ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                          : <Trash2 size={11} className="text-white" />
+                        }
+                      </button>
+                    </motion.div>
+                  );
+                })}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}

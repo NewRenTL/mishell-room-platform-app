@@ -23,6 +23,9 @@ export const propertiesService = {
   deletePhoto: (propertyId: string, photoId: string) =>
     api.delete(`/properties/${propertyId}/photos/${photoId}`),
 
+  setCoverPhoto: (propertyId: string, photoId: string) =>
+    api.patch(`/properties/${propertyId}/photos/${photoId}/set-cover`),
+
   changeStatus: (id: string, status: string) =>
     api.patch(`/properties/${id}/status`, { status }),
 };

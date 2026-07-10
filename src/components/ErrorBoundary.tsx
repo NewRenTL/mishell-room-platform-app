@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   logout = () => {
-    useAuthStore.getState().logout();
+    useAuthStore.getState().clearAuth();
     window.location.href = '/login';
   };
 
