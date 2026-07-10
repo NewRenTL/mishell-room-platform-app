@@ -43,8 +43,7 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
-  const isLibre = form.weeks === 'libre';
-  const weeksNum = isLibre ? 52 : (Number(form.weeks) || 1);
+  const weeksNum = Number(form.weeks) || 1;
   const checkOut = addWeeks(new Date(form.checkIn), weeksNum);
   const total = property ? Number(property.pricePerWeek) * weeksNum : 0;
 
@@ -101,29 +100,13 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
             min={today}
             onChange={(val) => set('checkIn', val)}
           />
-          <div className="flex gap-3">
-            {([
-              { v: '1',     label: '1 semana'  },
-              { v: '2',     label: '2 semanas' },
-              { v: 'libre', label: 'LIBRE'     },
-            ] as const).map((opt) => (
-              <button
-                key={opt.v}
-                type="button"
-                onClick={() => set('weeks', opt.v)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors
-                  ${form.weeks === opt.v
-                    ? 'bg-mishell-600 text-white border-mishell-600'
-                    : 'bg-white text-ink-700 border-ink-100'}`}
-              >
-                {opt.label}
-              </button>
-            ))}
+          <div className="flex justify-center">
+            <span className="px-5 py-2.5 rounded-xl text-sm font-medium border bg-mishell-600 text-white border-mishell-600">
+              1 semana
+            </span>
           </div>
           <p className="text-xs text-ink-600">
-            {isLibre
-              ? <>Sin fecha de salida fija — paga semana a semana. Notifica tu salida cuando decidas dejar la habitación.</>
-              : <>Salida estimada: <strong>{checkOut}</strong></>}
+            Salida estimada: <strong>{checkOut}</strong>
           </p>
         </div>
       </section>
@@ -159,17 +142,10 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
       {property && (
         <div className="bg-mishell-50 border border-mishell-100 rounded-2xl p-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-ink-600">
-              {isLibre ? 'Tarifa semanal' : `${form.weeks} ${Number(form.weeks) === 1 ? 'semana' : 'semanas'}`}
-            </span>
-            <span className="text-lg font-bold text-ink-900">
-              S/ {isLibre ? Number(property.pricePerWeek).toFixed(0) : total.toFixed(0)}
-              {isLibre && <span className="text-xs font-normal text-ink-500"> /sem</span>}
-            </span>
+            <span className="text-sm text-ink-600">1 semana</span>
+            <span className="text-lg font-bold text-ink-900">S/ {total.toFixed(0)}</span>
           </div>
-          <p className="text-xs text-ink-400 mt-0.5">
-            {isLibre ? 'Pago semanal sin tiempo fijo' : 'Total estimado del alojamiento'}
-          </p>
+          <p className="text-xs text-ink-400 mt-0.5">Total estimado del alojamiento</p>
         </div>
       )}
 

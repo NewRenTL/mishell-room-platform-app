@@ -37,6 +37,7 @@ export default function AddPropertyPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [coverIdx, setCoverIdx] = useState(0);
   const [photoError, setPhotoError] = useState('');
   const [createdId, setCreatedId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -70,7 +71,11 @@ export default function AddPropertyPage() {
   }
 
   function removePhoto(idx: number) {
-    setPhotos((prev) => prev.filter((_, i) => i !== idx));
+    setPhotos((prev) => {
+      const next = prev.filter((_, i) => i !== idx);
+      setCoverIdx((c) => (c === idx ? 0 : c > idx ? c - 1 : c));
+      return next;
+    });
   }
 
   async function handleSubmit() {
@@ -103,7 +108,8 @@ export default function AddPropertyPage() {
         latitude:  coords?.lat,
         longitude: coords?.lng,
       });
-      for (const photo of photos) {
+      const ordered = coverIdx === 0 ? photos : [photos[coverIdx], ...photos.filter((_, i) => i !== coverIdx)];
+      for (const photo of ordered) {
         await propertiesService.addPhoto(created.id, photo);
       }
       setCreatedId(created.id);
@@ -294,24 +300,29 @@ export default function AddPropertyPage() {
         {/* Photos */}
         <section data-tutorial="photos">
           <h2 className="text-sm font-bold text-ink-900 mb-1">Fotos de la propiedad</h2>
-          <p className="text-xs text-ink-500 mb-3">Sube hasta 10 fotos. La primera será la portada.</p>
+          <p className="text-xs text-ink-500 mb-3">Sube hasta 10 fotos. Toca una para elegirla como portada.</p>
 
           <div className="flex gap-3 flex-wrap">
             {photos.map((file, idx) => (
-              <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-ink-100 shrink-0">
+              <div
+                key={idx}
+                className={`relative w-24 h-24 rounded-2xl overflow-hidden shrink-0 cursor-pointer border-2 transition-all
+                  ${coverIdx === idx ? 'border-mishell-600 ring-2 ring-mishell-300' : 'border-ink-100'}`}
+                onClick={() => setCoverIdx(idx)}
+              >
                 <img
                   src={URL.createObjectURL(file)}
                   alt=""
                   className="w-full h-full object-cover"
                 />
-                {idx === 0 && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold text-center py-0.5">
-                    Portada
+                {coverIdx === idx && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-mishell-600/90 text-white text-[9px] font-bold text-center py-0.5 tracking-wide">
+                    PORTADA
                   </div>
                 )}
                 <button
                   type="button"
-                  onClick={() => removePhoto(idx)}
+                  onClick={(e) => { e.stopPropagation(); removePhoto(idx); }}
                   className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center"
                 >
                   <X size={11} className="text-white" />

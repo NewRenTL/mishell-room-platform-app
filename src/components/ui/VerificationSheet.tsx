@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { ShieldCheck, Clock, XCircle, CheckCircle2, AlertCircle, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Button } from './Button';
@@ -54,6 +55,7 @@ interface Props {
 
 export function VerificationSheet({ open, onClose, onApproved }: Props) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [submitError, setSubmitError] = useState('');
 
   const { data, isLoading } = useQuery({
@@ -172,12 +174,22 @@ export function VerificationSheet({ open, onClose, onApproved }: Props) {
                   </Button>
                 )}
 
-                <button
-                  onClick={onClose}
-                  className="text-xs text-ink-400 hover:text-ink-600 transition-colors py-1 text-center"
-                >
-                  Seguir explorando
-                </button>
+                {status === 'PENDING' ? (
+                  <button
+                    onClick={() => { onClose(); navigate('/profile'); }}
+                    className="flex items-center justify-center gap-1.5 text-sm font-semibold text-ink-700 hover:text-ink-900 transition-colors py-1"
+                  >
+                    Ir a mi perfil
+                    <ArrowRight size={15} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={onClose}
+                    className="text-xs text-ink-400 hover:text-ink-600 transition-colors py-1 text-center"
+                  >
+                    Seguir explorando
+                  </button>
+                )}
               </>
             )}
           </motion.div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   MapPin, FileText, ChevronRight,
-  BedDouble, Users, Navigation, Download, Loader2,
+  BedDouble, User, Users, Navigation, Download, Loader2,
 } from 'lucide-react';
 import { getApiErrorMessage } from '../../utils/error';
 import { motion } from 'motion/react';
@@ -160,7 +160,9 @@ export default function BookingDetailPage() {
                 </span>
               )}
               <span className="flex items-center gap-1 text-xs text-ink-700 bg-ink-50 px-2.5 py-1 rounded-full border border-ink-100">
-                <Users size={11} className="text-ink-500" />
+                {(property?.maxCapacity ?? 1) > 1
+                  ? <Users size={11} className="text-ink-500" />
+                  : <User size={11} className="text-ink-500" />}
                 {(property?.maxCapacity ?? 1) > 1 ? `${property?.maxCapacity} personas` : '1 persona'}
               </span>
             </div>

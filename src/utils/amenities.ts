@@ -31,9 +31,11 @@ export const AMENITY_ICONS: Record<string, React.ComponentType<{ size?: number; 
 };
 
 export const RESTRICTION_OPTIONS: { key: string; label: string }[] = [
-  { key: 'sin_mascotas',  label: 'Sin mascotas' },
-  { key: 'sin_ninos',     label: 'Sin niños' },
-  { key: 'max_1_persona', label: 'Capacidad máxima: 1 persona por habitación' },
+  { key: 'sin_mascotas',      label: 'Sin mascotas' },
+  { key: 'sin_ninos',         label: 'Sin niños' },
+  { key: 'max_1_persona',     label: 'Capacidad máxima: 1 persona por habitación' },
+  { key: 'sin_fumadores',     label: 'Prohibido para fumadores' },
+  { key: 'sin_estacionamiento', label: 'No se puede estacionar en el alojamiento' },
 ];
 
 export const RESTRICTION_LABELS: Record<string, string> = Object.fromEntries(
