@@ -143,11 +143,13 @@ export default function PropertyManagePage() {
   }
 
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !id) return;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length || !id) return;
     setUploadingPhoto(true);
     try {
-      await propertiesService.addPhoto(id, file);
+      for (const file of files) {
+        await propertiesService.addPhoto(id, file);
+      }
       qc.invalidateQueries({ queryKey: ['property', id] });
     } finally {
       setUploadingPhoto(false);
@@ -461,10 +463,10 @@ export default function PropertyManagePage() {
                 >
                   {uploadingPhoto
                     ? <div className="w-5 h-5 border-2 border-mishell-600 border-t-transparent rounded-full animate-spin" />
-                    : <><ImagePlus size={20} className="text-ink-400" /><span className="text-[10px] text-ink-400">Añadir</span></>
+                    : <><ImagePlus size={20} className="text-ink-400" /><span className="text-[10px] text-ink-400 text-center leading-tight">Añadir<br/>fotos</span></>
                   }
                 </button>
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
               </div>
             </section>
 
