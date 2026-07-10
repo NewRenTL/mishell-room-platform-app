@@ -151,6 +151,7 @@ export default function PropertyManagePage() {
         await propertiesService.addPhoto(id, file);
       }
       qc.invalidateQueries({ queryKey: ['property', id] });
+      qc.invalidateQueries({ queryKey: ['properties', 'mine'] });
     } finally {
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -164,6 +165,7 @@ export default function PropertyManagePage() {
     try {
       await propertiesService.deletePhoto(id, photoId);
       qc.invalidateQueries({ queryKey: ['property', id] });
+      qc.invalidateQueries({ queryKey: ['properties', 'mine'] });
     } finally { setDeletingPhotoId(null); }
   }
 
@@ -173,6 +175,7 @@ export default function PropertyManagePage() {
     try {
       await propertiesService.setCoverPhoto(id, photoId);
       qc.invalidateQueries({ queryKey: ['property', id] });
+      qc.invalidateQueries({ queryKey: ['properties', 'mine'] });
     } finally { setSettingCoverId(null); }
   }
 
