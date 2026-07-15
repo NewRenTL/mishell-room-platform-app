@@ -10,39 +10,79 @@ interface Section {
 const LEGAL_CONTENT: Record<string, { title: string; date: string; sections: Section[] }> = {
   terms: {
     title: 'Términos de Servicio',
-    date: 'Enero 2025',
+    date: 'Agosto 2026',
     sections: [
       {
-        heading: '1. Aceptación de los términos',
-        body: 'Al acceder y utilizar Mishell Room aceptas quedar vinculado por estos Términos de Servicio. Si no estás de acuerdo con alguna parte de los términos, no podrás acceder al servicio.',
+        heading: '1. Objeto',
+        body: 'MishellRoom es una plataforma digital intermediaria que conecta a propietarias o administradores autorizados de departamentos con inquilinas interesadas en alquilar habitaciones por periodos semanales, con posibilidad de continuidad por varias semanas o meses. Todas las solicitudes, aceptaciones, pagos y comunicaciones vinculadas al alquiler deben realizarse dentro de MishellRoom.',
       },
       {
-        heading: '2. Descripción del servicio',
-        body: 'Mishell Room es una plataforma digital que conecta a propietarios de habitaciones (socios) con personas que buscan alojamiento (inquilinos). Actuamos como intermediarios y no somos parte de los contratos de arrendamiento entre las partes.',
+        heading: '2. Aceptación',
+        body: 'Al registrarte, acceder o usar MishellRoom, aceptas estos Términos de Servicio, la Política de Privacidad, la Política de Pagos, la Política contra la Discriminación y las demás políticas publicadas en la app o web.',
       },
       {
-        heading: '3. Registro y cuenta',
-        body: 'Para usar el servicio debes crear una cuenta con información veraz y actualizada. Eres responsable de mantener la confidencialidad de tu contraseña o PIN y de todas las actividades que ocurran bajo tu cuenta.',
+        heading: '3. Rol de MishellRoom',
+        body: 'MishellRoom actúa como intermediaria tecnológica para facilitar publicaciones, validación de identidad, contacto entre usuarios, gestión operativa y registro de pagos dentro de la plataforma. MishellRoom no es propietaria de las habitaciones, no alquila ni subarrienda inmuebles directamente y no reemplaza a la propietaria o administradora autorizada en la relación contractual de alquiler o subarrendamiento.',
       },
       {
-        heading: '4. Pagos y tarifas',
-        body: 'Los pagos se realizan directamente entre inquilinos y propietarios según los términos acordados en cada reserva. Mishell Room puede cobrar comisiones por el uso de la plataforma, las cuales serán comunicadas de forma transparente antes de completar cualquier transacción.',
+        heading: '4. Usuarias y capacidad legal',
+        body: 'Pueden usar MishellRoom únicamente personas mayores de 18 años de edad con capacidad legal para contratar. Las usuarias podrán registrarse como inquilinas o como propietarias o administradoras autorizadas, y deberán completar el proceso de validación que solicite la plataforma.',
       },
       {
-        heading: '5. Conducta del usuario',
-        body: 'Te comprometes a usar la plataforma únicamente para fines legales y de manera que no infrinja los derechos de terceros. Queda prohibido el uso fraudulento, la publicación de información falsa o cualquier actividad que perjudique a otros usuarios.',
+        heading: '5. Verificación de identidad',
+        body: 'MishellRoom podrá solicitar documento de identidad, fotografía del documento, número de celular, correo electrónico y cualquier otra información razonable para verificar la identidad de las usuarias, prevenir fraudes y reforzar la seguridad de la comunidad. La información entregada debe ser veraz, completa y actualizada.',
       },
       {
-        heading: '6. Limitación de responsabilidad',
-        body: 'Mishell Room no se hace responsable de daños indirectos, incidentales o consecuentes derivados del uso o la imposibilidad de uso del servicio. Nuestra responsabilidad máxima no excederá el importe pagado por el usuario en los últimos 3 meses.',
+        heading: '6. Publicación de habitaciones',
+        body: 'La propietaria o administradora autorizada es responsable de publicar información real, clara y suficiente sobre la habitación ofrecida, incluyendo precio semanal, ubicación, condiciones de uso, servicios incluidos, reglas de convivencia, disponibilidad y fotografías reales. Quien publique una habitación declara que cuenta con facultad legal para alquilarla o subarrendarla.',
       },
       {
-        heading: '7. Modificaciones',
-        body: 'Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor al publicarse en la plataforma. El uso continuado del servicio tras la publicación implica la aceptación de los nuevos términos.',
+        heading: '7. Autorización para subarrendar',
+        body: 'La administradora o arrendataria ofrece una habitación en subarrendamiento. En Perú, el subarrendamiento está permitido siempre y cuando se declaren ante la Sunat los debidos impuestos, por lo que la Administradora puede mostrar evidencia razonable de dichos impuestos cuando corresponda.',
       },
       {
-        heading: '8. Contacto',
-        body: 'Para cualquier consulta sobre estos términos puedes contactarnos a través del chat de soporte dentro de la aplicación o escribirnos a contacto@mishellroom.com.',
+        heading: '8. Solicitud, aceptación y contrato',
+        body: 'Cuando una inquilina solicita una habitación y la propietaria o administradora autorizada la acepta dentro de MishellRoom, ambas partes celebran un acuerdo de alquiler o subarrendamiento sobre una habitación por periodos semanales. La continuidad por semanas adicionales o meses dependerá del pago semanal oportuno y del cumplimiento de las condiciones aceptadas en la plataforma.',
+      },
+      {
+        heading: '9. Pagos',
+        body: 'El pago del alquiler será semanal y por adelantado, según las condiciones informadas en cada publicación. Todo pago relacionado con el alquiler deberá realizarse dentro de MishellRoom, y está prohibido acordar pagos o cierres por fuera de la plataforma para evitar controles, comisiones o registros internos.',
+      },
+      {
+        heading: '10. Plazo de gracia por falta de pago',
+        body: 'Si la inquilina no realiza el pago correspondiente al inicio de una nueva semana, podrá aplicarse un plazo de gracia de 24 o 48 horas, según la configuración de MishellRoom o las condiciones informadas en la publicación. Vencido ese plazo sin pago efectivo, la propietaria o administradora autorizada podrá dar por terminado el alquiler semanal conforme al contrato aplicable y a las reglas de la plataforma.',
+      },
+      {
+        heading: '11. Sin garantía',
+        body: 'Por el momento, MishellRoom no maneja depósito de garantía. La obligación económica principal de la inquilina es pagar por adelantado la semana correspondiente, y la continuidad del alojamiento dependerá del cumplimiento de los pagos sucesivos acordados.',
+      },
+      {
+        heading: '12. Responsabilidades de la propietaria o administradora',
+        body: 'La propietaria o administradora autorizada es responsable por la veracidad del anuncio, por entregar la habitación en condiciones adecuadas de uso y habitabilidad, y por informar con claridad las reglas internas del inmueble.',
+      },
+      {
+        heading: '13. Responsabilidades de la inquilina',
+        body: 'La inquilina es responsable de usar la habitación y las áreas permitidas de manera adecuada, respetar las reglas del inmueble, pagar puntualmente cada semana y no causar daños, disturbios o usos contrarios a la ley. El incumplimiento podrá generar cancelación de la permanencia, suspensión de la cuenta y otras medidas previstas en la plataforma o en el contrato aplicable.',
+      },
+      {
+        heading: '14. Conducta prohibida',
+        body: 'Está prohibido publicar información falsa, suplantar identidad, discriminar, acosar, manipular pagos, cerrar acuerdos por fuera de MishellRoom, utilizar la app para fines ilícitos o vulnerar los sistemas de seguridad de la plataforma. MishellRoom podrá suspender anuncios, pagos o cuentas cuando detecte riesgos de fraude, incumplimientos o conductas abusivas.',
+      },
+      {
+        heading: '15. Protección de datos',
+        body: 'MishellRoom tratará los datos personales conforme a su Política de Privacidad y a la Ley de Protección de Datos Personales del Perú (Ley N.° 29733).',
+      },
+      {
+        heading: '16. Reclamos',
+        body: 'MishellRoom contará con canales de atención para consultas, quejas y reclamos. Además, como plataforma digital de comercio electrónico, deberá mantener un Libro de Reclamaciones virtual visible y accesible dentro de la app o web, conforme a la normativa peruana vigente.',
+      },
+      {
+        heading: '17. Cambios en los términos',
+        body: 'MishellRoom podrá actualizar estos Términos por razones legales, operativas o de seguridad. Los cambios relevantes serán informados antes de su entrada en vigencia mediante la app, la web o el correo registrado por la usuaria.',
+      },
+      {
+        heading: '18. Ley aplicable',
+        body: 'Estos Términos se rigen por las leyes de la República del Perú. Cualquier controversia será atendida conforme a la normativa peruana aplicable y a los mecanismos de atención al consumidor que correspondan.',
       },
     ],
   },
