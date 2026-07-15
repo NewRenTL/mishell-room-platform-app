@@ -36,6 +36,7 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
   const setGuestData = useBookingStore((s) => s.setGuestData);
   const setDates = useBookingStore((s) => s.setDates);
   const setBookingIds = useBookingStore((s) => s.setBookingIds);
+  const bookingId = useBookingStore((s) => s.bookingId);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -58,6 +59,15 @@ export default function Step1Guest({ propertyId, property, onNext }: Props) {
       return;
     }
     setError('');
+
+    // Si ya existe una reserva para esta propiedad, solo avanzamos sin crear otra
+    if (bookingId) {
+      setGuestData({ name, dni, phone });
+      setDates(checkIn, checkOut ?? undefined);
+      onNext();
+      return;
+    }
+
     setLoading(true);
     try {
       setGuestData({ name, dni, phone });

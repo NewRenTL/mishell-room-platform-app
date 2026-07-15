@@ -18,10 +18,11 @@ interface Props {
 }
 
 export default function Step2Contract({ bookingId, hasContract, onNext, onSkip }: Props) {
-  const setSignature = useBookingStore((s) => s.setSignature);
-  const contractId   = useBookingStore((s) => s.contractId);
+  const setSignature  = useBookingStore((s) => s.setSignature);
+  const contractId    = useBookingStore((s) => s.contractId);
+  const storedSigId   = useBookingStore((s) => s.signatureId);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
-  const [signed, setSigned] = useState(false);
+  const [signed, setSigned] = useState(!!storedSigId);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');

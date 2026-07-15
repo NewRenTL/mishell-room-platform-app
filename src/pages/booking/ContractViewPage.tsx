@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Download, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppHeader } from '../../components/layout/AppHeader';
+import { SignatureCanvas } from '../../components/ui/SignatureCanvas';
 import { bookingsService } from '../../services/bookings.service';
+import { signaturesService } from '../../services/signatures.service';
 import { getApiErrorMessage } from '../../utils/error';
 
 export default function ContractViewPage() {
@@ -12,9 +14,9 @@ export default function ContractViewPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [signing, setSigning] = useState(false);
   const [signError, setSignError] = useState('');
-  const [agreed, setAgreed] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
@@ -33,12 +35,12 @@ export default function ContractViewPage() {
   const isSigned = booking?.contract?.status === 'SIGNED' || contract?.status === 'SIGNED';
 
   async function handleSign() {
-    if (!bookingId || !agreed) return;
+    if (!bookingId || !signatureDataUrl) return;
     setSigning(true);
     setSignError('');
     try {
-      const signatureId = crypto.randomUUID();
-      await bookingsService.signContract(bookingId, signatureId);
+      const sigRes = await signaturesService.upload(signatureDataUrl);
+      await bookingsService.signContract(bookingId, sigRes.data.id);
       qc.invalidateQueries({ queryKey: ['booking', bookingId] });
       qc.invalidateQueries({ queryKey: ['contract', bookingId] });
     } catch (err: unknown) {
@@ -118,7 +120,7 @@ export default function ContractViewPage() {
 
           {/* Contract content */}
           <div
-            className="bg-white rounded-2xl border border-ink-100 p-5 text-sm text-ink-900 leading-relaxed max-h-[55vh] overflow-y-auto"
+            className="bg-white rounded-2xl border border-ink-100 p-5 text-sm text-ink-900 leading-relaxed max-h-[45vh] overflow-y-auto"
             dangerouslySetInnerHTML={{ __html: contract.content }}
           />
 
@@ -130,31 +132,27 @@ export default function ContractViewPage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="bg-white rounded-2xl border border-ink-100 p-4 flex flex-col gap-3"
+                className="bg-white rounded-2xl border border-ink-100 p-4 flex flex-col gap-4"
               >
-                <label className="flex items-start gap-3 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 accent-mishell-600 shrink-0"
-                  />
-                  <span className="text-sm text-ink-700 leading-relaxed">
-                    He leído y acepto los términos del contrato de arrendamiento
-                  </span>
-                </label>
+                <div>
+                  <p className="text-sm font-bold text-ink-900 mb-1">Tu firma</p>
+                  <p className="text-xs text-ink-500 mb-3">Dibuja tu firma con el dedo y pulsa "Guardar firma"</p>
+                  <SignatureCanvas onSave={(dataUrl) => { setSignatureDataUrl(dataUrl); setSignError(''); }} />
+                </div>
+
                 {signError && (
                   <p className="text-xs text-mishell-600 text-center">{signError}</p>
                 )}
+
                 <motion.button
                   onClick={handleSign}
-                  disabled={!agreed || signing}
+                  disabled={!signatureDataUrl || signing}
                   className="w-full bg-mishell-600 text-white font-semibold rounded-full h-12 text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   whileTap={{ scale: 0.97 }}
                 >
                   {signing
                     ? <><Loader2 size={14} className="animate-spin" /> Firmando...</>
-                    : 'Firmar contrato'
+                    : 'Firmar y guardar'
                   }
                 </motion.button>
               </motion.div>
