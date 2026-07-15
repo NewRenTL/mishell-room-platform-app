@@ -18,6 +18,7 @@ export default function PropertyDetailPage() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
+  const isRestricted = !isAuthenticated || (user?.role === 'INQUILINO' && user?.verificationStatus !== 'APPROVED');
   const setProperty = useBookingStore((s) => s.setProperty);
   const toggle = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.has(id ?? ''));
@@ -163,11 +164,6 @@ export default function PropertyDetailPage() {
                 {photoIdx + 1}/{allPhotos.length}
               </div>
             )}
-            {!isAuthenticated && allPhotos.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white text-[11px] font-semibold px-3 py-1 rounded-full">
-                +{allPhotos.length - 1} fotos — inicia sesión para verlas
-              </div>
-            )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-ink-400 text-sm">Sin fotos</div>
@@ -256,7 +252,7 @@ export default function PropertyDetailPage() {
             <span className="text-xs text-ink-600">· 124 reseñas</span>
           </div>
         </div>
-        <p className={`text-sm text-ink-600 flex items-center gap-1 mt-1 transition-all ${!isAuthenticated ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
+        <p className={`text-sm text-ink-600 flex items-center gap-1 mt-1 transition-all ${isRestricted ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
           <MapPin size={13} /> {property.address}{property.district ? `, ${property.district}` : ''}{property.province ? `, ${property.province}` : ''}{property.city ? `, ${property.city}` : ''}
         </p>
         {(property.apartmentName || property.roomNumber) && (
@@ -268,9 +264,9 @@ export default function PropertyDetailPage() {
               </span>
             )}
             {property.roomNumber && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1">
+              <span className={`inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1 transition-all ${isRestricted ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
                 <DoorOpen size={12} className="text-ink-500" />
-                {property.roomNumber}
+                Hab. {property.roomNumber}
               </span>
             )}
           </div>
@@ -334,7 +330,7 @@ export default function PropertyDetailPage() {
         {/* Location map */}
         <section>
           <h2 className="text-base font-bold text-ink-900 mb-1">Ubicación</h2>
-          <p className={`text-sm text-ink-600 mb-3 flex items-center gap-1 transition-all ${!isAuthenticated ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
+          <p className={`text-sm text-ink-600 mb-3 flex items-center gap-1 transition-all ${isRestricted ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
             <MapPin size={13} />
             {[property.address, property.district, property.province, property.city].filter(Boolean).join(', ')}
           </p>
@@ -379,7 +375,7 @@ export default function PropertyDetailPage() {
           className="w-full bg-mishell-600 hover:bg-mishell-500 active:bg-mishell-700 text-white font-semibold rounded-full h-14 text-base transition-colors"
           whileTap={{ scale: 0.97 }}
         >
-          Reservar ahora
+          {!isAuthenticated ? 'Crear Cuenta' : 'Reservar ahora'}
         </motion.button>
       </motion.div>
 

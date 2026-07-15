@@ -1,4 +1,4 @@
-import { Wifi, ShowerHead, Car, Microwave, Wind, ChefHat, UtensilsCrossed, Bath, Phone } from 'lucide-react';
+import { Wifi, ShowerHead, Car, Microwave, Wind, ChefHat, UtensilsCrossed, Bath, Phone, BedDouble } from 'lucide-react';
 
 export const AMENITY_OPTIONS: { key: string; label: string }[] = [
   { key: 'wifi',             label: 'Wifi rápido' },
@@ -10,7 +10,9 @@ export const AMENITY_OPTIONS: { key: string; label: string }[] = [
   { key: 'comedor',          label: 'Comedor personal' },
   { key: 'banio_compartido', label: 'Baño compartido' },
   { key: 'banio_personal',   label: 'Baño personal' },
-  { key: 'intercomunicador', label: 'Intercomunicador' },
+  { key: 'intercomunicador',    label: 'Intercomunicador' },
+  { key: 'cama_plaza_media',    label: 'Cama de plaza y media' },
+  { key: 'cama_dos_plazas',     label: 'Cama de dos plazas' },
 ];
 
 export const AMENITY_LABELS: Record<string, string> = Object.fromEntries(
@@ -27,7 +29,9 @@ export const AMENITY_ICONS: Record<string, React.ComponentType<{ size?: number; 
   comedor:          UtensilsCrossed,
   banio_compartido: Bath,
   banio_personal:   Bath,
-  intercomunicador: Phone,
+  intercomunicador:  Phone,
+  cama_plaza_media:  BedDouble,
+  cama_dos_plazas:   BedDouble,
 };
 
 export const RESTRICTION_OPTIONS: { key: string; label: string }[] = [

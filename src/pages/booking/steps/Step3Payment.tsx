@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreditCard, Info, Banknote, Building2 } from 'lucide-react';
+import { CreditCard, Info, Banknote, Building2, QrCode } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { bookingsService } from '../../../services/bookings.service';
@@ -28,6 +28,7 @@ const METHODS: Method[] = [
   { key: 'CARD',          label: 'Tarjeta',           description: 'Visa, Mastercard, American Express',         Icon: CreditCard },
   { key: 'TRANSFERENCIA', label: 'Transferencia',     description: 'Transfiere y sube tu comprobante',           Icon: Building2, manual: true },
   { key: 'EFECTIVO',      label: 'Efectivo',          description: 'Paga en persona al encargado',               Icon: Banknote,  manual: true },
+  { key: 'QR',            label: 'Pago QR',           description: 'Escanea el QR y sube la foto del pago',     Icon: QrCode,    manual: true },
 ];
 
 function MethodCard({ methodKey, label, description, logo, Icon, selected, index, onSelect }: {
@@ -116,18 +117,20 @@ export default function Step3Payment({ bookingId, onNext, onBack }: Props) {
         ))}
       </div>
 
-      {selected && ['TRANSFERENCIA', 'EFECTIVO'].includes(selected) && (
+      {selected && ['TRANSFERENCIA', 'EFECTIVO', 'QR'].includes(selected) && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-2.5">
           <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-700">
             {selected === 'TRANSFERENCIA'
               ? 'Deberás subir el comprobante de transferencia en el siguiente paso. El administrador confirmará tu pago.'
+              : selected === 'QR'
+              ? 'En el siguiente paso verás el QR de pago. Sube la foto del comprobante y el administrador verificará tu pago.'
               : 'El administrador registrará tu pago en persona y confirmará la reserva.'}
           </p>
         </div>
       )}
 
-      {!selected || !['TRANSFERENCIA', 'EFECTIVO'].includes(selected) ? (
+      {!selected || !['TRANSFERENCIA', 'EFECTIVO', 'QR'].includes(selected) ? (
         <div className="bg-ink-50 rounded-2xl p-4 flex items-start gap-2.5">
           <Info size={14} className="text-ink-400 shrink-0 mt-0.5" />
           <p className="text-xs text-ink-600">El cargo se realizará al confirmar la reserva.</p>

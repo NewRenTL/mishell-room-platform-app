@@ -14,7 +14,7 @@ export type BookingStatus =
   | 'CANCELLED';
 
 export type WeeklyPaymentStatus = 'PENDING' | 'PAID' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
-export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE' | 'TRANSFERENCIA' | 'EFECTIVO';
+export type PaymentMethod = 'CARD' | 'MERCADO_PAGO' | 'YAPE' | 'TRANSFERENCIA' | 'EFECTIVO' | 'QR';
 
 export interface WeeklyPayment {
   id: string;

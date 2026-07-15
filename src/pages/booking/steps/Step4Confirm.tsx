@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Building2, Banknote, Clock } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Building2, Banknote, Clock, QrCode, Upload, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
@@ -370,6 +370,134 @@ function YapeForm({ bookingId, total, onSuccess }: { bookingId: string; total: n
   );
 }
 
+// ─── QR payment form ─────────────────────────────────────────────────────────
+
+function QrForm({ bookingId, onSuccess }: { bookingId: string; onSuccess: () => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [file, setFile]     = useState<File | null>(null);
+  const [note, setNote]     = useState('');
+  const [fileError, setFileError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState('');
+
+  function handleFile(f: File | null) {
+    if (!f) { setFile(null); return; }
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(f.type)) {
+      setFileError('Solo se aceptan imágenes PNG, JPG o WEBP'); setFile(null); return;
+    }
+    if (f.size > 20 * 1024 * 1024) {
+      setFileError('La foto no puede superar 20 MB'); setFile(null); return;
+    }
+    setFileError(''); setFile(f);
+  }
+
+  async function handleSubmit() {
+    if (!file) { setError('Sube la foto del comprobante de pago'); return; }
+    setError('');
+    setLoading(true);
+    try {
+      await paymentsService.uploadQrVoucher(bookingId, file, note);
+      onSuccess();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al subir el comprobante'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <motion.div
+      className="flex flex-col gap-4 pt-3 border-t border-ink-100"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex items-center gap-2">
+        <QrCode size={15} className="text-mishell-600" />
+        <p className="text-sm font-semibold text-ink-900">Pago por QR</p>
+      </div>
+
+      {/* QR image */}
+      <div className="flex flex-col items-center gap-2 bg-white border border-ink-100 rounded-2xl p-4">
+        <p className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-1">Escanea este QR para pagar</p>
+        <img
+          src="/QR_MishellRoom_IZIPAY_low.jpg"
+          alt="QR de pago Mishell Rooms"
+          className="w-48 h-48 object-contain rounded-xl border border-ink-100"
+        />
+        <p className="text-[11px] text-ink-400 text-center">Usa tu app bancaria o Izipay para escanear</p>
+      </div>
+
+      {/* Photo upload */}
+      <div>
+        <p className="text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-2">Foto del comprobante *</p>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className={`w-full flex flex-col items-center gap-2 border-2 border-dashed rounded-2xl py-4 transition-colors ${
+            file ? 'border-mishell-400 bg-mishell-50' : 'border-ink-200 bg-white hover:border-ink-300'
+          }`}
+        >
+          {file ? (
+            <>
+              <CheckCircle2 size={22} className="text-mishell-600" />
+              <p className="text-sm font-medium text-mishell-700">{file.name}</p>
+              <span className="text-xs text-ink-500 underline">Cambiar foto</span>
+            </>
+          ) : (
+            <>
+              <Upload size={22} className="text-ink-400" />
+              <p className="text-sm font-medium text-ink-700">Subir captura del pago</p>
+              <p className="text-xs text-ink-400">JPG, PNG o WEBP · máx. 20 MB</p>
+            </>
+          )}
+        </button>
+        {fileError && <p className="mt-1.5 text-xs text-red-500">{fileError}</p>}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+        />
+      </div>
+
+      {/* Optional note */}
+      <div>
+        <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1 block">
+          Nota adicional (opcional)
+        </label>
+        <textarea
+          rows={2}
+          placeholder="Ej: Pagué a las 3pm, número de operación 123456..."
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          maxLength={200}
+          className="w-full border border-ink-100 rounded-xl px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-mishell-600 resize-none transition-colors"
+        />
+      </div>
+
+      <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl p-3">
+        <Clock size={13} className="text-amber-500 shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-700">
+          Tu pago quedará pendiente de verificación. El administrador confirmará tu reserva una vez revisado el comprobante.
+        </p>
+      </div>
+
+      {error && (
+        <div className="flex items-start gap-2 bg-mishell-50 rounded-xl p-3">
+          <AlertCircle size={14} className="text-mishell-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-mishell-700">{error}</p>
+        </div>
+      )}
+
+      <Button loading={loading} onClick={handleSubmit} disabled={!file}>
+        Enviar comprobante
+      </Button>
+    </motion.div>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function Step4Confirm({ bookingId, property, onSuccess }: Props) {
@@ -380,6 +508,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
   const [showYape]   = useState(paymentMethod === 'YAPE');
   const [showCard]   = useState(paymentMethod === 'CARD');
   const [showManual] = useState(paymentMethod === 'TRANSFERENCIA' || paymentMethod === 'EFECTIVO');
+  const [showQr]     = useState(paymentMethod === 'QR');
 
   const weeks = checkIn && checkOut
     ? Math.max(1, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (7 * 86400000)))
@@ -500,6 +629,13 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
         )}
       </AnimatePresence>
 
+      {/* QR payment form */}
+      <AnimatePresence>
+        {showQr && (
+          <QrForm bookingId={bookingId} onSuccess={() => { reset(); onSuccess(); }} />
+        )}
+      </AnimatePresence>
+
       {/* Manual payment instructions */}
       <AnimatePresence>
         {showManual && (
@@ -550,7 +686,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       </AnimatePresence>
 
       {/* Terms */}
-      {!showManual && (
+      {!showManual && !showQr && (
         <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
           <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-700 leading-relaxed">
@@ -562,7 +698,7 @@ export default function Step4Confirm({ bookingId, property, onSuccess }: Props) 
       )}
 
       {/* Confirm button — only for gateway methods */}
-      {!showYape && !showCard && !showManual && (
+      {!showYape && !showCard && !showManual && !showQr && (
         <Button loading={loading} onClick={handleConfirm} className="w-full">
           Confirmar y Reservar
         </Button>

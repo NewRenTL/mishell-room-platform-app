@@ -9,7 +9,7 @@ import type { RegRole } from '../../../types/auth';
 
 const PHONE_RE = /^9\d{8}$/;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-const MAX_SIZE = 5 * 1024 * 1024;
+const MAX_SIZE = 20 * 1024 * 1024;
 
 interface Props {
   role: RegRole;
@@ -68,7 +68,7 @@ function PhotoUpload({
           const f = e.target.files?.[0];
           if (!f) return;
           if (!ALLOWED_TYPES.includes(f.type)) { onError('Solo se aceptan imágenes (JPG, PNG, WEBP) o PDF'); onFile(null); return; }
-          if (f.size > MAX_SIZE) { onError('La foto no puede superar 5 MB'); onFile(null); return; }
+          if (f.size > MAX_SIZE) { onError('La foto no puede superar 20 MB'); onFile(null); return; }
           onError(''); onFile(f);
         }}
       />
@@ -112,8 +112,8 @@ export default function RegStep2Data({
 
       {/* Personal info */}
       <div className="flex gap-2">
-        <Input icon={<User size={16} />} placeholder="Nombre *" value={firstName} onChange={(e) => onFirstName(e.target.value)} required />
-        <Input placeholder="Apellido *" value={lastName} onChange={(e) => onLastName(e.target.value)} required />
+        <Input icon={<User size={16} />} placeholder="Nombre completo *" value={firstName} onChange={(e) => onFirstName(e.target.value)} required />
+        <Input placeholder="Apellido completo *" value={lastName} onChange={(e) => onLastName(e.target.value)} required />
       </div>
       <div>
         <Input icon={<Phone size={16} />} placeholder="Teléfono (opcional)" value={phone} onChange={(e) => handlePhone(e.target.value)} inputMode="tel" maxLength={9} />
@@ -140,7 +140,7 @@ export default function RegStep2Data({
       {/* DNI + photos — only INQUILINO */}
       {isInquilino ? (
         <>
-          <Input icon={<CreditCard size={16} />} placeholder="Número de DNI / Carnet Ext. *" value={dni} onChange={(e) => onDni(e.target.value)} inputMode="numeric" maxLength={12} />
+          <Input icon={<CreditCard size={16} />} placeholder="Número de DNI / Carnet Ext. *" value={dni} onChange={(e) => onDni(e.target.value)} inputMode="numeric" maxLength={20} />
           <div>
             <p className="text-[10px] font-semibold text-ink-500 uppercase tracking-wider mb-2">Foto del documento *</p>
             <div className="flex flex-col gap-3">
