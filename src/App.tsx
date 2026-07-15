@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { MobileLayout } from './components/layout/MobileLayout';
+import { useProfileSync } from './hooks/useProfileSync';
 
 const LoginPage          = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterFlowPage   = lazy(() => import('./pages/auth/RegisterFlowPage'));
@@ -70,79 +71,86 @@ const Fallback = () => (
   </div>
 );
 
+function AppRoutes() {
+  useProfileSync();
+  return (
+    <Routes>
+      {/* Public auth — un solo componente, tab dinámico */}
+      <Route path="/login"    element={<AuthLayout><LoginPage /></AuthLayout>} />
+      <Route path="/register" element={<RegisterFlowPage />} />
+
+      {/* Public marketplace — anyone can browse without an account */}
+      <Route path="/home" element={
+        <MobileLayout><HomePage /></MobileLayout>
+      } />
+      <Route path="/properties" element={
+        <MobileLayout><MarketplacePage /></MobileLayout>
+      } />
+      <Route path="/properties/:id" element={
+        <MobileLayout hideNav><PropertyDetailPage /></MobileLayout>
+      } />
+      <Route path="/booking/:propertyId" element={
+        <ProtectedRoute><BookingFlowPage /></ProtectedRoute>
+      } />
+      <Route path="/booking/success/:id" element={
+        <ProtectedRoute><BookingSuccessPage /></ProtectedRoute>
+      } />
+      <Route path="/booking/mp-return" element={
+        <ProtectedRoute><MpReturnPage /></ProtectedRoute>
+      } />
+      <Route path="/my-bookings" element={
+        <ProtectedRoute><MobileLayout><MyBookingsPage /></MobileLayout></ProtectedRoute>
+      } />
+      <Route path="/my-bookings/:id" element={
+        <ProtectedRoute><MobileLayout hideNav><BookingDetailPage /></MobileLayout></ProtectedRoute>
+      } />
+      <Route path="/booking/:bookingId/contract" element={
+        <ProtectedRoute><MobileLayout hideNav><ContractViewPage /></MobileLayout></ProtectedRoute>
+      } />
+      <Route path="/my-payments" element={
+        <ProtectedRoute><MobileLayout><MyPaymentsPage /></MobileLayout></ProtectedRoute>
+      } />
+      <Route path="/messages" element={
+        <ProtectedRoute><MobileLayout><MessagesPage /></MobileLayout></ProtectedRoute>
+      } />
+
+      {/* Admin mobile routes */}
+      <Route path="/admin-chat" element={
+        <AdminRoute><AdminChatListPage /></AdminRoute>
+      } />
+      <Route path="/admin-chat/:id" element={
+        <AdminRoute><AdminChatConvPage /></AdminRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute><MobileLayout><ProfilePage /></MobileLayout></ProtectedRoute>
+      } />
+      <Route path="/verification" element={
+        <ProtectedRoute><MobileLayout hideNav><VerificationPage /></MobileLayout></ProtectedRoute>
+      } />
+
+      {/* Socio routes */}
+      <Route path="/socio" element={
+        <SocioRoute><MobileLayout><SocioDashboardPage /></MobileLayout></SocioRoute>
+      } />
+      <Route path="/socio/properties/:id" element={
+        <SocioRoute><MobileLayout hideNav><PropertyManagePage /></MobileLayout></SocioRoute>
+      } />
+      <Route path="/socio/add-property" element={
+        <SocioRoute><AddPropertyPage /></SocioRoute>
+      } />
+
+      {/* Fallback */}
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={<Fallback />}>
-        <Routes>
-          {/* Public auth — un solo componente, tab dinámico */}
-          <Route path="/login"    element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<RegisterFlowPage />} />
-
-          {/* Public marketplace — anyone can browse without an account */}
-          <Route path="/home" element={
-            <MobileLayout><HomePage /></MobileLayout>
-          } />
-          <Route path="/properties" element={
-            <MobileLayout><MarketplacePage /></MobileLayout>
-          } />
-          <Route path="/properties/:id" element={
-            <MobileLayout hideNav><PropertyDetailPage /></MobileLayout>
-          } />
-          <Route path="/booking/:propertyId" element={
-            <ProtectedRoute><BookingFlowPage /></ProtectedRoute>
-          } />
-          <Route path="/booking/success/:id" element={
-            <ProtectedRoute><BookingSuccessPage /></ProtectedRoute>
-          } />
-          <Route path="/booking/mp-return" element={
-            <ProtectedRoute><MpReturnPage /></ProtectedRoute>
-          } />
-          <Route path="/my-bookings" element={
-            <ProtectedRoute><MobileLayout><MyBookingsPage /></MobileLayout></ProtectedRoute>
-          } />
-          <Route path="/my-bookings/:id" element={
-            <ProtectedRoute><MobileLayout hideNav><BookingDetailPage /></MobileLayout></ProtectedRoute>
-          } />
-          <Route path="/booking/:bookingId/contract" element={
-            <ProtectedRoute><MobileLayout hideNav><ContractViewPage /></MobileLayout></ProtectedRoute>
-          } />
-          <Route path="/my-payments" element={
-            <ProtectedRoute><MobileLayout><MyPaymentsPage /></MobileLayout></ProtectedRoute>
-          } />
-          <Route path="/messages" element={
-            <ProtectedRoute><MobileLayout><MessagesPage /></MobileLayout></ProtectedRoute>
-          } />
-
-          {/* Admin mobile routes */}
-          <Route path="/admin-chat" element={
-            <AdminRoute><AdminChatListPage /></AdminRoute>
-          } />
-          <Route path="/admin-chat/:id" element={
-            <AdminRoute><AdminChatConvPage /></AdminRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute><MobileLayout><ProfilePage /></MobileLayout></ProtectedRoute>
-          } />
-          <Route path="/verification" element={
-            <ProtectedRoute><MobileLayout hideNav><VerificationPage /></MobileLayout></ProtectedRoute>
-          } />
-
-          {/* Socio routes */}
-          <Route path="/socio" element={
-            <SocioRoute><MobileLayout><SocioDashboardPage /></MobileLayout></SocioRoute>
-          } />
-          <Route path="/socio/properties/:id" element={
-            <SocioRoute><MobileLayout hideNav><PropertyManagePage /></MobileLayout></SocioRoute>
-          } />
-          <Route path="/socio/add-property" element={
-            <SocioRoute><AddPropertyPage /></SocioRoute>
-          } />
-
-          {/* Fallback */}
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppRoutes />
       </Suspense>
     </BrowserRouter>
   );
