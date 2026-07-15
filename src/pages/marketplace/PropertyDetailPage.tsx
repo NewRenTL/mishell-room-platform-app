@@ -258,7 +258,7 @@ export default function PropertyDetailPage() {
         {(property.apartmentName || property.roomNumber) && (
           <div className="flex flex-wrap gap-2 mt-2">
             {property.apartmentName && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1">
+              <span className={`inline-flex items-center gap-1.5 text-xs text-ink-700 bg-ink-50 border border-ink-100 rounded-full px-3 py-1 transition-all ${isRestricted ? 'blur-[3px] select-none pointer-events-none' : ''}`}>
                 <Building2 size={12} className="text-ink-500" />
                 {property.apartmentName}
               </span>
