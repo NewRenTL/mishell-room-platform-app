@@ -21,9 +21,21 @@ const STEPS = [
 export default function BookingFlowPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const bookingId = useBookingStore((s) => s.bookingId);
-  const contractId = useBookingStore((s) => s.contractId);
+
+  const storePropertyId = useBookingStore((s) => s.propertyId);
+  const resumeStep     = useBookingStore((s) => s.resumeStep);
+  const setResumeStep  = useBookingStore((s) => s.setResumeStep);
+  const bookingId      = useBookingStore((s) => s.bookingId);
+  const contractId     = useBookingStore((s) => s.contractId);
+
+  const [step, setStep] = useState(() =>
+    storePropertyId === propertyId && !!bookingId && resumeStep >= 2 ? resumeStep : 1
+  );
+
+  function goToStep(next: number) {
+    setStep(next);
+    setResumeStep(next);
+  }
 
   const { data: property, isLoading, isError } = useQuery({
     queryKey: ['property', propertyId],
@@ -60,7 +72,7 @@ export default function BookingFlowPage() {
     <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
       <AppHeader
         title={property?.title ?? 'Reservar'}
-        onBack={step > 1 ? () => setStep(step - 1) : undefined}
+        onBack={step > 1 ? () => goToStep(step - 1) : undefined}
       />
 
       <div className="px-5 pt-4 pb-2">
@@ -80,7 +92,7 @@ export default function BookingFlowPage() {
               <Step1Guest
                 propertyId={propertyId!}
                 property={property}
-                onNext={() => setStep(2)}
+                onNext={() => goToStep(2)}
               />
             </motion.div>
           )}
@@ -95,8 +107,8 @@ export default function BookingFlowPage() {
               <Step2Contract
                 bookingId={bookingId!}
                 hasContract={!!contractId}
-                onNext={() => setStep(3)}
-                onSkip={() => setStep(3)}
+                onNext={() => goToStep(3)}
+                onSkip={() => goToStep(3)}
               />
             </motion.div>
           )}
@@ -110,8 +122,8 @@ export default function BookingFlowPage() {
             >
               <Step3Payment
                 bookingId={bookingId!}
-                onNext={() => setStep(4)}
-                onBack={() => setStep(2)}
+                onNext={() => goToStep(4)}
+                onBack={() => goToStep(2)}
               />
             </motion.div>
           )}

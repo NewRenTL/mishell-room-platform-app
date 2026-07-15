@@ -19,7 +19,11 @@ export default function PropertyDetailPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const isRestricted = !isAuthenticated || (user?.role === 'INQUILINO' && user?.verificationStatus !== 'APPROVED');
-  const setProperty = useBookingStore((s) => s.setProperty);
+  const setProperty       = useBookingStore((s) => s.setProperty);
+  const resetBooking      = useBookingStore((s) => s.reset);
+  const pendingBookingId  = useBookingStore((s) => s.bookingId);
+  const pendingPropertyId = useBookingStore((s) => s.propertyId);
+  const hasPendingBooking = pendingPropertyId === id && !!pendingBookingId;
   const toggle = useFavoritesStore((s) => s.toggle);
   const isFav = useFavoritesStore((s) => s.has(id ?? ''));
   const [photoIdx, setPhotoIdx] = useState(0);
@@ -54,6 +58,7 @@ export default function PropertyDetailPage() {
       setVerificationSheetOpen(true);
       return;
     }
+    if (pendingBookingId && pendingPropertyId !== id) resetBooking();
     import('../booking/BookingFlowPage').catch(() => {});
     setProperty(id!);
     navigate(`/booking/${id}`);
@@ -367,6 +372,20 @@ export default function PropertyDetailPage() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
+        {hasPendingBooking && (
+          <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-1">
+            <div>
+              <p className="text-xs font-bold text-amber-800">Reserva incompleta</p>
+              <p className="text-xs text-amber-700 mt-0.5">Continúa desde donde la dejaste</p>
+            </div>
+            <button
+              onClick={() => navigate(`/booking/${id}`)}
+              className="text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-full px-3 py-1.5 shrink-0 transition-colors"
+            >
+              Retomar →
+            </button>
+          </div>
+        )}
         {reserveError && (
           <p className="text-xs text-mishell-600 text-center mb-2 px-2">{reserveError}</p>
         )}
@@ -375,7 +394,7 @@ export default function PropertyDetailPage() {
           className="w-full bg-mishell-600 hover:bg-mishell-500 active:bg-mishell-700 text-white font-semibold rounded-full h-14 text-base transition-colors"
           whileTap={{ scale: 0.97 }}
         >
-          {!isAuthenticated ? 'Crear Cuenta' : 'Reservar ahora'}
+          {!isAuthenticated ? 'Crear Cuenta' : hasPendingBooking ? 'Continuar reserva' : 'Reservar ahora'}
         </motion.button>
       </motion.div>
 
@@ -383,6 +402,7 @@ export default function PropertyDetailPage() {
         open={verificationSheetOpen}
         onClose={() => setVerificationSheetOpen(false)}
         onApproved={() => {
+          if (pendingBookingId && pendingPropertyId !== id) resetBooking();
           import('../booking/BookingFlowPage').catch(() => {});
           setProperty(id!);
           navigate(`/booking/${id}`);
