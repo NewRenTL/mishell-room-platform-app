@@ -17,9 +17,6 @@ interface Props {
 
 const WEEK_OPTIONS = [
   { label: '1 sem.', weeks: 1 },
-  { label: '2 sem.', weeks: 2 },
-  { label: '3 sem.', weeks: 3 },
-  { label: '4 sem.', weeks: 4 },
   { label: 'Libre',  weeks: 0 },
 ];
 
