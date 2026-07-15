@@ -58,7 +58,10 @@ export default function BookingFlowPage() {
 
   return (
     <div className="max-w-107.5 mx-auto flex flex-col min-h-dvh bg-white">
-      <AppHeader title={property?.title ?? 'Reservar'} />
+      <AppHeader
+        title={property?.title ?? 'Reservar'}
+        onBack={step > 1 ? () => setStep(step - 1) : undefined}
+      />
 
       <div className="px-5 pt-4 pb-2">
         <Stepper steps={STEPS} current={step - 1} />
