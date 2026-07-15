@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Building2, Banknote, Clock, QrCode, Upload, CheckCircle2 } from 'lucide-react';
+import { MapPin, Calendar, User, AlertCircle, Smartphone, CreditCard, Info, Building2, Banknote, Clock, QrCode, Upload, CheckCircle2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../../../components/ui/Button';
 import { paymentsService } from '../../../services/payments.service';
@@ -426,6 +426,14 @@ function QrForm({ bookingId, onSuccess }: { bookingId: string; onSuccess: () => 
           className="w-48 h-48 object-contain rounded-xl border border-ink-100"
         />
         <p className="text-[11px] text-ink-400 text-center">Usa tu app bancaria o Izipay para escanear</p>
+        <a
+          href="/QR_MishellRoom_IZIPAY_low.jpg"
+          download="QR_MishellRoom.jpg"
+          className="flex items-center gap-1.5 text-xs font-semibold text-mishell-600 bg-mishell-50 border border-mishell-100 rounded-full px-4 py-1.5 hover:bg-mishell-100 transition-colors"
+        >
+          <Download size={13} />
+          Descargar QR
+        </a>
       </div>
 
       {/* Photo upload */}
