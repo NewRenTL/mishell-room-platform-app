@@ -1,9 +1,16 @@
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const LEGAL_CONTENT = {
+interface Section {
+  heading: string;
+  body: string;
+  items?: string[];
+}
+
+const LEGAL_CONTENT: Record<string, { title: string; date: string; sections: Section[] }> = {
   terms: {
     title: 'Términos de Servicio',
+    date: 'Enero 2025',
     sections: [
       {
         heading: '1. Aceptación de los términos',
@@ -35,44 +42,95 @@ const LEGAL_CONTENT = {
       },
       {
         heading: '8. Contacto',
-        body: 'Para cualquier consulta sobre estos términos puedes contactarnos a través del chat de soporte dentro de la aplicación o escribirnos a soporte@mishellroom.com.',
+        body: 'Para cualquier consulta sobre estos términos puedes contactarnos a través del chat de soporte dentro de la aplicación o escribirnos a contacto@mishellroom.com.',
       },
     ],
   },
   privacy: {
     title: 'Política de Privacidad',
+    date: 'Agosto 2026',
     sections: [
       {
-        heading: '1. Información que recopilamos',
-        body: 'Recopilamos información que nos proporcionas al crear tu cuenta (nombre, correo, DNI, teléfono), datos de uso de la plataforma y, en caso de registro con DNI, una fotografía del documento de identidad.',
+        heading: '1. Identidad del responsable',
+        body: 'MishellRoom es responsable del tratamiento de los datos personales recopilados a través de su aplicación y canales vinculados al servicio. Para consultas sobre privacidad o para ejercer derechos relacionados con datos personales, los usuarios pueden escribir a contacto@mishellroom.com.',
       },
       {
-        heading: '2. Uso de la información',
-        body: 'Utilizamos tu información para: gestionar tu cuenta y reservas, procesar pagos, enviarte notificaciones del servicio, mejorar la plataforma y cumplir con obligaciones legales.',
+        heading: '2. Alcance',
+        body: 'Esta Política de Privacidad explica cómo MishellRoom recopila, usa, almacena, protege y, cuando corresponde, comparte datos personales de personas que interactúan con la plataforma. Esta política ha sido elaborada para el mercado peruano y se rige por la Ley N.° 29733, su reglamento y demás normas aplicables.',
       },
       {
-        heading: '3. Compartición de datos',
-        body: 'No vendemos tus datos personales a terceros. Compartimos información únicamente con las partes necesarias para la prestación del servicio (propietarios con inquilinos para coordinar reservas) y con proveedores de servicios bajo acuerdos de confidencialidad.',
+        heading: '3. Rol de MishellRoom',
+        body: 'MishellRoom es una plataforma digital intermediaria que conecta a inquilinas con propietarios o administradores autorizados que publican habitaciones en alquiler o subarrendamiento. MishellRoom no alquila ni subarrienda inmuebles directamente, ni reemplaza al propietario o administrador en la relación contractual principal de alojamiento.',
       },
       {
-        heading: '4. Almacenamiento y seguridad',
-        body: 'Tus datos se almacenan en servidores seguros con cifrado en tránsito y en reposo. Las contraseñas y PINs se almacenan siempre en formato encriptado y nunca en texto plano.',
+        heading: '4. Datos personales que recopilamos',
+        body: 'MishellRoom podrá recopilar los siguientes datos personales:',
+        items: [
+          'Nombres y apellidos.',
+          'DNI o Carné de Extranjería.',
+          'Fotografía del documento de identidad.',
+          'Número de teléfono.',
+          'Correo electrónico.',
+          'Registros de contacto con soporte.',
+          'Historial de comunicaciones entre el usuario y MishellRoom.',
+          'Información básica vinculada a pagos, operaciones y reclamos.',
+        ],
       },
       {
-        heading: '5. Tus derechos',
-        body: 'Tienes derecho a acceder, rectificar o eliminar tu información personal en cualquier momento. Para ejercer estos derechos contacta a nuestro equipo de soporte. Atenderemos tu solicitud en un plazo máximo de 30 días.',
+        heading: '5. Finalidades del tratamiento',
+        body: 'MishellRoom trata datos personales para:',
+        items: [
+          'Crear y administrar cuentas dentro de la plataforma.',
+          'Verificar manualmente la identidad de usuarias y anunciantes.',
+          'Validar, cuando corresponda, la legitimidad del propietario o administrador autorizado que publica una habitación.',
+          'Prevenir fraude, suplantación de identidad y uso indebido del servicio.',
+          'Gestionar comunicaciones operativas y atención al usuario.',
+          'Procesar y registrar pagos relacionados con el servicio de alquiler.',
+          'Atender consultas, incidencias, reclamos y requerimientos legales.',
+          'Cumplir obligaciones legales y regulatorias aplicables en el Perú.',
+        ],
       },
       {
-        heading: '6. Cookies',
-        body: 'Utilizamos cookies y tecnologías similares para mejorar tu experiencia, analizar el uso del servicio y personalizar el contenido. Puedes controlar las cookies desde la configuración de tu navegador.',
+        heading: '6. Verificación de identidad',
+        body: 'MishellRoom podrá solicitar la imagen del documento de identidad para realizar una validación manual de identidad. Una vez concluida la validación, la imagen del documento será eliminada, salvo que exista una obligación legal, un incidente de seguridad, una investigación por fraude o un reclamo que justifique su conservación temporal por el tiempo estrictamente necesario.',
       },
       {
-        heading: '7. Menores de edad',
-        body: 'Nuestro servicio no está dirigido a menores de 18 años. No recopilamos conscientemente datos de menores. Si detectamos que un usuario es menor de edad, eliminaremos su cuenta y datos de forma inmediata.',
+        heading: '7. Base del tratamiento',
+        body: 'MishellRoom trata los datos personales porque son necesarios para prestar el servicio solicitado por el usuario, cumplir obligaciones legales, reforzar la seguridad de la plataforma y prevenir fraude. Cuando corresponda, MishellRoom solicitará el consentimiento del titular de los datos, especialmente para finalidades no indispensables para la operación principal del servicio del alquiler.',
       },
       {
-        heading: '8. Contacto',
-        body: 'Para consultas sobre privacidad escríbenos a privacidad@mishellroom.com o usa el chat de soporte dentro de la aplicación.',
+        heading: '8. Conservación de los datos',
+        body: 'MishellRoom conservará los datos personales solo durante el tiempo necesario para cumplir la finalidad para la que fueron recopilados. De forma referencial:',
+        items: [
+          'Datos de cuenta: mientras la cuenta esté activa y hasta 2 años después de su cierre.',
+          'Documento de identidad: solo durante el proceso de verificación manual; luego será eliminado, salvo fraude, reclamo o exigencia legal.',
+          'Datos de pagos y operaciones: por el tiempo necesario para sustento contractual, control interno y cumplimiento contable, tributario o legal aplicable.',
+          'Datos de reclamos: por al menos 2 años desde su registro.',
+        ],
+      },
+      {
+        heading: '9. Compartición de datos',
+        body: 'MishellRoom podrá compartir datos personales únicamente cuando sea necesario para operar la plataforma, por ejemplo con proveedores tecnológicos, servicios de hosting, infraestructura, base de datos, soporte técnico, pasarelas de pago, entidades bancarias o autoridades competentes cuando exista obligación legal. También podrá compartir con el propietario o administrador autorizado solo los datos necesarios para concretar el proceso de alquiler o subarrendamiento, respetando el principio de minimización de datos.',
+      },
+      {
+        heading: '10. Seguridad',
+        body: 'MishellRoom adoptará medidas razonables de seguridad técnicas, organizativas y administrativas para proteger los datos personales frente a pérdida, acceso no autorizado, uso indebido, alteración o divulgación no autorizada. La Autoridad Nacional de Protección de Datos Personales es la entidad encargada de supervisar el cumplimiento de estas obligaciones en el Perú.',
+      },
+      {
+        heading: '11. Derechos del titular',
+        body: 'La persona titular de los datos puede ejercer sus derechos ARCO (acceso, rectificación, cancelación y oposición) conforme a la normativa peruana. MishellRoom atenderá estas solicitudes a través del correo contacto@mishellroom.com, dentro de los plazos y condiciones establecidos por la ley.',
+      },
+      {
+        heading: '12. Comunicaciones',
+        body: 'MishellRoom podrá enviar comunicaciones necesarias para el funcionamiento del servicio, como validaciones, alertas de seguridad, mensajes operativos, pagos, soporte y reclamos. MishellRoom no realizará marketing masivo general por el momento; si implementa acciones promocionales en el futuro, lo hará conforme a la normativa aplicable.',
+      },
+      {
+        heading: '13. Menores de edad',
+        body: 'MishellRoom está dirigida únicamente a personas mayores de 18 años de edad con capacidad legal para contratar. No está diseñada para menores de edad ni busca recopilar intencionalmente sus datos personales.',
+      },
+      {
+        heading: '14. Cambios a esta política',
+        body: 'MishellRoom podrá modificar esta Política de Privacidad para adaptarla a cambios legales, operativos o tecnológicos. Cuando los cambios sean relevantes, serán informados por medios razonables dentro de la plataforma o mediante el correo registrado por el usuario.',
       },
     ],
   },
@@ -96,7 +154,7 @@ export function LegalModal({ type, onClose }: { type: LegalType; onClose: () => 
           />
           <motion.div
             className="fixed bottom-0 left-0 right-0 max-w-107.5 mx-auto bg-white rounded-t-3xl z-50 flex flex-col"
-            style={{ maxHeight: '82dvh' }}
+            style={{ maxHeight: '85dvh' }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -119,10 +177,20 @@ export function LegalModal({ type, onClose }: { type: LegalType; onClose: () => 
                 <div key={s.heading}>
                   <p className="text-sm font-semibold text-ink-900 mb-1">{s.heading}</p>
                   <p className="text-sm text-ink-600 leading-relaxed">{s.body}</p>
+                  {s.items && (
+                    <ul className="mt-1.5 flex flex-col gap-1 pl-1">
+                      {s.items.map((item) => (
+                        <li key={item} className="flex items-start gap-2 text-sm text-ink-600 leading-relaxed">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-ink-400 shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
               <p className="text-xs text-ink-400 text-center pb-2">
-                Última actualización: enero 2025
+                Última actualización: {content.date}
               </p>
             </div>
           </motion.div>
