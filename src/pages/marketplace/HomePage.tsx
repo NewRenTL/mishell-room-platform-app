@@ -61,7 +61,7 @@ export default function HomePage() {
               <span>Lima, Perú</span>
             </div>
             <p className="text-sm text-ink-600">
-              Hola, <span className="font-semibold text-ink-900">{user?.firstName}</span> — Encuentra tu próximo hogar
+              Hola, <span className="font-semibold text-ink-900">{user?.firstName}</span> — Encuentra tu próxima habitación
             </p>
           </div>
 
