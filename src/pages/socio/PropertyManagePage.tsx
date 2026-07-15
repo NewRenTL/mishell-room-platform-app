@@ -344,9 +344,9 @@ export default function PropertyManagePage() {
             {/* ir a mi perfil */}
             <button
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-ink-600 hover:text-ink-900 transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-mishell-600 hover:bg-mishell-500 active:bg-mishell-700 text-white font-semibold rounded-full h-12 text-sm transition-colors"
             >
-              ir a mi perfil <ArrowRight size={15} />
+              Ir a mi perfil <ArrowRight size={16} />
             </button>
 
             {/* Booking history */}
