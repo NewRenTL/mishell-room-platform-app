@@ -7,7 +7,7 @@ import { toPng } from 'html-to-image';
 import { Button } from '../../components/ui/Button';
 import { bookingsService } from '../../services/bookings.service';
 
-const WHATSAPP_NUMBER = '51910881880';
+const WHATSAPP_NUMBER = '51904756477';
 
 function fmt(dateStr: string | null | undefined) {
   if (!dateStr) return '—';

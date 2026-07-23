@@ -145,6 +145,12 @@ export default function PropertyManagePage() {
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (!files.length || !id) return;
+    const oversized = files.find((f) => f.size > 10 * 1024 * 1024);
+    if (oversized) {
+      setSaveError('Cada foto no puede superar 10 MB');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     setUploadingPhoto(true);
     try {
       for (const file of files) {

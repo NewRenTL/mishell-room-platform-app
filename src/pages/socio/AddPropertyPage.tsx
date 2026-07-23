@@ -64,7 +64,7 @@ export default function AddPropertyPage() {
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
     const incoming = Array.from(files).filter((f) => {
       if (!allowed.includes(f.type)) { setPhotoError('Solo se aceptan JPG, PNG o WEBP'); return false; }
-      if (f.size > 5 * 1024 * 1024) { setPhotoError('Cada foto no puede superar 5 MB'); return false; }
+      if (f.size > 10 * 1024 * 1024) { setPhotoError('Cada foto no puede superar 10 MB'); return false; }
       return true;
     });
     setPhotos((prev) => [...prev, ...incoming].slice(0, 10));
